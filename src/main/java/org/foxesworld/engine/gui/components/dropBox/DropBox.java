@@ -51,6 +51,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
                 repaint();
             }
         });
+        this.dropBoxListener = new Listener();
     }
 
     @Override

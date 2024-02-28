@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.util.Map;
 
 public interface GuiBuilderListener {
-
     void onPanelBuild(Map<String, OptionGroups> groups, String componentGroup, JPanel parentPanel);
     void onPanelsBuilt();
 }

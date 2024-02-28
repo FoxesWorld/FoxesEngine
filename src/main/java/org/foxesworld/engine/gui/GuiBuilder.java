@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.gui.components.ComponentFactoryListener;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.*;
 
 public class GuiBuilder {
-
     private final Engine engine;
     private final HashMap<String, List<JComponent>> componentsMap = new HashMap<>();
     private final HashMap<String, JPanel> panelsMap = new HashMap<>();
@@ -49,16 +49,15 @@ public class GuiBuilder {
     public List<Component> getAllChildComponents(String parentPanel) {
         List<Component> components = new ArrayList<>();
         for (String thisChild : childsNparents.get(parentPanel)) {
-            components.addAll(getComponentsMap().get(thisChild));
+            components.addAll(componentsMap.get(thisChild));
         }
         return components;
     }
 
     public JComponent getComponentById(String id) {
-        for (Map.Entry<String, List<JComponent>> panelsMap : this.getComponentsMap().entrySet()) {
-            String panelName = panelsMap.getKey();
+        for (Map.Entry<String, List<JComponent>> panelsMap : componentsMap.entrySet()) {
             for (JComponent component : panelsMap.getValue()) {
-                if (component.getName().equals(id)) {
+                if (component.getName() != null && component.getName().equals(id)) {
                     return component;
                 }
             }
@@ -102,22 +101,17 @@ public class GuiBuilder {
      * Method for building componentFactory based on a JSON structure
      */
     private void processChildComponents(OptionGroups optionGroups, JPanel parentPanel) {
-        //this.componentFactory.setComponentFactoryListener(this);
         for (ComponentAttributes componentAttributes : optionGroups.getChildComponents()) {
             if (componentAttributes.getComponentType() != null) {
-                JComponent component = this.componentFactory.createComponent(componentAttributes);
+                JComponent component = componentFactory.createComponent(componentAttributes);
                 parentPanel.add(component);
-                this.panelsComponents.put(parentPanel, component);
-                this.addComponentToMap(parentPanel.getName(), component);
+                componentsMap.computeIfAbsent(parentPanel.getName(), k -> new ArrayList<>()).add(component);
             } else if (componentAttributes.getGroups() != null) {
-                // Handle nested groups
                 buildPanels(componentAttributes.getGroups(), parentPanel);
             } else if (componentAttributes.getReadFrom() != null) {
-                // Handle reading from another JSON file
                 buildGui(componentAttributes.getReadFrom(), parentPanel);
-            } else if(componentAttributes.getLoadPanel() != null && !componentAttributes.getLoadPanel().isEmpty()){
-                //Saving to map to process when all panels are built
-                this.loadPanels.put(componentAttributes.getLoadPanel(), parentPanel);
+            } else if (componentAttributes.getLoadPanel() != null && !componentAttributes.getLoadPanel().isEmpty()) {
+                loadPanels.put(componentAttributes.getLoadPanel(), parentPanel);
             }
         }
     }
@@ -170,9 +164,9 @@ public class GuiBuilder {
         this.panelsMap.put(panel.getName(), panel);
     }
 
-    private void addPanelGroup(JPanel parent, JPanel child){
+    private void addPanelGroup(JPanel parent, JPanel child) {
         parent.add(child);
-        getPanelsMap().put(child.getName(), child);
+        panelsMap.put(child.getName(), child);
     }
 
     public HashMap<String, List<String>> getChildsNparents() {
@@ -186,4 +180,30 @@ public class GuiBuilder {
     public ComponentFactory getComponentFactory() {
         return componentFactory;
     }
+
+   /*  @Override
+    public void onComponentCreation(ComponentAttributes componentAttributes) {
+        if (componentAttributes.getInitialValue() != null) {
+            this.getInitialData(componentAttributes);
+        }
+    }
+
+    private void getInitialData(ComponentAttributes componentAttributes) {
+        String[] splitValue = componentAttributes.getInitialValue().split("#");
+        switch (splitValue[0]) {
+            case "config" -> {
+                componentAttributes.setInitialValue(String.valueOf(this.componentFactory.engine.getCONFIG().getCONFIG().get(splitValue[1])));
+            }
+
+            case "version" -> {
+                componentAttributes.setInitialValue(this.componentFactory.engine.getEngineData().getLauncherVersion());
+            }
+
+            case "dropBox" -> {
+                String[] val = splitValue[1].split("|");
+                System.out.println(val);
+                 this.getComponentFactory().setScrollBoxArr(val);
+            }
+        }
+    }*/
 }

@@ -12,9 +12,7 @@ public abstract class ServerParser {
     protected   int serversNum = 0;
     protected List<ServerAttributes> serverList = new ArrayList<>();
     protected Map<String, String> request = new HashMap<>();
-
     public  abstract List<ServerAttributes> parseServers(String login);
-
     public int getServersNum() {
         return serversNum;
     }

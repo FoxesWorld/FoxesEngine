@@ -25,7 +25,6 @@ public abstract class GameLauncher {
     protected URLClassLoader classLoader;
     protected final List<String> processArgs = new ArrayList<>();
     protected boolean isStarted;
-
     protected abstract void collectLibraries();
     protected abstract URLClassLoader createClassLoader(List<URL> libraryURLs);
     protected abstract void loadAuthLib();

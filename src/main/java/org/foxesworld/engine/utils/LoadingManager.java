@@ -142,8 +142,6 @@ public class LoadingManager extends JFrame {
         downTimer.start();
     }
 
-
-
     private void oscillate() {
         int startX = getX();
         int deltaY = 5;
@@ -224,6 +222,7 @@ public class LoadingManager extends JFrame {
     public void toggleLoader() {
         if (loadingTimer.isRunning()) {
             stopLoading();
+            this.dispose();
         } else {
             startLoading();
         }
