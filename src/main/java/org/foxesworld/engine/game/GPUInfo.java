@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 public class GPUInfo {
 
+    @SuppressWarnings("unused")
     public String getPreferredGPU() {
         String[] gpus = getAvailableGPUs();
 

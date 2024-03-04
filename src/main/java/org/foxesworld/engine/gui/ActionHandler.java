@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 public  abstract class ActionHandler {
     protected Engine engine;
     protected ServerAttributes currentServer;
+    @SuppressWarnings("unused")
     public abstract void handleAction(ActionEvent e);
     public Engine getEngine() {
         return engine;

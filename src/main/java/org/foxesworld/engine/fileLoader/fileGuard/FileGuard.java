@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public class FileGuard {
     private FileGuardListener fileGuardListener;
     private final List<String> checkList;
@@ -21,6 +22,7 @@ public class FileGuard {
     private int checkedFiles = 0;
     private int filesDeleted = 0;
 
+    @SuppressWarnings("unused")
     public FileGuard(GameLauncher gameLauncher) {
         this.gameLauncher = gameLauncher;
         this.checkList = Arrays.asList(
@@ -35,6 +37,7 @@ public class FileGuard {
         this.logger = this.gameLauncher.getLogger();
     }
 
+    @SuppressWarnings("unused")
     public void scanAndDeleteFilesInSubdirectories(Set<String> filesToKeep) {
         totalFiles = countTotalFiles();
         checkedFiles = 0;
@@ -120,7 +123,7 @@ public class FileGuard {
             this.ignoreList.add(thisDir);
         }
     }
-
+    @SuppressWarnings("unused")
     public void addIgnoreDirs(String dirs) {
         if (dirs != null) {
             for (String dir : dirs.split(",")) {
@@ -130,6 +133,7 @@ public class FileGuard {
         }
     }
 
+    @SuppressWarnings("unused")
     public void recursiveDelete(File file) {
         try {
             if (!file.exists())
@@ -148,6 +152,7 @@ public class FileGuard {
         return file.getName().endsWith(".txt");
     }
 
+    @SuppressWarnings("unused")
     public void setFileGuardListener(FileGuardListener fileGuardListener) {
         this.fileGuardListener = fileGuardListener;
     }

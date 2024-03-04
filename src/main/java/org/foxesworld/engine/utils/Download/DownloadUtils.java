@@ -24,6 +24,7 @@ public class DownloadUtils {
         this.progressLabel = (JLabel) engine.getGuiBuilder().getComponentById("progressLabel");
     }
 
+    @SuppressWarnings("unused")
     public void downloader(String downloadFile, String savePath, long totalSize) {
         this.progressBar.add(this.progressLabel);
         String Durl = engine.getEngineData().getBindUrl() + downloadFile;

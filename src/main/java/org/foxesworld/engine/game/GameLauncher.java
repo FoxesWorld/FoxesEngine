@@ -42,6 +42,7 @@ public abstract class GameLauncher {
         return buildVersionDir() + File.separator + "libraries";
     }
 
+    @SuppressWarnings("unused")
     public abstract String buildMinecraftJarPath();
 
     public String buildNativesPath() {
@@ -50,10 +51,12 @@ public abstract class GameLauncher {
 
     public abstract String buildClientDir();
 
+    @SuppressWarnings("unused")
     protected String buildAssetsPath() {
         return buildGameDir() + "assets";
     }
 
+    @SuppressWarnings("unused")
     protected File buildRuntimeDir() {
         File runtimeDir = new File(buildGameDir() + "runtime");
         if (!runtimeDir.isDirectory()) {
@@ -62,12 +65,14 @@ public abstract class GameLauncher {
         return runtimeDir;
     }
 
+    @SuppressWarnings("unused")
     public abstract String getCurrentJre();
 
     public Logger getLogger() {
         return logger;
     }
 
+    @SuppressWarnings("unused")
     public void setStarted(boolean started) {
         isStarted = started;
         if (!isStarted) {
@@ -75,14 +80,17 @@ public abstract class GameLauncher {
         }
     }
 
+    @SuppressWarnings("unused")
     public boolean isStarted() {
         return isStarted;
     }
 
+    @SuppressWarnings("unused")
     public void setGameListener(GameListener gameListener) {
         this.gameListener = gameListener;
     }
 
+    @SuppressWarnings("unused")
     protected int getIntVer() {
         return intVer;
     }
