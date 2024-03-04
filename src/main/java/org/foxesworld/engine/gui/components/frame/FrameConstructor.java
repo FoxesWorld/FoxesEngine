@@ -66,4 +66,8 @@ public class FrameConstructor extends JFrame {
     public Panel getPanel() {
         return panel;
     }
+
+    public void setFrameSize(int width, int height){
+        this.setSize(width, height);
+    }
 }
