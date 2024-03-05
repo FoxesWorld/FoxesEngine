@@ -7,8 +7,8 @@ import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 
 public class TexturedSliderUI extends BasicSliderUI {
-    private ImageIcon thumbImage;
-    private ImageIcon trackImage;
+    private final ImageIcon thumbImage;
+    private final ImageIcon trackImage;
 
     public TexturedSliderUI(JSlider slider, String thumbImage, String trackImage) {
         super(slider);

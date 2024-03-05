@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.gui.components.ComponentFactoryListener;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
@@ -21,8 +20,8 @@ public class GuiBuilder {
     private final HashMap<String, List<JComponent>> componentsMap = new HashMap<>();
     private final HashMap<String, JPanel> panelsMap = new HashMap<>();
     private final HashMap<JPanel, JComponent> panelsComponents = new HashMap<>();
-    private final HashMap<String, JPanel> loadPanels = new HashMap<>();
     private final HashMap<String, List<String>> childsNparents = new HashMap<>();
+    private final HashMap<String, JPanel> loadPanels = new HashMap<>();
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
     private GuiBuilderListener guiBuilderListener;
@@ -181,29 +180,4 @@ public class GuiBuilder {
         return componentFactory;
     }
 
-   /*  @Override
-    public void onComponentCreation(ComponentAttributes componentAttributes) {
-        if (componentAttributes.getInitialValue() != null) {
-            this.getInitialData(componentAttributes);
-        }
-    }
-
-    private void getInitialData(ComponentAttributes componentAttributes) {
-        String[] splitValue = componentAttributes.getInitialValue().split("#");
-        switch (splitValue[0]) {
-            case "config" -> {
-                componentAttributes.setInitialValue(String.valueOf(this.componentFactory.engine.getCONFIG().getCONFIG().get(splitValue[1])));
-            }
-
-            case "version" -> {
-                componentAttributes.setInitialValue(this.componentFactory.engine.getEngineData().getLauncherVersion());
-            }
-
-            case "dropBox" -> {
-                String[] val = splitValue[1].split("|");
-                System.out.println(val);
-                 this.getComponentFactory().setScrollBoxArr(val);
-            }
-        }
-    }*/
 }

@@ -5,6 +5,7 @@ import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.button.ButtonStyle;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.checkbox.CheckboxStyle;
+import org.foxesworld.engine.gui.components.dropBox.DropBox;
 import org.foxesworld.engine.gui.components.label.Label;
 import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.components.multiButton.MultiButton;
@@ -13,7 +14,6 @@ import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.passfield.PassFieldStyle;
 import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
 import org.foxesworld.engine.gui.components.scrollBar.CustomScrollBar;
-import org.foxesworld.engine.gui.components.dropBox.DropBox;
 import org.foxesworld.engine.gui.components.dropBox.DropBoxStyle;
 import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
@@ -211,11 +211,10 @@ public class ComponentFactory {
 
             case "dropBox" -> {
                 DropBoxStyle dropBoxStyle = new DropBoxStyle(this);
-                DropBox dropBox = new DropBox(this, this.scrollBoxArr, yPos);
+                DropBox dropBox = new DropBox(this,  yPos);
                 dropBoxStyle.apply(dropBox);
                 dropBox.setBounds(xPos,yPos, width,height);
                 dropBox.setName(componentAttributes.getComponentId());
-                dropBox.setSelectedIndex(componentAttributes.getSelectedIndex());
                 dropBox.repaint();
                 return dropBox;
             }
