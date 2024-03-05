@@ -14,8 +14,8 @@ import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.engine.gui.components.panel.PanelVisibility;
 import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
-import org.foxesworld.engine.news.News;
 import org.foxesworld.engine.sound.Sound;
+//import org.foxesworld.engine.sound.SoundPlayer;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.FontUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
@@ -35,10 +35,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final LoadingManager loadingManager;
     private final String configFiles;
     private final String appTitle;
-    private final Sound SOUND;
+    private Sound SOUND;
     public static Logger LOGGER;
     private final Discord discord;
-    private News news;
     private final LanguageProvider LANG;
     private final ServerInfo serverInfo;
     private final FontUtils FONTUTILS;
@@ -64,9 +63,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.panelVisibility = new PanelVisibility(this);
         LOGGER.info(appTitle + " started...");
         this.LANG = new LanguageProvider(this, this.getGuiProperties().getLocaleFile());
+        this.SOUND = new Sound(this, Engine.class.getClassLoader().getResourceAsStream("assets/sounds/sounds.json"));
         this.FONTUTILS = new FontUtils(this);
         this.serverInfo = new ServerInfo(this);
-        this.SOUND = new Sound(this);
         this.discord = new Discord(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(CONFIG.getLogLevel()));
 
@@ -156,9 +155,6 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public void setGuiBuilder(GuiBuilder guiBuilder) {
         this.guiBuilder = guiBuilder;
     }
-    public void setNews(News news) {
-        this.news = news;
-    }
     public void setInit(boolean init) {
         this.init = init;
     }
@@ -168,4 +164,5 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public LoadingManager getLoadingManager() {
         return loadingManager;
     }
+
 }

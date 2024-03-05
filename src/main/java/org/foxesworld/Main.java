@@ -4,7 +4,6 @@ import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.engine.gui.styles.StyleProvider;
-import org.foxesworld.engine.news.News;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -28,7 +27,6 @@ public class Main  extends Engine {
         //this.getGuiBuilder().getComponentFactory().setComponentFactoryListener(new Components(this));
         getGuiBuilder().setGuiBuilderListener(this);
         //getGuiBuilder().getComponentFactory().setComponentFactoryListener(getGuiBuilder());
-        setNews(new News(this));
         this.getGuiBuilder().buildGui(this.getGuiProperties().getFrameTpl(), this.getFrame().getRootPanel());
         loadMainPanel(this.getGuiProperties().getMainFrame());
 

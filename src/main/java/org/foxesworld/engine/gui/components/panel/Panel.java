@@ -44,20 +44,12 @@ public class Panel extends JPanel {
     }
 
     private String getSeasonalBackground(){
-        switch(CurrentMonth.getCurrentMonth()){
-            case DECEMBER, JANUARY, FEBRUARY:
-                return  frameAttributes.getWinterImage();
-
-            case MARCH, APRIL, MAY:
-                return  frameAttributes.getSpringImage();
-
-            case JUNE, JULY, AUGUST:
-                return  frameAttributes.getSummerImage();
-
-            case SEPTEMBER, OCTOBER, NOVEMBER:
-                return  frameAttributes.getAutumnImage();
-        }
-        return  "";
+        return switch (CurrentMonth.getCurrentMonth()) {
+            case DECEMBER, JANUARY, FEBRUARY -> frameAttributes.getWinterImage();
+            case MARCH, APRIL, MAY -> frameAttributes.getSpringImage();
+            case JUNE, JULY, AUGUST -> frameAttributes.getSummerImage();
+            case SEPTEMBER, OCTOBER, NOVEMBER -> frameAttributes.getAutumnImage();
+        };
     }
 
     private BufferedImage applyDarkening(BufferedImage image, Color darkeningColor) {

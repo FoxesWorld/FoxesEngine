@@ -165,11 +165,11 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
         if (state == State.OPENED) {
             dropBoxListener.onScrollBoxClose(selected);
-            componentFactory.engine.getSOUND().playSound("dropBox/dropBoxOpen.ogg", false);
+            componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
 
         } else {
             dropBoxListener.onScrollBoxOpen(selected);
-            componentFactory.engine.getSOUND().playSound("dropBox/dropBoxClose.ogg", false);
+            componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxClose");
         }
 
         state = (state == State.OPENED) ? State.CLOSED : State.OPENED;
@@ -181,7 +181,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     @Override
     public void mouseEntered(MouseEvent e) {
         if (state != State.OPENED) {
-            componentFactory.engine.getSOUND().playSound("button/buttonHover.ogg", false);
+            componentFactory.engine.getSOUND().playSound("button", "hover");
         }
         state = State.ROLLOVER;
         entered = true;

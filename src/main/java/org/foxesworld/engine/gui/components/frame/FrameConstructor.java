@@ -54,6 +54,7 @@ public class FrameConstructor extends JFrame {
         setContentPane(this.rootPanel);
         setVisible(true);
     }
+
     public Dimension getScreenSize() {
         return screenSize;
     }

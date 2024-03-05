@@ -1,97 +1,83 @@
 package org.foxesworld.engine.sound;
 
-import de.jarnbjo.vorbis.VorbisAudioFileReader;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.foxesworld.engine.Engine;
 
-import javax.sound.sampled.*;
-import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class Sound {
+    private final SoundPlayer soundPlayer;
+    private final Map<String, Map<String, String>> soundsMap = new HashMap<>();
+    private final Random random = new Random();
 
-    private final Engine engine;
-    private final String baseDir = "assets/sounds/";
-    private final VorbisAudioFileReader vorbisAudioFileReader;
-    private final List<Clip> activeClips = new ArrayList<>();
-
-    public Sound(Engine engine) {
-        this.engine = engine;
-        vorbisAudioFileReader = new VorbisAudioFileReader();
+    public Sound(Engine engine, InputStream inputStream) {
+        this.soundPlayer = new SoundPlayer(engine);
+        loadSounds(inputStream);
     }
 
-    public void playSound(String path, boolean loop) {
-        if (engine.getCONFIG().isEnableSound()) {
-            String fullPath = baseDir + path;
-            try {
-                InputStream inputStream = Sound.class.getClassLoader().getResourceAsStream(fullPath);
-                AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioInputStream);
-                setVolume(clip, (float) engine.getCONFIG().getVolume() / 100.0f);
+    private void loadSounds(InputStream inputStream) {
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            JsonParser parser = new JsonParser();
+            JsonObject jsonObject = parser.parse(reader).getAsJsonObject();
 
-                if (loop) {
-                    clip.loop(Clip.LOOP_CONTINUOUSLY);
-                }
+            Set<Map.Entry<String, JsonElement>> entries = jsonObject.entrySet();
+            for (Map.Entry<String, JsonElement> entry : entries) {
+                String category = entry.getKey();
+                JsonObject categoryObj = entry.getValue().getAsJsonObject();
 
-                clip.start();
-                activeClips.add(clip);
-            } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+                Map<String, String> categorySounds = new HashMap<>();
+                Set<Map.Entry<String, JsonElement>> soundEntries = categoryObj.entrySet();
 
-    private void setVolume(Clip clip, float volume) {
-        if (volume < 0.0f || volume > 1.0f) {
-            throw new IllegalArgumentException("Volume should be between 0.0 and 1.0");
-        }
+                for (Map.Entry<String, JsonElement> soundEntry : soundEntries) {
+                    String soundName = soundEntry.getKey();
+                    JsonElement soundElement = soundEntry.getValue();
 
-        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-        float range = gainControl.getMaximum() - gainControl.getMinimum();
-        float gain = (range * volume) + gainControl.getMinimum();
-        gainControl.setValue(gain);
-    }
+                    if (soundElement.isJsonObject()) {
+                        JsonObject soundObj = soundElement.getAsJsonObject();
+                        JsonArray soundsArray = soundObj.getAsJsonArray("sounds");
 
-    public void changeActiveVolume(float volume) {
-        for (Clip clip : activeClips) {
-            setVolume(clip, volume);
-        }
-    }
-
-
-    public void stopAllSounds() {
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() {
-                for (Clip clip : activeClips) {
-                    if (clip.isRunning()) {
-                        fadeOut(clip);
+                        if (soundsArray != null && soundsArray.size() > 0) {
+                            String randomSound = chooseRandomSound(soundsArray);
+                            categorySounds.put(soundName, randomSound);
+                        }
                     }
                 }
-                activeClips.clear();
-                return null;
+
+                if (!categorySounds.isEmpty()) {
+                    soundsMap.put(category, categorySounds);
+                }
             }
-        };
-        worker.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void fadeOut(Clip clip) {
-        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-        float currentVolume = gainControl.getValue();
-        while (currentVolume > -80.0f) {
-            currentVolume -= 0.25f;
-            gainControl.setValue(currentVolume);
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    private String chooseRandomSound(JsonArray soundArray) {
+        int randomIndex = random.nextInt(soundArray.size());
+        return soundArray.get(randomIndex).getAsString();
+    }
+
+    public Map<String, String> getSounds(String category) {
+        return soundsMap.get(category);
+    }
+
+    public void playSound(String category, String soundName) {
+        Map<String, String> categorySounds = soundsMap.get(category);
+        if (categorySounds != null) {
+            this.soundPlayer.playSound(categorySounds.get(soundName), false);
         }
-        clip.stop();
-        gainControl.setValue(0.0f);
-        activeClips.remove(clip);
+    }
+
+    public SoundPlayer getSoundPlayer() {
+        return soundPlayer;
     }
 }
