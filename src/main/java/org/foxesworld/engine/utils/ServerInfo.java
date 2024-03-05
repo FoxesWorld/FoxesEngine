@@ -13,12 +13,13 @@ import java.util.StringTokenizer;
 
 public class ServerInfo {
     private final LanguageProvider lang;
-    private final BufferedImage serverStatusImg;
+
+
+    private BufferedImage serverStatusImg;
     private int servtype = 2;
 
     public ServerInfo(Engine engine) {
         lang = engine.getLANG();
-        serverStatusImg = ImageUtils.getLocalImage("assets/ui/icons/status.png");
     }
 
     public String[] pollServer(String ip, int port) {
@@ -101,5 +102,10 @@ public class ServerInfo {
             return statusKey;
         }
     }
+
+    public void setServerStatusImg(BufferedImage serverStatusImg) {
+        this.serverStatusImg = serverStatusImg;
+    }
+
 
 }

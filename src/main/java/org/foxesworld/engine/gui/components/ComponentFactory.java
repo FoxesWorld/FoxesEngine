@@ -222,7 +222,7 @@ public class ComponentFactory {
             case "serverBox" -> {
                 ServerBoxStyle serverBoxStyle = new ServerBoxStyle(this);
                 ServerBox serverBox = new ServerBox();
-                serverBox.updateBox(componentAttributes.getComponentId(), ImageUtils.getLocalImage("assets/ui/icons/status.png").getSubimage(16, 0, 16, 16));
+                serverBox.updateBox(componentAttributes.getComponentId(), ImageUtils.getLocalImage(style.getTexture()).getSubimage(16, 0, 16, 16));
                 serverBoxStyle.apply(serverBox);
                 serverBox.setBounds(xPos,yPos, width,height);
                 serverBox.setBackground(hexToColor(componentAttributes.getColor()));

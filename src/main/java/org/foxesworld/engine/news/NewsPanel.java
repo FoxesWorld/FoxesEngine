@@ -31,8 +31,8 @@ public class NewsPanel extends JPanel {
     public NewsPanel(List<NewsAttributes> newsAttributesList) {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setOpaque(true);
-        contentPanel.setBackground(hexToColor("#1e1f2073"));
+        contentPanel.setOpaque(false);
+        //contentPanel.setBackground(hexToColor("#1e1f2073"));
 
         for (NewsAttributes newsAttributes : newsAttributesList) {
             contentPanel.add(createNewsPanel(newsAttributes));
