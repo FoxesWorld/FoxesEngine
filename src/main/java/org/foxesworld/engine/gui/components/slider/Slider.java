@@ -18,6 +18,6 @@ public class Slider extends JSlider {
     @SuppressWarnings("unused")
     public void setSliderListener(SliderListener sliderListener) {
         this.sliderListener = sliderListener;
-        this.addChangeListener(e -> sliderListener.onSliderChange(this.getValue()));
+        this.addChangeListener(e -> sliderListener.onSliderChange(this));
     }
 }

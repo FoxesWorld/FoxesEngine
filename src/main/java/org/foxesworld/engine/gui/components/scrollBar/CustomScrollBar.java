@@ -12,15 +12,15 @@ import java.awt.event.MouseWheelListener;
 public class CustomScrollBar extends JComponent {
 
     /* EXPERIMENTAL */
-    private int minValue;
-    private int maxValue;
-    private int extent;
+    private final int minValue;
+    private final int maxValue;
+    private final int extent;
     private int value;
     private boolean isDragging = false;
     private static final int SCROLLBAR_WIDTH = 16;
 
-    private Image thumbImage;
-    private Image trackImage;
+    private final Image thumbImage;
+    private final Image trackImage;
 
     public CustomScrollBar(int minValue, int maxValue, int extent) {
         this.minValue = minValue;
@@ -55,17 +55,14 @@ public class CustomScrollBar extends JComponent {
             }
         });
 
-        addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                int notches = e.getWheelRotation();
-                if (notches < 0) {
-                    value = Math.max(minValue, value - 1);
-                } else {
-                    value = Math.min(maxValue - extent, value + 1);
-                }
-                repaint();
+        addMouseWheelListener(e -> {
+            int notches = e.getWheelRotation();
+            if (notches < 0) {
+                value = Math.max(minValue, value - 1);
+            } else {
+                value = Math.min(maxValue - extent, value + 1);
             }
+            repaint();
         });
     }
 

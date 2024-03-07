@@ -9,15 +9,12 @@ import org.foxesworld.engine.Engine;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Sound {
     private final SoundPlayer soundPlayer;
-    private final Map<String, Map<String, String>> soundsMap = new HashMap<>();
-    private final Random random = new Random();
+    private final Map<String, Map<String, List<String>>> soundsMap = new HashMap<>();
+    private Random random = new Random();
 
     public Sound(Engine engine, InputStream inputStream) {
         this.soundPlayer = new SoundPlayer(engine);
@@ -33,50 +30,53 @@ public class Sound {
             for (Map.Entry<String, JsonElement> entry : entries) {
                 String category = entry.getKey();
                 JsonObject categoryObj = entry.getValue().getAsJsonObject();
+                Map<String, List<String>> subCategorySoundsMap = new HashMap<>();
 
-                Map<String, String> categorySounds = new HashMap<>();
-                Set<Map.Entry<String, JsonElement>> soundEntries = categoryObj.entrySet();
+                Set<Map.Entry<String, JsonElement>> subCategoryEntries = categoryObj.entrySet();
+                for (Map.Entry<String, JsonElement> subCategoryEntry : subCategoryEntries) {
+                    String subCategory = subCategoryEntry.getKey();
+                    JsonArray soundsArray = subCategoryEntry.getValue().getAsJsonObject().getAsJsonArray("sounds");
+                    List<String> subCategorySounds = new ArrayList<>();
 
-                for (Map.Entry<String, JsonElement> soundEntry : soundEntries) {
-                    String soundName = soundEntry.getKey();
-                    JsonElement soundElement = soundEntry.getValue();
-
-                    if (soundElement.isJsonObject()) {
-                        JsonObject soundObj = soundElement.getAsJsonObject();
-                        JsonArray soundsArray = soundObj.getAsJsonArray("sounds");
-
-                        if (soundsArray != null && soundsArray.size() > 0) {
-                            String randomSound = chooseRandomSound(soundsArray);
-                            categorySounds.put(soundName, randomSound);
-                        }
+                    for (JsonElement soundElement : soundsArray) {
+                        subCategorySounds.add(soundElement.getAsString());
                     }
+
+                    subCategorySoundsMap.put(subCategory, subCategorySounds);
                 }
 
-                if (!categorySounds.isEmpty()) {
-                    soundsMap.put(category, categorySounds);
-                }
+                soundsMap.put(category, subCategorySoundsMap);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String chooseRandomSound(JsonArray soundArray) {
-        int randomIndex = random.nextInt(soundArray.size());
-        return soundArray.get(randomIndex).getAsString();
+    public List<String> getSounds(String category, String subCategory) {
+        Map<String, List<String>> subCategorySoundsMap = soundsMap.get(category);
+        if (subCategorySoundsMap != null) {
+            return subCategorySoundsMap.get(subCategory);
+        }
+        return null;
     }
 
-    public Map<String, String> getSounds(String category) {
-        return soundsMap.get(category);
-    }
-
-    public void playSound(String category, String soundName) {
-        Map<String, String> categorySounds = soundsMap.get(category);
-        if (categorySounds != null) {
-            this.soundPlayer.playSound(categorySounds.get(soundName), false);
+    public void playSound(String category, String subCategory) {
+        List<String> subCategorySounds = getSounds(category, subCategory);
+        if (subCategorySounds != null && !subCategorySounds.isEmpty()) {
+            int randomIndex = random.nextInt(subCategorySounds.size());
+            String randomSound = subCategorySounds.get(randomIndex);
+            this.soundPlayer.playSound(randomSound, false);
         }
     }
 
+    public void playSound(String category, String subCategory, boolean loop) {
+        List<String> subCategorySounds = getSounds(category, subCategory);
+        if (subCategorySounds != null && !subCategorySounds.isEmpty()) {
+            int randomIndex = random.nextInt(subCategorySounds.size());
+            String randomSound = subCategorySounds.get(randomIndex);
+            this.soundPlayer.playSound(randomSound, loop);
+        }
+    }
     public SoundPlayer getSoundPlayer() {
         return soundPlayer;
     }

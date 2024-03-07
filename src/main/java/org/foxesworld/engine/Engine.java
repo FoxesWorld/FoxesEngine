@@ -14,8 +14,8 @@ import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.engine.gui.components.panel.PanelVisibility;
 import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
+import org.foxesworld.engine.news.News;
 import org.foxesworld.engine.sound.Sound;
-//import org.foxesworld.engine.sound.SoundPlayer;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.FontUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
@@ -36,12 +36,13 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final String configFiles;
     private final String appTitle;
     private Sound SOUND;
+    private News news;
     public static Logger LOGGER;
     private final Discord discord;
     private final LanguageProvider LANG;
     private final ServerInfo serverInfo;
     private final FontUtils FONTUTILS;
-    private final Config CONFIG;
+    private static Config CONFIG;
     private CryptUtils CRYPTO;
     private final FrameConstructor frameConstructor;
     private final PanelVisibility panelVisibility;
@@ -110,7 +111,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public HTTPrequest getPOSTrequest() {
         return POSTrequest;
     }
-    public Logger getLOGGER() {
+    public static Logger getLOGGER() {
         return LOGGER;
     }
     public LanguageProvider getLANG() {
@@ -165,4 +166,10 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         return loadingManager;
     }
 
+    public void setNews(News news) {
+        this.news = news;
+    }
+    public News getNews() {
+        return news;
+    }
 }

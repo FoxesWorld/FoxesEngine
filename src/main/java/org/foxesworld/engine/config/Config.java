@@ -18,7 +18,8 @@ public class Config extends ConfigAbstract {
 
     private int selectedServer, gpuIndex;
     private double volume;
-    private  String login, password, lang, logLevel, ramAmount;
+    private int ramAmount;
+    private  String login, password, lang, logLevel;
     private  boolean autoEnter, fullScreen, loadNews, enableSound;
 
     public Config(Engine engine) {
@@ -108,7 +109,7 @@ public class Config extends ConfigAbstract {
     public String getLogLevel() {
         return logLevel;
     }
-    public String getRamAmount() {
+    public int getRamAmount() {
         return ramAmount;
     }
     public double getVolume() {

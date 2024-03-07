@@ -26,6 +26,8 @@ public class ComponentAttributes {
     private int delay;
     private String bounds;
     private  int minValue;
+    private int minorSpacing;
+    private int majorSpacing;
     private int maxValue;
     private String thumbImage;
     private String trackImage;
@@ -106,6 +108,15 @@ public class ComponentAttributes {
     public int getMaxValue() {
         return maxValue;
     }
+
+    public int getMinorSpacing() {
+        return minorSpacing;
+    }
+
+    public int getMajorSpacing() {
+        return majorSpacing;
+    }
+
     public int getSelectedIndex() {
         return selectedIndex;
     }

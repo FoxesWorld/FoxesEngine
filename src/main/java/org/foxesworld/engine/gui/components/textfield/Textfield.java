@@ -3,6 +3,8 @@ package org.foxesworld.engine.gui.components.textfield;
 import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -11,15 +13,18 @@ import java.io.Serial;
 public class Textfield extends JTextField {
 	@Serial
 	private static final long serialVersionUID = 1L;
+	private  TextFieldListener textFieldListener;
 	public BufferedImage texture;
 	private int paddingX = 0;
 	private int paddingY = 0;
 	private boolean caretVisible = true;
 	private Timer caretTimer;
+	private String placeholder;
 
 	public Textfield(String placeholder) {
+		this.placeholder = placeholder;
 		setOpaque(false);
-		setText(placeholder);
+		setText(this.placeholder);
 
 		addFocusListener(new FocusAdapter() {
 			@Override
@@ -99,6 +104,32 @@ public class Textfield extends JTextField {
 		}
 
 		g.dispose();
+	}
+
+	public void setTextFieldListener(TextFieldListener textFieldListener) {
+		this.textFieldListener = textFieldListener;
+		getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				checkText();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				checkText();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				checkText();
+			}
+
+			private void checkText() {
+				if (!getText().equals(placeholder)) {
+					textFieldListener.onTextChange(Textfield.this);
+				}
+			}
+		});
 	}
 
 	public void setPaddingX(int paddingX) {

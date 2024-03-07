@@ -33,6 +33,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
@@ -248,7 +249,30 @@ public class ComponentFactory {
                 if(componentAttributes.getInitialValue() != null) {
                     slider.setValue(Integer.parseInt(componentAttributes.getInitialValue()));
                 }
-                if(style.getThumbImage() != "" & style.getTrackImage() != "") {
+                if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
+                    slider.setUI(new TexturedSliderUI(slider, style.getThumbImage(), style.getTrackImage()));
+                }
+
+                return slider;
+            }
+
+            case "labeledSlider" ->{
+                Slider slider = new Slider(this);
+                slider.setEnabled(componentAttributes.isEnabled());
+                slider.setName(componentAttributes.getComponentId());
+                slider.setMinimum(componentAttributes.getMinValue());
+                slider.setMaximum(componentAttributes.getMaxValue());
+                slider.setBounds(xPos, yPos, width, height);
+                slider.setOpaque(style.isOpaque());
+                if(componentAttributes.getInitialValue() != null) {
+                    slider.setValue(Integer.parseInt(componentAttributes.getInitialValue()));
+                }
+                slider.setMajorTickSpacing(componentAttributes.getMajorSpacing());
+                slider.setMinorTickSpacing(componentAttributes.getMinorSpacing());
+                slider.setPaintTicks(true);
+                slider.setPaintLabels(true);
+                slider.setSnapToTicks(true);
+                if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
                     slider.setUI(new TexturedSliderUI(slider, style.getThumbImage(), style.getTrackImage()));
                 }
 
