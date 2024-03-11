@@ -21,8 +21,8 @@ public class LanguageProvider {
     private int localeIndex = 0;
     private String currentLang;
 
-    public LanguageProvider(Engine engine, String langFilePath) {
-        this.currentLang = engine.getCONFIG().getLang();
+    public LanguageProvider(Engine engine, String langFilePath, String locale) {
+        this.currentLang = locale;
 
         try {
             Gson gson = new Gson();
@@ -102,7 +102,6 @@ public class LanguageProvider {
             }
         }
     }
-
     public String[] getLocalesSet() {
         return localesSet.toArray(new String[0]);
     }

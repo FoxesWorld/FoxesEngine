@@ -8,19 +8,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class Config extends ConfigAbstract {
     private Engine engine;
     private Map<String, Object> CONFIG;
-
     private int selectedServer, gpuIndex;
     private double volume;
     private int ramAmount;
-    private  String login, password, lang, logLevel;
-    private  boolean autoEnter, fullScreen, loadNews, enableSound;
+    private  String login, password, lang;
+    private  boolean autoEnter, fullScreen, loadNews, enableSound,launchAC;
 
     public Config(Engine engine) {
         this.engine = engine;
@@ -42,14 +41,14 @@ public class Config extends ConfigAbstract {
     }
     public void setConfigValue(String key, Object value){
         if(CONFIG.get(key) != null) {
-            clearConfigData(Arrays.asList(key), false);
+            clearConfigData(Collections.singletonList(key), false);
         }
         CONFIG.put(key, value);
         assignConfigValues();
     }
 
     public void clearConfigData(List<String> dataToClear, boolean write) {
-        this.engine.getLOGGER().debug("Wiping "+dataToClear);
+        Engine.getLOGGER().debug("Wiping "+dataToClear);
         for (String keyToWipe : dataToClear) {
             this.CONFIG.remove(keyToWipe);
         }
@@ -58,7 +57,7 @@ public class Config extends ConfigAbstract {
         }
     }
     public void clearConfigData(String dataToClear, boolean write) {
-        this.engine.getLOGGER().debug("Wiping "+dataToClear);
+        Engine.getLOGGER().debug("Wiping "+dataToClear);
             this.CONFIG.remove(dataToClear);
         if (write) {
             this.writeCurrentConfig();
@@ -72,13 +71,14 @@ public class Config extends ConfigAbstract {
                     field.set(this, configMap.getValue());
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
+                this.writeCurrentConfig();
             }
         }
     }
     public void writeCurrentConfig() {
-        this.engine.getLOGGER().debug("Writing "+ configToJSON());
-        try (FileWriter fileWriter = new FileWriter(this.getFullPath() + File.separator + "config/config.json")) {
+        //Engine.getLOGGER().debug("Writing "+ configToJSON());
+        try (FileWriter fileWriter = new FileWriter(getFullPath() + File.separator + "config/config.json")) {
             fileWriter.write(configToJSON());
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,10 +93,6 @@ public class Config extends ConfigAbstract {
     public Map<String, Object> getCONFIG() {
         return CONFIG;
     }
-    @Override
-    public String getFullPath() {
-        return cfgProvider.getGameFullPath();
-    }
     public String getLogin() {
         return login;
     }
@@ -105,9 +101,6 @@ public class Config extends ConfigAbstract {
     }
     public String getLang() {
         return lang;
-    }
-    public String getLogLevel() {
-        return logLevel;
     }
     public int getRamAmount() {
         return ramAmount;
@@ -123,6 +116,9 @@ public class Config extends ConfigAbstract {
     }
     public boolean isLoadNews() {
         return loadNews;
+    }
+    public boolean isLaunchAC() {
+        return launchAC;
     }
     public boolean isEnableSound() {
         return enableSound;

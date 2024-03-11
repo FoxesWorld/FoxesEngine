@@ -3,7 +3,6 @@ package org.foxesworld;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
-import org.foxesworld.engine.gui.styles.StyleProvider;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -22,7 +21,7 @@ public class Main  extends Engine {
 
     @Override
     public void initialize(Engine engine) {
-        setStyleProvider(new StyleProvider(this));
+        //setStyleProvider(new StyleProvider(this));
         setGuiBuilder(new GuiBuilder(this));
         //this.getGuiBuilder().getComponentFactory().setComponentFactoryListener(new Components(this));
         getGuiBuilder().setGuiBuilderListener(this);

@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.foxesworld.engine.config.Config;
+import org.foxesworld.engine.config.ConfigAbstract;
 import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.GuiBuilderListener;
@@ -26,25 +27,29 @@ import org.foxesworld.engine.gui.ActionHandler;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Map;
 
 public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
+    private String soundsFile = "assets/sounds/sounds.json";
     private final GuiProperties guiProperties;
-    private final LoadingManager loadingManager;
+    private LoadingManager loadingManager;
     private final String configFiles;
     private final String appTitle;
     private Sound SOUND;
+    private Config config;
+    private LanguageProvider LANG;
     private News news;
     public static Logger LOGGER;
     private final Discord discord;
-    private final LanguageProvider LANG;
     private final ServerInfo serverInfo;
     private final FontUtils FONTUTILS;
-    private static Config CONFIG;
-    private CryptUtils CRYPTO;
-    private final FrameConstructor frameConstructor;
+    protected CryptUtils CRYPTO;
+    private FrameConstructor frameConstructor;
     private final PanelVisibility panelVisibility;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
@@ -57,21 +62,26 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
         guiProperties = new GuiProperties(this);
-        this.CONFIG = new Config(this);
-        System.setProperty("log.dir", CONFIG.getFullPath());
+        this.config = new Config(this);
+        System.setProperty("log.dir", ConfigAbstract.getFullPath());
         LOGGER = LogManager.getLogger(Engine.class);
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
         LOGGER.info(appTitle + " started...");
-        this.LANG = new LanguageProvider(this, this.getGuiProperties().getLocaleFile());
-        this.SOUND = new Sound(this, Engine.class.getClassLoader().getResourceAsStream("assets/sounds/sounds.json"));
+
         this.FONTUTILS = new FontUtils(this);
         this.serverInfo = new ServerInfo(this);
         this.discord = new Discord(this);
-        Configurator.setLevel(getLOGGER().getName(), Level.valueOf(CONFIG.getLogLevel()));
+        Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
 
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
+    }
+
+    @SuppressWarnings("unused")
+    public void postInit(String locale, boolean enableSnd, float sndVolume){
+        this.LANG = new LanguageProvider(this, this.getGuiProperties().getLocaleFile(), locale);
+        this.SOUND = new Sound(this, enableSnd, sndVolume, Engine.class.getClassLoader().getResourceAsStream(this.soundsFile));
         this.frameConstructor = new FrameConstructor(this);
         this.loadingManager = new LoadingManager(this);
         this.CRYPTO = new CryptUtils(this);
@@ -91,6 +101,25 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
             return URLDecoder.decode(HTTPrequest.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
         } catch (java.net.URISyntaxException e) {
             return null;
+        }
+    }
+
+    public void restartApplication(int xmx) {
+        String path = ConfigAbstract.getFullPath();
+        ArrayList params = new ArrayList();
+        params.add(path + "/runtime/"+ this.getEngineData().getProgramRuntime() + "/bin/java");
+        params.add("-Xmx"+xmx+"M");
+        params.add("-jar");
+        params.add(appPath().substring(1));
+
+        ProcessBuilder builder = new ProcessBuilder(params);
+        builder.redirectErrorStream(true);
+        builder.directory(new File(path + File.separator));
+        try {
+            builder.start();
+            System.exit(-1);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Restart Error occured \n PLease try again" + e, "Restart Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     public String[] getConfigFiles() {
@@ -119,9 +148,6 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
     public FontUtils getFONTUTILS() {
         return FONTUTILS;
-    }
-    public Config getCONFIG() {
-        return CONFIG;
     }
     public StyleProvider getStyleProvider() {
         return styleProvider;
@@ -165,11 +191,16 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public LoadingManager getLoadingManager() {
         return loadingManager;
     }
-
+    public void setSoundsFile(String soundsFile) {
+        this.soundsFile = soundsFile;
+    }
     public void setNews(News news) {
         this.news = news;
     }
     public News getNews() {
         return news;
+    }
+    public Config getConfig() {
+        return config;
     }
 }

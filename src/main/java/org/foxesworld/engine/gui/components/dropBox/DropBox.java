@@ -107,7 +107,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         for (int i = 0; i < values.length; ++i) {
             drawPanel(g, i);
             if (i == selected) {
-                g.drawImage(point, 176, panelTX.getHeight() * i + 10, this);
+                g.drawImage(point, 185, panelTX.getHeight() * i + 10, this);
             }
         }
         g.drawString(values[selected], 10, selectedTX.getHeight() * (values.length + 1) - g.getFontMetrics().getHeight() / 2 - 5);

@@ -11,15 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class EngineData {
-    private String bindUrl;
-    private String launcherBrand;
-    private String launcherVersion;
-    @Deprecated
-    private String appId;
-    @Deprecated
-    private String accessToken;
-    private String groupDomain;
-    private String vkAPIversion;
+    private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
     private int downloadThreads;
     private List<RequestProperty> requestProperties;
     private List<TweakClasses> tweakClasses;
@@ -54,7 +46,12 @@ public class EngineData {
     public List<TweakClasses> getTweakClasses() {
         return tweakClasses;
     }
-
+    public String getLogLevel() {
+        return logLevel;
+    }
+    public String getProgramRuntime() {
+        return programRuntime;
+    }
     public Map<String, Object> getGui() {
         return gui;
     }

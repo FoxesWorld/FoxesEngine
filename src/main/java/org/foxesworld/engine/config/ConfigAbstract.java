@@ -28,10 +28,9 @@ public abstract class ConfigAbstract {
     }
     protected Map<String, Map> getAllCfgMaps(){
         return cfgProvider.getAllCfgMaps();
-
     }
 
-    protected String getFullPath() {
+    public static String getFullPath() {
         return cfgProvider.getGameFullPath();
     }
 }

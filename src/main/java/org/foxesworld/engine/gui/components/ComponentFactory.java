@@ -22,7 +22,7 @@ import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
 import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
 import org.foxesworld.engine.gui.components.textfield.Textfield;
 import org.foxesworld.engine.gui.components.textfield.TextfieldStyle;
-import org.foxesworld.engine.gui.styles.StyleProvider;
+import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.ImageUtils;
 
@@ -41,9 +41,9 @@ public class ComponentFactory {
 
     public Engine engine;
     private final LanguageProvider LANG;
-    private final Map<String, Map<String, StyleProvider.StyleAttributes>> componentStyles = new HashMap<>();
+    private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
 
-    public StyleProvider.StyleAttributes style = null;
+    public StyleAttributes style = null;
     private ComponentAttributes componentAttribute;
     private String[] scrollBoxArr = {""};
     private ComponentFactoryListener componentFactoryListener;
@@ -241,22 +241,6 @@ public class ComponentFactory {
             }
 
             case "slider" -> {
-                Slider slider = new Slider(this);
-                slider.setEnabled(componentAttributes.isEnabled());
-                slider.setName(componentAttributes.getComponentId());
-                slider.setBounds(xPos, yPos, width, height);
-                slider.setOpaque(style.isOpaque());
-                if(componentAttributes.getInitialValue() != null) {
-                    slider.setValue(Integer.parseInt(componentAttributes.getInitialValue()));
-                }
-                if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
-                    slider.setUI(new TexturedSliderUI(slider, style.getThumbImage(), style.getTrackImage()));
-                }
-
-                return slider;
-            }
-
-            case "labeledSlider" ->{
                 Slider slider = new Slider(this);
                 slider.setEnabled(componentAttributes.isEnabled());
                 slider.setName(componentAttributes.getComponentId());

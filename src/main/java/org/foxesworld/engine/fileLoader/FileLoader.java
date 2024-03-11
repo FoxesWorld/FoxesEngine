@@ -2,6 +2,7 @@ package org.foxesworld.engine.fileLoader;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.config.ConfigAbstract;
 import org.foxesworld.engine.utils.LoadingManager;
 import org.foxesworld.engine.gui.ActionHandler;
 import org.foxesworld.engine.utils.Download.DownloadUtils;
@@ -36,7 +37,7 @@ public class FileLoader {
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
         this.POSTrequest = engine.getPOSTrequest();
-        this.homeDir = engine.getCONFIG().getFullPath();
+        this.homeDir = ConfigAbstract.getFullPath();
         this.downloadUtils = new DownloadUtils(engine);
         this.executorService = Executors.newFixedThreadPool(this.engine.getEngineData().getDownloadThreads());
         this.loadingManager = this.engine.getLoadingManager();

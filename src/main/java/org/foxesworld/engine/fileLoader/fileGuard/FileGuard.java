@@ -86,7 +86,7 @@ public class FileGuard {
             for (File file : files) {
                 if (file.isFile()) {
                     String checkPath = file.getPath().replace(this.gameLauncher.buildGameDir(), "").replace("\\", "/");
-                    if (!filesToKeep.contains(checkPath) && !this.isUserConfig(file) && !isInIgnoreList(file)) {
+                    if (!filesToKeep.contains(checkPath) && !this.isUserConfig(file) && !isInIgnoreList(file)){ //&& !this.isUserConfig(file) && !isInIgnoreList(file)) {
                         boolean deleted = file.delete();
                         if (deleted) {
                             logger.debug("Deleted unlisted file: " + checkPath);

@@ -13,24 +13,26 @@ import java.util.List;
 public class SoundPlayer {
 
     private final Engine engine;
-    //private final String baseDir = "assets/sounds/";
+    private boolean enabled;
+    private float volume;
     private final VorbisAudioFileReader vorbisAudioFileReader;
     private final List<Clip> activeClips = new ArrayList<>();
 
-    public SoundPlayer(Engine engine) {
+    public SoundPlayer(Engine engine, boolean enabled, float volume) {
         this.engine = engine;
+        this.enabled = enabled;
+        this.volume = volume;
         vorbisAudioFileReader = new VorbisAudioFileReader();
     }
 
     public void playSound(String path, boolean loop) {
-        if (engine.getCONFIG().isEnableSound()) {
-            //String fullPath = baseDir + path;
+        if (this.enabled) {
             try {
                 InputStream inputStream = SoundPlayer.class.getClassLoader().getResourceAsStream(path);
                 AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioInputStream);
-                setVolume(clip, (float) engine.getCONFIG().getVolume() / 100.0f);
+                setVolume(clip, this.volume / 100.0f);
 
                 if (loop) {
                     clip.loop(Clip.LOOP_CONTINUOUSLY);

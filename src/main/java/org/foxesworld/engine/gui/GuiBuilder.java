@@ -28,7 +28,7 @@ public class GuiBuilder {
     private boolean additionalPanelsBuilt = false;
     public GuiBuilder(Engine engine) {
         this.engine = engine;
-        engine.getLOGGER().debug("=== GUI BUILDER ===");
+        Engine.getLOGGER().debug("=== GUI BUILDER ===");
         this.frameConstructor = engine.getFrame();
         this.componentFactory = new ComponentFactory(engine);
     }

@@ -14,10 +14,11 @@ import java.util.*;
 public class Sound {
     private final SoundPlayer soundPlayer;
     private final Map<String, Map<String, List<String>>> soundsMap = new HashMap<>();
-    private Random random = new Random();
+    private final Random random = new Random();
 
-    public Sound(Engine engine, InputStream inputStream) {
-        this.soundPlayer = new SoundPlayer(engine);
+    public Sound(Engine engine, boolean enabled, float volume, InputStream inputStream) {
+        Engine.getLOGGER().debug("FoxesSound init");
+        this.soundPlayer = new SoundPlayer(engine, enabled, volume);
         loadSounds(inputStream);
     }
 
