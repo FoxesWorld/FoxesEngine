@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public final class SpriteAnimation extends JComponent {
+public class SpriteAnimation extends JComponent {
     private final BufferedImage spriteSheet;
     private final int rows, columns;
     private int currentFrame = 0;

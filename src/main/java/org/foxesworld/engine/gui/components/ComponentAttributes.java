@@ -11,6 +11,7 @@ public class ComponentAttributes {
     private String componentStyle;
     private String componentId;
     private int rowNum;
+    private int colNum;
     private int imgCount;
     private int fontSize;
     private boolean enabled;
@@ -54,6 +55,11 @@ public class ComponentAttributes {
     public int getRowNum() {
         return rowNum;
     }
+
+    public int getColNum() {
+        return colNum;
+    }
+
     public int getImgCount() {
         return imgCount;
     }

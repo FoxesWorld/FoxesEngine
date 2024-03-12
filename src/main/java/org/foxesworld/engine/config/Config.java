@@ -58,7 +58,7 @@ public class Config extends ConfigAbstract {
     }
     public void clearConfigData(String dataToClear, boolean write) {
         Engine.getLOGGER().debug("Wiping "+dataToClear);
-            this.CONFIG.remove(dataToClear);
+        this.CONFIG.remove(dataToClear);
         if (write) {
             this.writeCurrentConfig();
         }

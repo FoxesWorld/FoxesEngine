@@ -3,7 +3,6 @@ package org.foxesworld.engine.game;
 import org.apache.logging.log4j.Logger;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.config.Config;
-import org.foxesworld.engine.config.ConfigAbstract;
 import org.foxesworld.engine.server.ServerAttributes;
 
 import java.io.File;
@@ -35,7 +34,7 @@ public abstract class GameLauncher {
     protected abstract void launchGame();
     protected abstract String addTweakClass();
     public String buildGameDir() {
-        return ConfigAbstract.getFullPath();
+        return Config.getFullPath();
     }
     protected abstract void setJre();
 

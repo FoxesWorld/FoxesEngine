@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.foxesworld.engine.config.Config;
-import org.foxesworld.engine.config.ConfigAbstract;
 import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.GuiBuilderListener;
@@ -41,14 +40,14 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final String configFiles;
     private final String appTitle;
     private Sound SOUND;
-    private Config config;
+    protected Config config;
     private LanguageProvider LANG;
     private News news;
     public static Logger LOGGER;
     private final Discord discord;
     private final ServerInfo serverInfo;
     private final FontUtils FONTUTILS;
-    protected CryptUtils CRYPTO;
+    private CryptUtils CRYPTO;
     private FrameConstructor frameConstructor;
     private final PanelVisibility panelVisibility;
     private GuiBuilder guiBuilder;
@@ -63,10 +62,12 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         setEngineData(engineData.initEngineValues("engine.json"));
         guiProperties = new GuiProperties(this);
         this.config = new Config(this);
-        System.setProperty("log.dir", ConfigAbstract.getFullPath());
+        System.setProperty("log.dir", Config.getFullPath());
         LOGGER = LogManager.getLogger(Engine.class);
+        this.LANG = new LanguageProvider(this, this.getGuiProperties().getLocaleFile(), String.valueOf(this.getConfig().getCONFIG().get("lang")));
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
+        this.SOUND = new Sound(this, Engine.class.getClassLoader().getResourceAsStream(this.soundsFile));
         LOGGER.info(appTitle + " started...");
 
         this.FONTUTILS = new FontUtils(this);
@@ -76,16 +77,11 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
-    }
-
-    @SuppressWarnings("unused")
-    public void postInit(String locale, boolean enableSnd, float sndVolume){
-        this.LANG = new LanguageProvider(this, this.getGuiProperties().getLocaleFile(), locale);
-        this.SOUND = new Sound(this, enableSnd, sndVolume, Engine.class.getClassLoader().getResourceAsStream(this.soundsFile));
         this.frameConstructor = new FrameConstructor(this);
         this.loadingManager = new LoadingManager(this);
         this.CRYPTO = new CryptUtils(this);
     }
+
     public abstract void initialize(Engine engine);
     @Override
     public abstract void onPanelsBuilt();
@@ -104,8 +100,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         }
     }
 
+    @SuppressWarnings("unused")
     public void restartApplication(int xmx) {
-        String path = ConfigAbstract.getFullPath();
+        String path = Config.getFullPath();
         ArrayList params = new ArrayList();
         params.add(path + "/runtime/"+ this.getEngineData().getProgramRuntime() + "/bin/java");
         params.add("-Xmx"+xmx+"M");
@@ -200,6 +197,11 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public News getNews() {
         return news;
     }
+
+    public CryptUtils getCRYPTO() {
+        return CRYPTO;
+    }
+
     public Config getConfig() {
         return config;
     }

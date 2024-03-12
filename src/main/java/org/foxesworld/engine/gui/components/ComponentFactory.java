@@ -19,12 +19,12 @@ import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
-import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
 import org.foxesworld.engine.gui.components.textfield.Textfield;
 import org.foxesworld.engine.gui.components.textfield.TextfieldStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.ImageUtils;
+import org.foxesworld.engine.utils.SpriteAnimation;
 
 import javax.swing.*;
 import java.awt.*;
@@ -157,9 +157,14 @@ public class ComponentFactory {
             }
 
             case "spriteImage" -> {
-                SpriteAnimation spriteAnimation = new SpriteAnimation(componentAttributes);
+                SpriteAnimation spriteAnimation = new SpriteAnimation(
+                        componentAttributes.getImageIcon(),
+                        componentAttributes.getRowNum(),
+                        componentAttributes.getColNum(),
+                        componentAttributes.getDelay(),
+                        new Rectangle(xPos,yPos, width, height));
                 spriteAnimation.setOpaque(style.isOpaque());
-                spriteAnimation.setBounds(xPos,yPos,width,height);
+                spriteAnimation.setVisible(componentAttributes.isEnabled());
                 spriteAnimation.setName(componentAttributes.getComponentId());
                 return  spriteAnimation;
             }

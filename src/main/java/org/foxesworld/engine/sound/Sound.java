@@ -16,9 +16,9 @@ public class Sound {
     private final Map<String, Map<String, List<String>>> soundsMap = new HashMap<>();
     private final Random random = new Random();
 
-    public Sound(Engine engine, boolean enabled, float volume, InputStream inputStream) {
+    public Sound(Engine engine, InputStream inputStream) {
         Engine.getLOGGER().debug("FoxesSound init");
-        this.soundPlayer = new SoundPlayer(engine, enabled, volume);
+        this.soundPlayer = new SoundPlayer(engine);
         loadSounds(inputStream);
     }
 
