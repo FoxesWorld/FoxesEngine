@@ -2,7 +2,7 @@ package org.foxesworld.engine.game;
 
 import org.apache.logging.log4j.Logger;
 import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.config.Config;
+import org.foxesworld.engine.config.ConfigAbstract;
 import org.foxesworld.engine.server.ServerAttributes;
 
 import java.io.File;
@@ -21,7 +21,7 @@ public abstract class GameLauncher {
     protected final ExecutorService executorService = Executors.newSingleThreadExecutor();
     protected Engine engine;
     protected Logger logger;
-    protected Config config;
+    protected ConfigAbstract config;
     protected int intVer;
     private final String[] toTest = {"_JAVA_OPTIONS", "_JAVA_OPTS", "JAVA_OPTS", "JAVA_OPTIONS"};
     protected URLClassLoader classLoader;
@@ -34,7 +34,7 @@ public abstract class GameLauncher {
     protected abstract void launchGame();
     protected abstract String addTweakClass();
     public String buildGameDir() {
-        return Config.getFullPath();
+        return ConfigAbstract.getFullPath();
     }
     protected abstract void setJre();
 

@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.foxesworld.engine.config.Config;
+import org.foxesworld.engine.config.ConfigAbstract;
 import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.GuiBuilderListener;
@@ -39,13 +39,12 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final String configFiles;
     private final String appTitle;
     protected Sound SOUND;
-    protected Config config;
+    protected ConfigAbstract config;
     protected LanguageProvider LANG;
     protected ServerInfo serverInfo;
     private News news;
     public static Logger LOGGER;
-    private final Discord discord;
-
+    protected Discord discord;
     private final FontUtils FONTUTILS;
     protected CryptUtils CRYPTO;
     protected FrameConstructor frameConstructor;
@@ -61,16 +60,14 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
         guiProperties = new GuiProperties(this);
-        this.config = new Config(this);
-        System.setProperty("log.dir", Config.getFullPath());
+        System.setProperty("log.dir", ConfigAbstract.getFullPath());
         LOGGER = LogManager.getLogger(Engine.class);
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
         LOGGER.info(appTitle + " started...");
 
         this.FONTUTILS = new FontUtils(this);
-        //this.serverInfo = new ServerInfo(this);
-        this.discord = new Discord(this);
+        //this.discord = new Discord(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
 
         this.GETrequest = new HTTPrequest(this, "GET");
@@ -98,7 +95,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
     @SuppressWarnings("unused")
     public void restartApplication(int xmx) {
-        String path = Config.getFullPath();
+        String path = ConfigAbstract.getFullPath();
         ArrayList params = new ArrayList();
         params.add(path + "/runtime/"+ this.getEngineData().getProgramRuntime() + "/bin/java");
         params.add("-Xmx"+xmx+"M");
@@ -194,8 +191,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public CryptUtils getCRYPTO() {
         return CRYPTO;
     }
-
-    public Config getConfig() {
+    public ConfigAbstract getConfig() {
         return config;
     }
 }
