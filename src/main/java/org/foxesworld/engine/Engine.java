@@ -34,21 +34,21 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
-    private String soundsFile = "assets/sounds/sounds.json";
     private final GuiProperties guiProperties;
-    private LoadingManager loadingManager;
+    protected LoadingManager loadingManager;
     private final String configFiles;
     private final String appTitle;
-    private Sound SOUND;
+    protected Sound SOUND;
     protected Config config;
-    private LanguageProvider LANG;
+    protected LanguageProvider LANG;
+    protected ServerInfo serverInfo;
     private News news;
     public static Logger LOGGER;
     private final Discord discord;
-    private final ServerInfo serverInfo;
+
     private final FontUtils FONTUTILS;
-    private CryptUtils CRYPTO;
-    private FrameConstructor frameConstructor;
+    protected CryptUtils CRYPTO;
+    protected FrameConstructor frameConstructor;
     private final PanelVisibility panelVisibility;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
@@ -64,25 +64,21 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.config = new Config(this);
         System.setProperty("log.dir", Config.getFullPath());
         LOGGER = LogManager.getLogger(Engine.class);
-        this.LANG = new LanguageProvider(this, this.getGuiProperties().getLocaleFile(), String.valueOf(this.getConfig().getCONFIG().get("lang")));
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
-        this.SOUND = new Sound(this, Engine.class.getClassLoader().getResourceAsStream(this.soundsFile));
         LOGGER.info(appTitle + " started...");
 
         this.FONTUTILS = new FontUtils(this);
-        this.serverInfo = new ServerInfo(this);
+        //this.serverInfo = new ServerInfo(this);
         this.discord = new Discord(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
 
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
-        this.frameConstructor = new FrameConstructor(this);
-        this.loadingManager = new LoadingManager(this);
-        this.CRYPTO = new CryptUtils(this);
     }
 
-    public abstract void initialize(Engine engine);
+    public abstract void init(Engine engine);
+    protected abstract void preInit(Engine engine);
     @Override
     public abstract void onPanelsBuilt();
     @Override
@@ -122,7 +118,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public String[] getConfigFiles() {
         return configFiles.split(",");
     }
-    public boolean isInit() {
+    protected boolean isInit() {
         return init;
     }
     public FrameConstructor getFrame() {
@@ -187,9 +183,6 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
     public LoadingManager getLoadingManager() {
         return loadingManager;
-    }
-    public void setSoundsFile(String soundsFile) {
-        this.soundsFile = soundsFile;
     }
     public void setNews(News news) {
         this.news = news;

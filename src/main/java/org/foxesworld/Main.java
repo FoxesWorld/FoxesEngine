@@ -16,11 +16,11 @@ public class Main  extends Engine {
 
     public Main(){
         super("config");
-        initialize(this);
+        init(this);
     }
 
     @Override
-    public void initialize(Engine engine) {
+    public void init(Engine engine) {
         //setStyleProvider(new StyleProvider(this));
         setGuiBuilder(new GuiBuilder(this));
         //this.getGuiBuilder().getComponentFactory().setComponentFactoryListener(new Components(this));
@@ -32,6 +32,11 @@ public class Main  extends Engine {
         //ALL PANELS ARE BUILT
         this.getGuiBuilder().buildAdditionalPanels();
         setInit(true);
+    }
+
+    @Override
+    protected void preInit(Engine engine) {
+
     }
 
     @Override
