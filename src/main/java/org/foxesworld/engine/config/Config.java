@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-public abstract class ConfigAbstract {
+public abstract class Config {
 
     protected Map<String, Object> CONFIG;
     private String cfgFileExtension = "";

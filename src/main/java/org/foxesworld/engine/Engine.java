@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.foxesworld.engine.config.ConfigAbstract;
+import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.GuiBuilderListener;
@@ -39,7 +39,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final String configFiles;
     private final String appTitle;
     protected Sound SOUND;
-    protected ConfigAbstract config;
+    protected Config config;
     protected LanguageProvider LANG;
     protected ServerInfo serverInfo;
     private News news;
@@ -60,7 +60,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
         guiProperties = new GuiProperties(this);
-        System.setProperty("log.dir", ConfigAbstract.getFullPath());
+        System.setProperty("log.dir", Config.getFullPath());
         LOGGER = LogManager.getLogger(Engine.class);
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
@@ -95,7 +95,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
     @SuppressWarnings("unused")
     public void restartApplication(int xmx) {
-        String path = ConfigAbstract.getFullPath();
+        String path = Config.getFullPath();
         ArrayList params = new ArrayList();
         params.add(path + "/runtime/"+ this.getEngineData().getProgramRuntime() + "/bin/java");
         params.add("-Xmx"+xmx+"M");
@@ -191,7 +191,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public CryptUtils getCRYPTO() {
         return CRYPTO;
     }
-    public ConfigAbstract getConfig() {
+    public Config getConfig() {
         return config;
     }
 }

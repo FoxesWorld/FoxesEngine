@@ -192,14 +192,16 @@ public final class JVMHelper {
         }
 
         public static OS byName(String name) {
-            if (name.startsWith("Windows"))
+            String lowercaseName = name.toLowerCase(Locale.ENGLISH);
+            if (lowercaseName.contains("win"))
                 return WIN;
-            if (name.startsWith("Linux"))
+            if (lowercaseName.contains("linux"))
                 return LINUX;
-            if (name.startsWith("Mac OS X"))
+            if (lowercaseName.contains("mac"))
                 return MACOSX;
             throw new RuntimeException(String.format("Is not yet supported: '%s'", name));
         }
+
     }
 
 }
