@@ -45,6 +45,7 @@ public class FileGuard {
 
         for (String dir : checkList) {
             logger.debug("Checking Dir " + dir);
+            fileGuardListener.onDirCheck(dir);
             scanAndDeleteFilesRecursively(new File(dir), filesToKeep);
         }
 
@@ -85,6 +86,7 @@ public class FileGuard {
         if (files != null) {
             for (File file : files) {
                 if (file.isFile()) {
+                    fileGuardListener.onFileCheck(file);
                     String checkPath = file.getPath().replace(this.gameLauncher.buildGameDir(), "").replace("\\", "/");
                     if (!filesToKeep.contains(checkPath) && !this.isUserConfig(file) && !isInIgnoreList(file)){ //&& !this.isUserConfig(file) && !isInIgnoreList(file)) {
                         boolean deleted = file.delete();

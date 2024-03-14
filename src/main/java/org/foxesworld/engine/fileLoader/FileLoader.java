@@ -55,11 +55,17 @@ public class FileLoader {
         loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title", 800);
         for (FileAttributes file : fileAttributes) {
             file.setReplaceMask(this.replaceMask);
+
             String fileWithoutMask = file.getFilename().replace(file.getReplaceMask(), "");
-            addFileToKeep(fileWithoutMask);
-            engine.getLOGGER().debug("Adding to keep " + fileWithoutMask);
+            String fullPath = this.homeDir +  fileWithoutMask;
+            //if(md5Func.md5(fullPath).equals(file.getHash())) {
+                addFileToKeep(fileWithoutMask);
+                Engine.getLOGGER().debug("Adding to keep " + fullPath);
+            //} else {
+            //    Engine.getLOGGER().debug("Incorrect hash for " + fullPath);
+            //}
         }
-        engine.getLOGGER().info("Keeping " + filesToKeep.size() + " files");
+        Engine.getLOGGER().info("Keeping " + filesToKeep.size() + " files");
         loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title", 800);
         this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
         fileLoaderListener.onFilesRead();
@@ -159,7 +165,6 @@ public class FileLoader {
         return downloadUtils;
     }
 
-    @SuppressWarnings("unused")
     public Set<String> getFilesToKeep() {
         return filesToKeep;
     }

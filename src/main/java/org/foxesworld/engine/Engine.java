@@ -60,7 +60,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
         guiProperties = new GuiProperties(this);
-        System.setProperty("log.dir", Config.getFullPath());
+        System.setProperty("log.dir", System.getProperty("user.dir"));
         LOGGER = LogManager.getLogger(Engine.class);
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);

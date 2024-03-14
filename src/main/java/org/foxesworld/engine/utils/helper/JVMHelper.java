@@ -2,7 +2,10 @@ package org.foxesworld.engine.utils.helper;
 
 import org.foxesworld.engine.Engine;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -10,19 +13,15 @@ import java.lang.management.RuntimeMXBean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public final class JVMHelper {
 
+    // Runtime environment variables
     public static final RuntimeMXBean RUNTIME_MXBEAN = ManagementFactory.getRuntimeMXBean();
-    public static final OperatingSystemMXBean OPERATING_SYSTEM_MXBEAN =
-            ManagementFactory.getOperatingSystemMXBean();
+    public static final OperatingSystemMXBean OPERATING_SYSTEM_MXBEAN = ManagementFactory.getOperatingSystemMXBean();
     public static final OS OS_TYPE = OS.byName(OPERATING_SYSTEM_MXBEAN.getName());
     public static final int OS_BITS = getCorrectOSArch();
-    // System properties
     public static final String OS_VERSION = OPERATING_SYSTEM_MXBEAN.getVersion();
     public static final ARCH ARCH_TYPE = getArch(System.getProperty("os.arch"));
     public static final String NATIVE_EXTENSION = getNativeExtension(OS_TYPE);
@@ -42,8 +41,7 @@ public final class JVMHelper {
         }
     }
 
-    private JVMHelper() {
-    }
+    private JVMHelper() {}
 
     public static ARCH getArch(String arch) {
         if (arch.equals("amd64") || arch.equals("x86-64") || arch.equals("x86_64")) return ARCH.X86_64;
@@ -51,6 +49,29 @@ public final class JVMHelper {
         if (arch.startsWith("armv8") || arch.startsWith("aarch64")) return ARCH.ARM64;
         if (arch.startsWith("arm") || arch.startsWith("aarch32")) return ARCH.ARM32;
         throw new InternalError(String.format("Unsupported arch '%s'", arch));
+    }
+
+    public static String getJavaVersion(String javaBinPath) {
+        if (new File(javaBinPath).isDirectory()) {
+            String[] command = {javaBinPath + "/java", "-version"};
+            String out = "";
+            try {
+                Process process = Runtime.getRuntime().exec(command);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("java version")) {
+                        out = line.split(" ")[2].replace("\"", "");
+                    }
+                }
+                process.destroy();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return out;
+        }
+        return null;
     }
 
     public static int getVersion() {
@@ -93,7 +114,7 @@ public final class JVMHelper {
 
     public static void fullGC() {
         RUNTIME.gc();
-       Engine.LOGGER.debug("Used heap: %d MiB", RUNTIME.totalMemory() - RUNTIME.freeMemory() >> 20);
+        Engine.LOGGER.debug("Used heap: %d MiB", RUNTIME.totalMemory() - RUNTIME.freeMemory() >> 20);
     }
 
     public static String[] getClassPath() {
@@ -119,7 +140,7 @@ public final class JVMHelper {
     public static X509Certificate[] getCertificates(Class<?> clazz) {
         Object[] signers = clazz.getSigners();
         if (signers == null) return null;
-        return Arrays.stream(signers).filter((c) -> c instanceof X509Certificate).map((c) -> (X509Certificate) c).toArray(X509Certificate[]::new);
+        return Arrays.stream(signers).filter(c -> c instanceof X509Certificate).map(c -> (X509Certificate) c).toArray(X509Certificate[]::new);
     }
 
     public static void checkStackTrace(Class<?> mainClass) {
@@ -197,9 +218,10 @@ public final class JVMHelper {
                 return WIN;
             if (lowercaseName.contains("linux"))
                 return LINUX;
-            if (lowercaseName.contains("mac"))
+            if (lowercaseName.contains("mac") || lowercaseName.contains("osx"))
                 return MACOSX;
-            throw new RuntimeException(String.format("Is not yet supported: '%s'", name));
+            //throw new RuntimeException(String.format("Is not yet supported: '%s'", name));
+            return LINUX;
         }
 
     }
