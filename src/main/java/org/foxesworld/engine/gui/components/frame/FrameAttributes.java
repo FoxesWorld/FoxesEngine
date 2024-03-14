@@ -1,5 +1,8 @@
 package org.foxesworld.engine.gui.components.frame;
 
+import org.foxesworld.engine.gui.components.ComponentAttributes;
+
+import java.util.List;
 import java.util.Map;
 
 public class FrameAttributes {
@@ -16,6 +19,7 @@ public class FrameAttributes {
     private String backgroundBlur;
     private boolean undecorated;
     private Map<String, OptionGroups> groups;
+    private List<ComponentAttributes> childComponents;
 
     public String getAppTitle() {
         return appTitle;
@@ -67,5 +71,9 @@ public class FrameAttributes {
 
     public Map<String, OptionGroups> getGroups() {
         return groups;
+    }
+
+    public List<ComponentAttributes> getChildComponents() {
+        return childComponents;
     }
 }

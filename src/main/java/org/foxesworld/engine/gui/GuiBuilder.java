@@ -11,38 +11,37 @@ import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import javax.swing.*;
 import java.awt.*;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 public class GuiBuilder {
     private final Engine engine;
     private final HashMap<String, List<JComponent>> componentsMap = new HashMap<>();
     private final HashMap<String, JPanel> panelsMap = new HashMap<>();
-    private final HashMap<JPanel, JComponent> panelsComponents = new HashMap<>();
     private final HashMap<String, List<String>> childsNparents = new HashMap<>();
     private final HashMap<String, JPanel> loadPanels = new HashMap<>();
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
     private GuiBuilderListener guiBuilderListener;
     private boolean additionalPanelsBuilt = false;
+
     public GuiBuilder(Engine engine) {
         this.engine = engine;
         Engine.getLOGGER().debug("=== GUI BUILDER ===");
-        this.frameConstructor = engine.getFrame();
-        this.componentFactory = new ComponentFactory(engine);
+        frameConstructor = engine.getFrame();
+        componentFactory = new ComponentFactory(engine);
     }
 
-    /*
-     * Method for building GUI based on a JSON file
-     * Accepts the path to the file and the InputStream flag to specify the data source (resources or file)
-     */
     public void buildGui(String framePath, JPanel parent) {
-        FrameAttributes frameAttributes;
-        InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(FrameConstructor.class.getClassLoader().getResourceAsStream(framePath)), StandardCharsets.UTF_8);
-        frameAttributes = new Gson().fromJson(reader, FrameAttributes.class);
-        // Building component group
+        FrameAttributes frameAttributes = loadFrameAttributes(framePath);
         buildPanels(frameAttributes.getGroups(), parent);
+    }
+
+    private FrameAttributes loadFrameAttributes(String framePath) {
+        Gson gson = new Gson();
+        return gson.fromJson(new InputStreamReader(GuiBuilder.class.getClassLoader().getResourceAsStream(framePath)), FrameAttributes.class);
     }
 
     public List<Component> getAllChildComponents(String parentPanel) {
@@ -54,8 +53,8 @@ public class GuiBuilder {
     }
 
     public JComponent getComponentById(String id) {
-        for (Map.Entry<String, List<JComponent>> panelsMap : componentsMap.entrySet()) {
-            for (JComponent component : panelsMap.getValue()) {
+        for (Map.Entry<String, List<JComponent>> panelsMapEntry : componentsMap.entrySet()) {
+            for (JComponent component : panelsMapEntry.getValue()) {
                 if (component.getName() != null && component.getName().equals(id)) {
                     return component;
                 }
@@ -65,15 +64,12 @@ public class GuiBuilder {
     }
 
     public void setLabelText(String componentId, String text) {
-        JComponent component = this.getComponentById(componentId);
+        JComponent component = getComponentById(componentId);
         if (component instanceof JLabel) {
             ((JLabel) component).setText(text);
         }
     }
 
-    /*
-     * Method for building componentFactory based on a JSON structure
-     */
     private void buildPanels(Map<String, OptionGroups> groups, JPanel parentPanel) {
         if (groups != null) {
             for (Map.Entry<String, OptionGroups> entry : groups.entrySet()) {
@@ -82,25 +78,19 @@ public class GuiBuilder {
                 JPanel thisPanel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup);
                 thisPanel.setName(componentGroup);
                 thisPanel.setVisible(optionGroups.getPanelOptions().isVisible());
-                //All childElements are built here
-                this.processChildComponents(optionGroups, thisPanel);
-
-                //If panel with {nanme} is not already added
-                if (!this.getPanelsMap().containsKey(componentGroup)) {
+                processChildComponents(optionGroups.getChildComponents(), thisPanel);
+                if (!panelsMap.containsKey(componentGroup)) {
                     addPanelGroup(parentPanel, thisPanel);
                     guiBuilderListener.onPanelBuild(groups, componentGroup, parentPanel);
                 }
-                buildPanels(optionGroups.getGroups(), thisPanel); // Recursive call for nested groups
+                buildPanels(optionGroups.getGroups(), thisPanel);
                 childsNparents.computeIfAbsent(parentPanel.getName(), k -> new ArrayList<>()).add(thisPanel.getName());
             }
         }
     }
 
-    /*
-     * Method for building componentFactory based on a JSON structure
-     */
-    private void processChildComponents(OptionGroups optionGroups, JPanel parentPanel) {
-        for (ComponentAttributes componentAttributes : optionGroups.getChildComponents()) {
+    private void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
+        for (ComponentAttributes componentAttributes : childComponents) {
             if (componentAttributes.getComponentType() != null) {
                 JComponent component = componentFactory.createComponent(componentAttributes);
                 parentPanel.add(component);
@@ -108,7 +98,12 @@ public class GuiBuilder {
             } else if (componentAttributes.getGroups() != null) {
                 buildPanels(componentAttributes.getGroups(), parentPanel);
             } else if (componentAttributes.getReadFrom() != null) {
-                buildGui(componentAttributes.getReadFrom(), parentPanel);
+                FrameAttributes frameAttributes = loadFrameAttributes(componentAttributes.getReadFrom());
+                if (frameAttributes.getGroups() == null && frameAttributes.getChildComponents() != null && !frameAttributes.getChildComponents().isEmpty()) {
+                    processChildComponents(frameAttributes.getChildComponents(), parentPanel);
+                } else {
+                    buildGui(componentAttributes.getReadFrom(), parentPanel);
+                }
             } else if (componentAttributes.getLoadPanel() != null && !componentAttributes.getLoadPanel().isEmpty()) {
                 loadPanels.put(componentAttributes.getLoadPanel(), parentPanel);
             }
@@ -120,12 +115,12 @@ public class GuiBuilder {
             guiBuilderListener.onPanelsBuilt();
             Engine.LOGGER.debug(" == BUILDING ADDITIONAL PANELS ==");
 
-            for (Map.Entry<String, JPanel> additional : this.loadPanels.entrySet()) {
+            for (Map.Entry<String, JPanel> additional : loadPanels.entrySet()) {
                 Engine.LOGGER.debug("Processing {}", additional.getKey());
-                JPanel loadingPanel = this.panelsMap.get(additional.getKey());
+                JPanel loadingPanel = panelsMap.get(additional.getKey());
 
                 if (loadingPanel != null) {
-                    this.addPanelGroup(additional.getValue(), loadingPanel);
+                    addPanelGroup(additional.getValue(), loadingPanel);
                 }
             }
             additionalPanelsBuilt = true;
@@ -134,38 +129,20 @@ public class GuiBuilder {
         }
     }
 
-
-    /*
-     * Method for adding a component to the component map
-     */
-    private void addComponentToMap(String groupId, JComponent component) {
-        if (!componentsMap.containsKey(groupId)) {
-            componentsMap.put(groupId, new ArrayList<>());
-        }
-        componentsMap.get(groupId).add(component);
+    private void addPanelGroup(JPanel parent, JPanel child) {
+        parent.add(child);
+        panelsMap.put(child.getName(), child);
     }
 
-    /*
-     * Getting a list of components attached to JPanel by group name
-     */
     public HashMap<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }
-
-    /*
-     * Getting a panel map
-     */
-    public HashMap<String, JPanel> getPanelsMap() {
-        return panelsMap;
-    }
-
     public void addPanelToMap(JPanel panel) {
         this.panelsMap.put(panel.getName(), panel);
     }
 
-    private void addPanelGroup(JPanel parent, JPanel child) {
-        parent.add(child);
-        panelsMap.put(child.getName(), child);
+    public HashMap<String, JPanel> getPanelsMap() {
+        return panelsMap;
     }
 
     public HashMap<String, List<String>> getChildsNparents() {
@@ -179,5 +156,4 @@ public class GuiBuilder {
     public ComponentFactory getComponentFactory() {
         return componentFactory;
     }
-
 }
