@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-public class TextfieldStyle {
+public class TextFieldStyle {
 	public Color foregroundColor;
 	public Color backgroundColor;
 	public Color border;
@@ -20,7 +20,7 @@ public class TextfieldStyle {
 	public BufferedImage texture;
 	private ComponentFactory componentFactory;
 
-	public TextfieldStyle(ComponentFactory componentFactory) {
+	public TextFieldStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;
 		this.foregroundColor = hexToColor(componentFactory.style.getColor());
 		this.backgroundColor = hexToColor(componentFactory.style.getBackground());
@@ -33,7 +33,7 @@ public class TextfieldStyle {
 		this.texture = ImageUtils.getLocalImage(componentFactory.style.getTexture());
 	}
 
-	public void apply(Textfield text) {
+	public void apply(TextField text) {
 		text.texture = texture;
 		text.setPaddingX(componentFactory.style.getPaddingX());
 		text.setPaddingY(componentFactory.style.getPaddingY());

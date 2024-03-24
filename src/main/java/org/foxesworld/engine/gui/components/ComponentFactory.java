@@ -19,8 +19,8 @@ import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
-import org.foxesworld.engine.gui.components.textfield.Textfield;
-import org.foxesworld.engine.gui.components.textfield.TextfieldStyle;
+import org.foxesworld.engine.gui.components.textfield.TextField;
+import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.ImageUtils;
@@ -134,8 +134,8 @@ public class ComponentFactory {
             }
 
             case "textField" -> {
-                TextfieldStyle textfieldStyle = new TextfieldStyle(this);
-                Textfield textfield = new Textfield(LANG.getString(componentAttributes.getLocaleKey()));
+                TextFieldStyle textfieldStyle = new TextFieldStyle(this);
+                TextField textfield = new TextField(LANG.getString(componentAttributes.getLocaleKey()));
                 textfieldStyle.apply(textfield);
                 textfield.setName(componentAttributes.getComponentId());
                 textfield.setBounds(xPos, yPos, textfieldStyle.width, textfieldStyle.height);

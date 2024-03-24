@@ -1,6 +1,6 @@
 package org.foxesworld.engine.config;
 
-import com.foxesworld.cfgProvider.cfgProvider;
+import org.foxesworld.cfgProvider.CfgProvider;
 import com.google.gson.GsonBuilder;
 
 import java.io.File;
@@ -19,15 +19,20 @@ public abstract class Config {
     protected void addCfgFiles(String[] configFiles){
         for(String cfgUnit: configFiles){
             String cfgFileName = cfgUnit + cfgFileExtension;
-            new cfgProvider(cfgFileName);
+            new CfgProvider(cfgFileName);
         }
     }
 
+    @SuppressWarnings("unused")
     public abstract void addToConfig(Map<String, String> inputData, List values);
+    @SuppressWarnings("unused")
     public abstract void setConfigValue(String key, Object value);
+    @SuppressWarnings("unused")
     public abstract void clearConfigData(List<String> dataToClear, boolean write);
+    @SuppressWarnings("unused")
     public abstract void clearConfigData(String dataToClear, boolean write);
 
+    @SuppressWarnings("unused")
     public void assignConfigValues(){
         for(Map.Entry<String, Object> configMap : this.CONFIG.entrySet()){
             try {
@@ -54,24 +59,27 @@ public abstract class Config {
     public String configToJSON() {
         return new GsonBuilder().setPrettyPrinting().create().toJson(CONFIG);
     }
-
+    @SuppressWarnings("unused")
     protected void setDirPathIndex(int index){
-        cfgProvider.setBaseDirPathIndex(index);
+        CfgProvider.setBaseDirPathIndex(index);
     }
+    @SuppressWarnings("unused")
     protected  void setCfgExportDir(String dir){
-        cfgProvider.setCfgExportDirName(dir);
+        CfgProvider.setCfgExportDirName(dir);
     }
-    protected void setDebug(boolean debug){ cfgProvider.setDebug(debug);}
+    @SuppressWarnings("unused")
+    protected void setDebug(boolean debug){ CfgProvider.setDebug(debug);}
     protected void setCfgFileExtension(String ext){
         this.cfgFileExtension = ext;
-        cfgProvider.setCfgFileExtension(ext);
+        CfgProvider.setCfgFileExtension(ext);
     }
-    protected Map<String, Map> getAllCfgMaps(){
-        return cfgProvider.getAllCfgMaps();
+    @SuppressWarnings("unused")
+    protected Map<String, Map<String, Object>> getAllCfgMaps(){
+        return CfgProvider.getAllCfgMaps();
     }
 
     public static String getFullPath() {
-        return cfgProvider.getGameFullPath();
+        return CfgProvider.getGameFullPath();
     }
 
     public Map<String, Object> getCONFIG() {

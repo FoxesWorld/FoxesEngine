@@ -59,8 +59,8 @@ public class FileLoader {
             String fileWithoutMask = file.getFilename().replace(file.getReplaceMask(), "");
             String fullPath = this.homeDir +  fileWithoutMask;
             //if(md5Func.md5(fullPath).equals(file.getHash())) {
-                addFileToKeep(fileWithoutMask);
-                Engine.getLOGGER().debug("Adding to keep " + fullPath);
+            addFileToKeep(fileWithoutMask);
+            Engine.getLOGGER().debug("Adding to keep " + fullPath);
             //} else {
             //    Engine.getLOGGER().debug("Incorrect hash for " + fullPath);
             //}
@@ -80,7 +80,7 @@ public class FileLoader {
     @SuppressWarnings("unused")
     public void downloadFiles() {
         int totalFiles = fileAttributes.size();
-        engine.getLOGGER().debug("~-=== Downloading " + totalFiles + " files ===-~");
+        Engine.getLOGGER().debug("~-=== Downloading " + totalFiles + " files ===-~");
         if (totalFiles == 0) {
             fileLoaderListener.onFilesLoaded();
         }

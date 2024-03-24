@@ -11,18 +11,14 @@ import java.awt.image.BufferedImage;
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class DropBox extends JComponent implements MouseListener, MouseMotionListener {
-
-    private enum State {CLOSED, OPENED, ROLLOVER}
     private Color color, hoverColor;
     private boolean loaded = false;
     private final ComponentFactory componentFactory;
     private DropBoxListener dropBoxListener;
-    private int previousHover = -1;
     private String[] values;
     private final int initialY;
     private State state = State.CLOSED;
-    private int x = 0;
-    private int y = 0;
+    private int x = 0, y = 0, previousHover = -1;
     private int selected;
     private int hover;
     private boolean entered;
@@ -191,7 +187,11 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     @Override
     public void mouseExited(MouseEvent e) {
         entered = false;
+        if(state.equals(State.OPENED)) {
+            componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
+        }
         state = State.CLOSED;
+
         repaint();
     }
 
@@ -309,5 +309,17 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     public void setHoverColor(Color hoverColor) {
         this.hoverColor = hoverColor;
+    }
+
+    public String[] getValues() {
+        return values;
+    }
+
+    public BufferedImage getOpenedTX() {
+        return openedTX;
+    }
+
+    public State getState() {
+        return state;
     }
 }

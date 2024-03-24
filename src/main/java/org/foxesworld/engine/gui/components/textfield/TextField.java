@@ -10,10 +10,11 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-public class Textfield extends JTextField {
+public class TextField extends JTextField {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private  TextFieldListener textFieldListener;
+	private int carretDelay = 500;
 	public BufferedImage texture;
 	private int paddingX = 0;
 	private int paddingY = 0;
@@ -21,7 +22,7 @@ public class Textfield extends JTextField {
 	private Timer caretTimer;
 	private String placeholder;
 
-	public Textfield(String placeholder) {
+	public TextField(String placeholder) {
 		this.placeholder = placeholder;
 		setOpaque(false);
 		setText(this.placeholder);
@@ -56,7 +57,7 @@ public class Textfield extends JTextField {
 
 	private void startCaretBlinking() {
 		if (caretTimer == null || !caretTimer.isRunning()) {
-			caretTimer = new Timer(500, new ActionListener() {
+			caretTimer = new Timer(carretDelay, new ActionListener() {
 				private boolean caretVisibleState = true;
 
 				@Override
@@ -126,7 +127,7 @@ public class Textfield extends JTextField {
 
 			private void checkText() {
 				if (!getText().equals(placeholder)) {
-					textFieldListener.onTextChange(Textfield.this);
+					textFieldListener.onTextChange(TextField.this);
 				}
 			}
 		});

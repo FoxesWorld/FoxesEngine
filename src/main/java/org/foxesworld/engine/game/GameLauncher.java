@@ -12,10 +12,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class GameLauncher {
 
     protected GameListener gameListener;
+    protected AuthLib authLib;
+    protected ClientType clientType;
+    protected Process process;
+    protected Map<String, String> replaceValues = new HashMap<>();
     protected ServerAttributes gameClient;
     protected final ExecutorService executorService = Executors.newSingleThreadExecutor();
     protected Engine engine;
@@ -33,11 +34,25 @@ public abstract class GameLauncher {
     protected URLClassLoader classLoader;
     protected final List<String> processArgs = new ArrayList<>();
     protected boolean isStarted;
-
-    protected abstract void addArgs(String tweakClassVal);
+    protected abstract void addArgs();
+    protected abstract void setJreArgs();
     protected abstract void launchGame();
-    protected abstract void setJre();
+    protected  abstract String determineMainClass();
+    protected abstract void prepareForLaunch();
 
+    protected void logDebugInformation() {
+        logger.debug("#############################");
+        logger.debug("GameDir " + buildGameDir());
+        logger.debug("ClientDir " + buildClientDir());
+        logger.debug("VersionsDir " + buildVersionDir());
+        logger.debug("JarFile " + buildMinecraftJarPath());
+        logger.debug("Natives " + buildNativesPath());
+        logger.debug("Libraries " + buildLibrariesPath());
+        logger.debug("Assets " + buildAssetsPath());
+        logger.debug("#############################");
+    }
+
+    @SuppressWarnings("unused")
     protected URLClassLoader collectLibraries() {
         AtomicInteger num = new AtomicInteger();
         processArgs.add("-cp");
@@ -146,7 +161,6 @@ public abstract class GameLauncher {
             executorService.shutdown();
         }
     }
-
     protected void checkDangerousParams() {
         for (String t : toTest) {
             String env = System.getenv(t);
@@ -158,7 +172,12 @@ public abstract class GameLauncher {
             }
         }
     }
-
+    public void killProcess() {
+        if (!this.process.isAlive())
+            throw new IllegalStateException();
+        Engine.getLOGGER().info("Killing process forcefully");
+        this.process.destroyForcibly();
+    }
     public boolean isStarted() {
         return isStarted;
     }

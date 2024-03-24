@@ -1,4 +1,4 @@
-package org.foxesworld.engine.game.argsReader;
+package org.foxesworld.engine.game.jsonLaunchProperties.argsReader;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,8 +35,7 @@ public class ArgsReader {
             gameArguments = jsonObject.getAsJsonObject("arguments").getAsJsonArray("game");
 
             jvmArguments = applyRules(jvmArguments);
-            gameArguments = applyRules(gameArguments);
-
+            //gameArguments = applyRules(gameArguments);
             fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,22 +46,16 @@ public class ArgsReader {
         JsonArray resultArray = new JsonArray();
         for (JsonElement argumentElement : argumentsArray) {
             JsonObject argumentObject = argumentElement.getAsJsonObject();
-            // Проверяем наличие правил для аргумента
             if (argumentObject.has("rules")) {
                 JsonArray rulesArray = argumentObject.getAsJsonArray("rules");
-                // Проверяем каждое правило
                 for (JsonElement ruleElement : rulesArray) {
                     JsonObject ruleObject = ruleElement.getAsJsonObject();
-                    // Проверяем, допустимо ли применить правило для текущей платформы
                     if (isRuleApplicable(ruleObject)) {
-                        // Добавляем аргумент в массив результата
                         resultArray.add(argumentElement);
-                        // Прекращаем проверку правил для этого аргумента, если одно правило уже применимо
                         break;
                     }
                 }
             } else {
-                // Если для аргумента нет правил, добавляем его в массив результата без проверки
                 resultArray.add(argumentElement);
             }
         }
@@ -101,7 +94,6 @@ public class ArgsReader {
         }
         return stringBuilder;
     }
-
     private String replaceVariables(String value, Map<String, String> variables) {
         Pattern pattern = Pattern.compile("\\$\\{([^}]*)\\}");
         Matcher matcher = pattern.matcher(value);

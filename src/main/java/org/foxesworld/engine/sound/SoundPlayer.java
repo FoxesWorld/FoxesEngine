@@ -23,12 +23,18 @@ public class SoundPlayer {
 
     public void playSound(String path, boolean loop) {
         if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getCONFIG().get("enableSound")))) {
+            float volume = 0f;
             try {
                 InputStream inputStream = SoundPlayer.class.getClassLoader().getResourceAsStream(path);
                 AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioInputStream);
-                setVolume(clip,  Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f);
+                if(path.contains("mus")){
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.03f;
+                } else {
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
+                }
+                setVolume(clip,  volume);
 
                 if (loop) {
                     clip.loop(Clip.LOOP_CONTINUOUSLY);

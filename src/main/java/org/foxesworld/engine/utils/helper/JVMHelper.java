@@ -18,6 +18,7 @@ import java.util.*;
 public final class JVMHelper {
 
     // Runtime environment variables
+
     public static final RuntimeMXBean RUNTIME_MXBEAN = ManagementFactory.getRuntimeMXBean();
     public static final OperatingSystemMXBean OPERATING_SYSTEM_MXBEAN = ManagementFactory.getOperatingSystemMXBean();
     public static final OS OS_TYPE = OS.byName(OPERATING_SYSTEM_MXBEAN.getName());
@@ -52,27 +53,38 @@ public final class JVMHelper {
     }
 
     public static String getJavaVersion(String javaBinPath) {
-        if (new File(javaBinPath).isDirectory()) {
-            String[] command = {javaBinPath + "/java", "-version"};
-            String out = "";
+        if ((new File(javaBinPath)).isDirectory()) {
+            String[] command = new String[]{javaBinPath + "/java", "-version"};
+            String version = "";
+
             try {
                 Process process = Runtime.getRuntime().exec(command);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("java version")) {
-                        out = line.split(" ")[2].replace("\"", "");
+                    if (line.contains("version")) {
+                        version = line.split(" ")[2];
+                        break;
                     }
                 }
+
+                int exitCode = process.waitFor();
+                if (exitCode != 0) {
+                    Engine.getLOGGER().error("Command exited with non-zero status: " + exitCode);
+                }
+
                 process.destroy();
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
 
-            return out;
+            return version.replace("\\", "");
+        } else {
+            return null;
         }
-        return null;
     }
+
 
     public static int getVersion() {
         return Runtime.version().feature();
@@ -218,9 +230,9 @@ public final class JVMHelper {
                 return WIN;
             if (lowercaseName.contains("linux"))
                 return LINUX;
-            if (lowercaseName.contains("mac") || lowercaseName.contains("osx"))
+            if (lowercaseName.contains("mac") || lowercaseName.contains("osx")) {
                 return MACOSX;
-            //throw new RuntimeException(String.format("Is not yet supported: '%s'", name));
+            }
             return LINUX;
         }
 
