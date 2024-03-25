@@ -67,8 +67,6 @@ public abstract class Config {
     protected  void setCfgExportDir(String dir){
         CfgProvider.setCfgExportDirName(dir);
     }
-    @SuppressWarnings("unused")
-    protected void setDebug(boolean debug){ CfgProvider.setDebug(debug);}
     protected void setCfgFileExtension(String ext){
         this.cfgFileExtension = ext;
         CfgProvider.setCfgFileExtension(ext);
@@ -79,7 +77,7 @@ public abstract class Config {
     }
 
     public static String getFullPath() {
-        return CfgProvider.getGameFullPath();
+        return CfgProvider.getGameFullPath() + File.separator;
     }
 
     public Map<String, Object> getCONFIG() {
