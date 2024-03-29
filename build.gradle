@@ -21,18 +21,35 @@ buildscript {
 plugins {
     id 'java'
     id 'application'
+    id 'maven-publish'
     id "com.github.johnrengelman.shadow" version "8.1.0"
 }
+
+archivesBaseName = project.archivesBaseName
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def pass = properties.getProperty('github.package.password')
+    def user = properties.getProperty('github.package.username')
+    version = properties.getProperty("project.version")
+    group = properties.getProperty("project.group")
+    archivesBaseName = properties.getProperty("project.archivesBaseName")
+    if (pass != null && user != null) {
+        println("Login and password valid!")
+    } else {
+        println("Please, check you username or password!")
+    }
 
 application {
     mainClass = 'org.foxesworld.engine.Engine'
 }
 
-group 'org.foxesworld'
-version '1.3.1-ALPHA'
-
 repositories {
     mavenCentral()
+}
+
+java {
+    withSourcesJar()
 }
 
 dependencies {
@@ -44,3 +61,26 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
 }
 apply plugin: "com.github.johnrengelman.shadow"
+
+publishing {
+    repositories {
+        maven {
+            name 'GitHubPackages'
+            url = 'https://maven.pkg.github.com/FoxesWorld/FoxesEngine'
+            credentials {
+                username = user
+                password = pass
+            }
+        }
+    }
+
+    publications {
+        gpr(MavenPublication) {
+            groupId = group
+            artifactId = archivesBaseName
+            version = version
+            from components.java
+        }
+    }
+}
+

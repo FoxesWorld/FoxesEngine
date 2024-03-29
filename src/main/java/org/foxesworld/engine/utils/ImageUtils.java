@@ -12,6 +12,7 @@ import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +43,16 @@ public class ImageUtils {
             BufferedImage bufferedImage = ImageIO.read(bis);
             bis.close();
             return bufferedImage;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static BufferedImage loadImageFromUrl(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);
+            return ImageIO.read(url);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

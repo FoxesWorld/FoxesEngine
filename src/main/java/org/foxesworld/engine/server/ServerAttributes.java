@@ -2,15 +2,7 @@ package org.foxesworld.engine.server;
 
 public class ServerAttributes {
     private int id;
-    private String serverName;
-    private String serverVersion;
-    private String mainClass;
-    private String jreVersion;
-    private String forgeVersion;
-    private String forgeGroup;
-    private  String mcpVersion;
-    private String client;
-    private String host;
+    private String serverName, serverVersion,mainClass,jreVersion, forgeVersion, forgeGroup, serverImage, serverDescription, mcpVersion,client, host;
     private int port;
     private String ignoreDirs;
     public int getId() {
@@ -46,6 +38,15 @@ public class ServerAttributes {
     public int getPort() {
         return port;
     }
+
+    public String getServerImage() {
+        return serverImage;
+    }
+
+    public String getServerDescription() {
+        return serverDescription;
+    }
+
     public String getIgnoreDirs() {
         return ignoreDirs;
     }

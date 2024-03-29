@@ -71,7 +71,9 @@ public class Panel extends JPanel {
     }
 
     public JPanel createGroupPanel(PanelAttributes panelOptions, String groupName) {
-        groupPanel = new JPanel(null, true) {
+        LayoutManager layoutManager = null;
+
+        groupPanel = new JPanel(null, panelOptions.isDoubleBuffered()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -135,7 +137,31 @@ public class Panel extends JPanel {
 
         String bounds = panelOptions.getBounds();
         groupPanel.setBounds(getPanelBounds(bounds, 0), getPanelBounds(bounds, 1), getPanelBounds(bounds, 2), getPanelBounds(bounds, 3));
+        if(panelOptions.getLayout() != null) {
+            layoutManager = this.getLayout(panelOptions.getLayout(), groupPanel);
+        }
+        groupPanel.setLayout(layoutManager);
         return groupPanel;
+    }
+
+    private LayoutManager getLayout(String layout, JPanel groupPanel){
+        switch (layout){
+            case "bordered" -> {
+                return new BorderLayout();
+            }
+
+            case "boxed" -> {
+                return new BoxLayout(groupPanel, BoxLayout.Y_AXIS);
+            }
+
+            case "flow" -> {
+                return  new FlowLayout(FlowLayout.LEFT);
+            }
+
+            default -> {
+                return null;
+            }
+        }
     }
 
     private int getPanelBounds(String bounds, int index){

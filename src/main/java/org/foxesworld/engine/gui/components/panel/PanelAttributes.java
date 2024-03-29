@@ -1,14 +1,8 @@
 package org.foxesworld.engine.gui.components.panel;
 public class PanelAttributes {
-    private boolean opaque = false;
-    private boolean visible;
-    private boolean focusable;
+    private boolean opaque = false, visible,focusable, doubleBuffered = true;
     private int cornerRadius;
-    private String border = "";
-    private String listener = "";
-    private String background = "";
-    private String backgroundImage;
-    private String bounds = "";
+    private String border = "", listener = "",background = "",backgroundImage,bounds = "", layout;
 
     public boolean isOpaque() {
         return opaque;
@@ -32,6 +26,14 @@ public class PanelAttributes {
 
     public String getListener() {
         return listener;
+    }
+
+    public String getLayout() {
+        return layout;
+    }
+
+    public boolean isDoubleBuffered() {
+        return doubleBuffered;
     }
 
     public String getBackground() {

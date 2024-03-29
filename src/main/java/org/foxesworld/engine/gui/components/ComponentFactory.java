@@ -46,6 +46,8 @@ public class ComponentFactory {
     public StyleAttributes style = null;
     private ComponentAttributes componentAttribute;
     private String[] scrollBoxArr = {""};
+
+    private  String[] bounds ={};
     private ComponentFactoryListener componentFactoryListener;
 
     public ComponentFactory(Engine engine){
@@ -60,7 +62,7 @@ public class ComponentFactory {
             }
             style = componentStyles.get(componentAttributes.getComponentType()).get(componentAttributes.getComponentStyle());
         }
-        String[] bounds = componentAttributes.getBounds().split(",");
+        bounds = componentAttributes.getBounds().split(",");
         int xPos = Integer.parseInt(bounds[0]);
         int yPos = Integer.parseInt(bounds[1]);
         int width = Integer.parseInt(bounds[2]);
@@ -79,7 +81,7 @@ public class ComponentFactory {
 
             case "label" -> {
                 LabelStyle labelStyle = new LabelStyle(this);
-                Label label = new Label(LANG.getString(componentAttributes.getLocaleKey()));
+                Label label = new Label(this);
                 labelStyle.apply(label);
                 if(componentAttributes.getImageIcon() != null) {
                     ImageIcon icon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
@@ -130,6 +132,7 @@ public class ComponentFactory {
                     checkbox.getActionMap().put(componentAttributes.getComponentId(), buttonAction);
                     checkbox.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, componentAttributes.getComponentId());
                 }
+                checkbox.setOpaque(style.isOpaque());
                 return checkbox;
             }
 
@@ -272,6 +275,10 @@ public class ComponentFactory {
         }
     }
 
+    public LanguageProvider getLANG() {
+        return LANG;
+    }
+
     public void setComponentFactoryListener(ComponentFactoryListener componentFactoryListener) {
         this.componentFactoryListener = componentFactoryListener;
     }
@@ -291,6 +298,10 @@ public class ComponentFactory {
 
     public void setScrollBoxArr(String[] scrollBoxArr) {
         this.scrollBoxArr = scrollBoxArr;
+    }
+
+    public String[] getBounds() {
+        return bounds;
     }
 
     public ComponentAttributes getComponentAttribute() {
