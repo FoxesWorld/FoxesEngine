@@ -8,9 +8,9 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     private int rowNum, colNum, imgCount, fontSize;
     @SuppressWarnings("unused")
-    private boolean enabled, rounded, html;
+    private boolean enabled, rounded, opaque;
     @SuppressWarnings("unused")
-    private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId, bounds, thumbImage, trackImage, alignment;
+    private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background,bounds, thumbImage, trackImage, alignment;
     @SuppressWarnings("unused")
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue;
     @SuppressWarnings("unused")
@@ -31,6 +31,11 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     public String getReadFrom() {
         return readFrom;
+    }
+
+    @SuppressWarnings("unused")
+    public String getBackground() {
+        return background;
     }
 
     @SuppressWarnings("unused")
@@ -112,6 +117,10 @@ public class ComponentAttributes {
     public boolean isRounded() {
         return rounded;
     }
+    @SuppressWarnings("unused")
+    public boolean isOpaque() {
+        return rounded;
+    }
 
     @SuppressWarnings("unused")
     public int getIconWidth() {
@@ -126,11 +135,6 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     public int getTotalFrames() {
         return totalFrames;
-    }
-
-    @SuppressWarnings("unused")
-    public boolean isHtml() {
-        return html;
     }
 
     @SuppressWarnings("unused")

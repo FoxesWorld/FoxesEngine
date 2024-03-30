@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.panel;
 
+import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.utils.CurrentMonth;
@@ -139,28 +140,27 @@ public class Panel extends JPanel {
         groupPanel.setBounds(getPanelBounds(bounds, 0), getPanelBounds(bounds, 1), getPanelBounds(bounds, 2), getPanelBounds(bounds, 3));
         if(panelOptions.getLayout() != null) {
             layoutManager = this.getLayout(panelOptions.getLayout(), groupPanel);
+            groupPanel.setLayout(layoutManager);
         }
-        groupPanel.setLayout(layoutManager);
+
         return groupPanel;
     }
 
-    private LayoutManager getLayout(String layout, JPanel groupPanel){
-        switch (layout){
-            case "bordered" -> {
+    private LayoutManager getLayout(String layout, JPanel panel){
+        switch (layout.toLowerCase()) {
+            case "flow":
+                return new FlowLayout();
+            case "border":
                 return new BorderLayout();
-            }
-
-            case "boxed" -> {
-                return new BoxLayout(groupPanel, BoxLayout.Y_AXIS);
-            }
-
-            case "flow" -> {
-                return  new FlowLayout(FlowLayout.LEFT);
-            }
-
-            default -> {
+            case "grid":
+                return new GridLayout();
+            case "gridbag":
+                return new GridBagLayout();
+            case "box":
+                return new BoxLayout(panel, BoxLayout.X_AXIS);
+            default:
+                Engine.LOGGER.error("Invalid layout type: " + layout);
                 return null;
-            }
         }
     }
 

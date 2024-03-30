@@ -6,7 +6,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.Serial;
-import java.util.ArrayList;
+
+import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 
 public class Label extends JLabel {
@@ -14,13 +15,7 @@ public class Label extends JLabel {
 	private static final long serialVersionUID = 1L;
 
 	public Label(ComponentFactory componentFactory) {
-		String text = "";
-		if(componentFactory.getComponentAttribute().isHtml()){
-			text = "<html>" +this.getText()+ "</html>";
-		} else {
-			text = componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey());
-		}
-		setText(text);
+		setText(componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
 		setOpaque(componentFactory.style.isOpaque());
 		setPreferredSize(new Dimension(Integer.parseInt(componentFactory.getBounds()[2]), Integer.parseInt(componentFactory.getBounds()[3])));
 		if(componentFactory.getComponentAttribute().getAlignment() != null) {
@@ -37,6 +32,9 @@ public class Label extends JLabel {
 					Integer.parseInt(borders.getItem(2)),
 					Integer.parseInt(borders.getItem(3))));
 		}
+		//if(componentFactory.getComponentAttribute().getBackground()!=null) {
+		//	setBackground(hexToColor(componentFactory.getComponentAttribute().getBackground()));
+		//}
 
 	}
 

@@ -103,6 +103,7 @@ public class ComponentFactory {
                 if(componentAttributes.getColor() != null) {
                     label.setForeground(hexToColor(componentAttributes.getColor()));
                 }
+                label.setOpaque(componentAttribute.isOpaque());
 
                 return label;
             }

@@ -12,15 +12,12 @@ public class FileAttributes {
     public int getSize() {
         return size;
     }
-
     public String getFilename() {
         return filename;
     }
-
     public String getHash() {
         return hash;
     }
-
     public void setReplaceMask(String replaceMask) {
         this.replaceMask = replaceMask;
     }

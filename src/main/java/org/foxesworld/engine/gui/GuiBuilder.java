@@ -70,6 +70,22 @@ public class GuiBuilder {
         }
     }
 
+    public void setLabelIcon(String componentId, ImageIcon icon) {
+        JComponent component = getComponentById(componentId);
+        if (component instanceof JLabel) {
+            ((JLabel) component).setIcon(icon);
+        }
+    }
+    public void setLabelText(String componentId, String text, boolean html) {
+        JComponent component = getComponentById(componentId);
+        if (component instanceof JLabel) {
+            if (html) {
+                text = "<html>" + text + "</html>";
+            }
+            ((JLabel) component).setText(text);
+        }
+    }
+
     private void buildPanels(Map<String, OptionGroups> groups, JPanel parentPanel) {
         if (groups != null) {
             for (Map.Entry<String, OptionGroups> entry : groups.entrySet()) {
