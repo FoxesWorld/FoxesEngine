@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class DropBox extends JComponent implements MouseListener, MouseMotionListener {
+    @SuppressWarnings("unused")
     private Color color, hoverColor;
     private boolean loaded = false;
     private final ComponentFactory componentFactory;
@@ -21,6 +22,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     private int x = 0, y = 0, previousHover = -1;
     private int selected;
     private int hover;
+    @SuppressWarnings("unused")
     private boolean entered;
     private BufferedImage defaultTX;
     private BufferedImage openedTX;
@@ -181,19 +183,21 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         }
         state = State.ROLLOVER;
         entered = true;
+        hover = -1;
         repaint();
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         entered = false;
-        if(state.equals(State.OPENED)) {
+        if (state.equals(State.OPENED)) {
             componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
         }
         state = State.CLOSED;
         dropBoxListener.onScrollBoxClose(selected);
         repaint();
     }
+
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -220,25 +224,24 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     public void mouseMoved(MouseEvent e) {
         y = e.getY();
         x = e.getX();
-        int newHover = (state == State.OPENED) ? (y / openedTX.getHeight()) : -1;
+        int newHover = (state == State.OPENED) ? (y / openedTX.getHeight()) : (y / defaultTX.getHeight());
         if (newHover >= 0 && newHover < values.length && newHover != previousHover) {
-            if (state == State.OPENED) {
-                dropBoxListener.onServerHover(newHover);
-            }
+            dropBoxListener.onServerHover(newHover);
             previousHover = newHover;
             repaint();
             hover = y / openedTX.getHeight();
         }
     }
 
+    @SuppressWarnings("unused")
     public int getSelectedIndex() {
         return selected;
     }
-
+    @SuppressWarnings("unused")
     public int getHoverIndex() {
         return hover;
     }
-
+    @SuppressWarnings("unused")
     public String getSelected() {
         try {
             return values[selected];
@@ -248,6 +251,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         }
     }
 
+    @SuppressWarnings("unused")
     public void setSelectedIndex(int i) {
         if (values.length <= i) {
             return;
@@ -256,6 +260,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         repaint();
     }
 
+    @SuppressWarnings("unused")
     public void setValues(String[] values) {
         this.values = values;
         repaint();
@@ -267,10 +272,12 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     }
 
 
+    @SuppressWarnings("unused")
     public boolean isOpened() {
         return state == State.OPENED;
     }
 
+    @SuppressWarnings("unused")
     public void setScrollBoxListener(DropBoxListener dropBoxListener) {
         this.dropBoxListener = dropBoxListener;
     }
@@ -310,7 +317,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     public void setHoverColor(Color hoverColor) {
         this.hoverColor = hoverColor;
     }
-
+    @SuppressWarnings("unused")
     public String[] getValues() {
         return values;
     }
@@ -318,7 +325,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     public BufferedImage getOpenedTX() {
         return openedTX;
     }
-
+    @SuppressWarnings("unused")
     public State getState() {
         return state;
     }
