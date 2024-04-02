@@ -9,8 +9,10 @@ public abstract class User {
 
     protected Engine engine;
 
+    @SuppressWarnings("unused")
     protected abstract void setUserSpace();
 
+    @SuppressWarnings("unused")
     protected String getUserHead(String login) {
         Map<String, String> skinData = new HashMap<>();
         skinData.put("sysRequest", "skin");

@@ -84,4 +84,8 @@ public class Checkbox extends JCheckBox {
     public void setCheckBoxListener(CheckBoxListener checkBoxListener) {
         this.checkBoxListener = checkBoxListener;
     }
+
+    public boolean getValue(){
+        return  isSelected();
+    }
 }

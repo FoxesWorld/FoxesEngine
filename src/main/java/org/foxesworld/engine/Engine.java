@@ -76,6 +76,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
     public abstract void init();
     protected abstract void preInit();
+
     @Override
     public abstract void onPanelsBuilt();
     @Override

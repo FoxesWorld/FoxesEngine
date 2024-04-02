@@ -200,6 +200,10 @@ public class TextField extends JTextField {
 		return selectionColor;
 	}
 
+	public String getValue(){
+		return  this.getText();
+	}
+
 	// Метод для получения цвета текста при выделении
 	public Color getSelectedTextColor() {
 		return selectedTextColor;

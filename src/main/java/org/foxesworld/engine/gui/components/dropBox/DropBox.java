@@ -244,7 +244,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         return hover;
     }
     @SuppressWarnings("unused")
-    public String getSelected() {
+    public String getValue() {
         try {
             return values[selected];
         } catch (ArrayIndexOutOfBoundsException e) {
