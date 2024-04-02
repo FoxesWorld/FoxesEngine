@@ -1,23 +1,8 @@
 package org.foxesworld.engine.gui.styles;
 
 public class StyleAttributes {
-    private String name;
-    private String backgroundImage;
-    private String background;
-    private String color;
-    private String hoverColor;
-    private String caretColor;
-    private String align;
-    private String borderColor;
-    private String trackImage;
-    private String thumbImage;
-    private int width;
-    private int height;
-    private int paddingX;
-    private int paddingY;
-    private String font;
-    private int fontSize;
-    private String texture;
+    private String name,backgroundImage,background,color,hoverColor,caretColor,align,borderColor,trackImage, thumbImage,texture,font,selectionColor;
+    private int width,height,paddingX,paddingY,fontSize, borderRadius;
     private boolean opaque;
 
     public String getName() {
@@ -48,8 +33,16 @@ public class StyleAttributes {
         return align;
     }
 
+    public String getSelectionColor() {
+        return selectionColor;
+    }
+
     public String getBorderColor() {
         return borderColor;
+    }
+
+    public int getBorderRadius() {
+        return borderRadius;
     }
 
     public int getWidth() {

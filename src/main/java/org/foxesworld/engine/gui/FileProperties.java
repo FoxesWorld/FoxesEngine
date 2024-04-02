@@ -5,16 +5,17 @@ import org.foxesworld.engine.Engine;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class GuiProperties {
+public class FileProperties {
     private String frameTpl;
     private String mainFrame;
     private String localeFile;
+    private String soundsFile;
 
-    public GuiProperties(Engine engine){
-        Map<String, Object> guiList = engine.getEngineData().getGui();
+    public FileProperties(Engine engine){
+        Map<String, Object> guiList = engine.getEngineData().getFiles();
         for (Map.Entry<String, Object> guiEl : guiList.entrySet()) {
             try {
-                Field field = GuiProperties.class.getDeclaredField(guiEl.getKey());
+                Field field = FileProperties.class.getDeclaredField(guiEl.getKey());
                 if(field.hashCode()!= 0) {
                     field.set(this, guiEl.getValue());
                 }
@@ -32,5 +33,9 @@ public class GuiProperties {
 
     public String getLocaleFile() {
         return localeFile;
+    }
+
+    public String getSoundsFile() {
+        return soundsFile;
     }
 }

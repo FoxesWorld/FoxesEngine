@@ -15,7 +15,7 @@ public class EngineData {
     private int downloadThreads;
     private List<RequestProperty> requestProperties;
     private List<TweakClasses> tweakClasses;
-    private Map<String, Object> gui;
+    private Map<String, Object> files;
     public String getBindUrl() {
         return bindUrl;
     }
@@ -52,8 +52,8 @@ public class EngineData {
     public String getProgramRuntime() {
         return programRuntime;
     }
-    public Map<String, Object> getGui() {
-        return gui;
+    public Map<String, Object> getFiles() {
+        return files;
     }
     public EngineData initEngineValues(String propertyPath) {
         InputStream inputStream = Engine.class.getClassLoader().getResourceAsStream(propertyPath);

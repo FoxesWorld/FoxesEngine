@@ -14,28 +14,38 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public abstract class GameLauncher {
 
     protected GameListener gameListener;
+    @SuppressWarnings("unused")
     protected ServerAttributes gameClient;
     protected final ExecutorService executorService = Executors.newSingleThreadExecutor();
     protected Engine engine;
     protected Logger logger;
+    @SuppressWarnings("unused")
     protected Config config;
     protected int intVer;
     private final String[] toTest = {"_JAVA_OPTIONS", "_JAVA_OPTS", "JAVA_OPTS", "JAVA_OPTIONS"};
     protected URLClassLoader classLoader;
     protected final List<String> processArgs = new ArrayList<>();
     protected boolean isStarted;
+    @SuppressWarnings("unused")
     protected abstract void collectLibraries();
+    @SuppressWarnings("unused")
     protected abstract URLClassLoader createClassLoader(List<URL> libraryURLs);
+    @SuppressWarnings("unused")
     protected abstract void loadAuthLib(String accessToken, String UUID, String userProperties);
+    @SuppressWarnings("unused")
     protected abstract void addArgs(String tweakClassVal);
+    @SuppressWarnings("unused")
     protected abstract void launchGame();
+    @SuppressWarnings("unused")
     protected abstract String addTweakClass();
     public String buildGameDir() {
         return Config.getFullPath();
     }
+    @SuppressWarnings("unused")
     protected abstract void setJre();
 
     public abstract String buildVersionDir();
@@ -109,11 +119,12 @@ public abstract class GameLauncher {
     protected int getIntVer() {
         return intVer;
     }
-
+    @SuppressWarnings("unused")
     public URLClassLoader getClassLoader() {
         return classLoader;
     }
 
+    @SuppressWarnings("unused")
     public List<String> getProcessArgs() {
         return processArgs;
     }

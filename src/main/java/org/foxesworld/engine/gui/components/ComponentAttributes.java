@@ -8,11 +8,11 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     private int rowNum, colNum, imgCount, fontSize;
     @SuppressWarnings("unused")
-    private boolean enabled, rounded, opaque;
+    private boolean enabled, opaque;
     @SuppressWarnings("unused")
     private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background,bounds, thumbImage, trackImage, alignment;
     @SuppressWarnings("unused")
-    private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue;
+    private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     @SuppressWarnings("unused")
     private Map<String, OptionGroups> groups;
     @SuppressWarnings("unused")
@@ -61,6 +61,11 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     public int getColNum() {
         return colNum;
+    }
+
+    @SuppressWarnings("unused")
+    public int getBorderRadius() {
+        return borderRadius;
     }
 
     @SuppressWarnings("unused")
@@ -114,12 +119,8 @@ public class ComponentAttributes {
     }
 
     @SuppressWarnings("unused")
-    public boolean isRounded() {
-        return rounded;
-    }
-    @SuppressWarnings("unused")
     public boolean isOpaque() {
-        return rounded;
+        return opaque;
     }
 
     @SuppressWarnings("unused")

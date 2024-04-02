@@ -29,8 +29,6 @@ import org.foxesworld.engine.utils.SpriteAnimation;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.geom.Ellipse2D;
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -85,8 +83,8 @@ public class ComponentFactory {
                 labelStyle.apply(label);
                 if(componentAttributes.getImageIcon() != null) {
                     ImageIcon icon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
-                    if(componentAttribute.isRounded()) {
-                        icon = new ImageIcon(this.getRoundedImage(icon.getImage(), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
+                    if(componentAttribute.getBorderRadius() != 0) {
+                        icon = new ImageIcon(ImageUtils.getRoundedImage(icon.getImage(), componentAttribute.getBorderRadius()));
                     }
                     label.setIcon(icon);
                 }
@@ -103,7 +101,7 @@ public class ComponentFactory {
                 if(componentAttributes.getColor() != null) {
                     label.setForeground(hexToColor(componentAttributes.getColor()));
                 }
-                label.setOpaque(componentAttribute.isOpaque());
+                label.setOpaque(style.isOpaque());
 
                 return label;
             }
@@ -139,7 +137,7 @@ public class ComponentFactory {
 
             case "textField" -> {
                 TextFieldStyle textfieldStyle = new TextFieldStyle(this);
-                TextField textfield = new TextField(LANG.getString(componentAttributes.getLocaleKey()));
+                TextField textfield = new TextField(this);
                 textfieldStyle.apply(textfield);
                 textfield.setName(componentAttributes.getComponentId());
                 textfield.setBounds(xPos, yPos, textfieldStyle.width, textfieldStyle.height);
@@ -282,15 +280,6 @@ public class ComponentFactory {
 
     public void setComponentFactoryListener(ComponentFactoryListener componentFactoryListener) {
         this.componentFactoryListener = componentFactoryListener;
-    }
-
-    private Image getRoundedImage(Image image, int width, int height) {
-        BufferedImage roundedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = roundedImage.createGraphics();
-        g2.setClip(new Ellipse2D.Float(0, 0, width, height));
-        g2.drawImage(image, 0, 0, width, height, null);
-        g2.dispose();
-        return roundedImage;
     }
 
     public enum Align {

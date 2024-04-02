@@ -5,6 +5,7 @@ public enum ClientType {
     modified,
     fabricclient;
 
+    @SuppressWarnings("unused")
     public static ClientType getType(String str) {
         if (str != null) {
             for (ClientType clientType : ClientType.values()) {

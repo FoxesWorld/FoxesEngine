@@ -106,6 +106,4 @@ public class ServerInfo {
     public void setServerStatusImg(BufferedImage serverStatusImg) {
         this.serverStatusImg = serverStatusImg;
     }
-
-
 }

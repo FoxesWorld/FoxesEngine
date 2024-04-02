@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
@@ -73,6 +74,15 @@ public class ImageUtils {
         g2.drawImage(image, 0, 0, null);
         g2.dispose();
 
+        return roundedImage;
+    }
+
+    public static Image getRoundedImage(Image image, int width, int height) {
+        BufferedImage roundedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = roundedImage.createGraphics();
+        g2.setClip(new Ellipse2D.Float(0, 0, width, height));
+        g2.drawImage(image, 0, 0, width, height, null);
+        g2.dispose();
         return roundedImage;
     }
 

@@ -23,14 +23,14 @@ public class SoundPlayer {
 
     public void playSound(String path, boolean loop) {
         if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getCONFIG().get("enableSound")))) {
-            float volume = 0f;
+            float volume;
             try {
                 InputStream inputStream = SoundPlayer.class.getClassLoader().getResourceAsStream(path);
                 AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioInputStream);
                 if(path.contains("mus")){
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.03f;
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.15f;
                 } else {
                     volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
                 }
@@ -50,7 +50,8 @@ public class SoundPlayer {
 
     private void setVolume(Clip clip, float volume) {
         if (volume < 0.0f || volume > 1.0f) {
-            throw new IllegalArgumentException("Volume should be between 0.0 and 1.0");
+            Engine.LOGGER.error("Volume should be between 0.0 and 1.0");
+            return;
         }
 
         FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
@@ -59,6 +60,7 @@ public class SoundPlayer {
         gainControl.setValue(gain);
     }
 
+    @SuppressWarnings("unused")
     public void changeActiveVolume(float volume) {
         for (Clip clip : activeClips) {
             setVolume(clip, volume);
@@ -66,6 +68,7 @@ public class SoundPlayer {
     }
 
 
+    @SuppressWarnings("unused")
     public void stopAllSounds() {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override

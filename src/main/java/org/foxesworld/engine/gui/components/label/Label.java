@@ -7,7 +7,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.Serial;
 
-import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 
 public class Label extends JLabel {

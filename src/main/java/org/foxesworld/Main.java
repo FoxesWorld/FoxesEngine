@@ -3,6 +3,7 @@ package org.foxesworld;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
+import org.foxesworld.engine.gui.styles.StyleProvider;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,18 +17,18 @@ public class Main  extends Engine {
 
     public Main(){
         super("config");
-        init(this);
+        init();
     }
 
     @Override
-    public void init(Engine engine) {
-        //setStyleProvider(new StyleProvider(this));
+    public void init() {
+        setStyleProvider(new StyleProvider(new String[]{"button"}));
         setGuiBuilder(new GuiBuilder(this));
         //this.getGuiBuilder().getComponentFactory().setComponentFactoryListener(new Components(this));
         getGuiBuilder().setGuiBuilderListener(this);
         //getGuiBuilder().getComponentFactory().setComponentFactoryListener(getGuiBuilder());
-        this.getGuiBuilder().buildGui(this.getGuiProperties().getFrameTpl(), this.getFrame().getRootPanel());
-        loadMainPanel(this.getGuiProperties().getMainFrame());
+        this.getGuiBuilder().buildGui(this.getFileProperties().getFrameTpl(), this.getFrame().getRootPanel());
+        loadMainPanel(this.getFileProperties().getMainFrame());
 
         //ALL PANELS ARE BUILT
         this.getGuiBuilder().buildAdditionalPanels();
@@ -35,7 +36,7 @@ public class Main  extends Engine {
     }
 
     @Override
-    protected void preInit(Engine engine) {
+    protected void preInit() {
 
     }
 

@@ -226,10 +226,12 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         x = e.getX();
         int newHover = (state == State.OPENED) ? (y / openedTX.getHeight()) : (y / defaultTX.getHeight());
         if (newHover >= 0 && newHover < values.length && newHover != previousHover) {
-            dropBoxListener.onServerHover(newHover);
-            previousHover = newHover;
-            repaint();
-            hover = y / openedTX.getHeight();
+            if(state.equals(State.OPENED)) {
+                dropBoxListener.onServerHover(newHover);
+                previousHover = newHover;
+                repaint();
+                hover = y / openedTX.getHeight();
+            }
         }
     }
 

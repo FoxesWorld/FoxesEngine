@@ -12,6 +12,7 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
@@ -40,8 +41,9 @@ public class Panel extends JPanel {
     }
 
     private void drawDarkenedBackground(Graphics g) {
-        BufferedImage backgroundImage = ImageUtils.getLocalImage(getSeasonalBackground());
-        g.drawImage(applyDarkening(backgroundImage, hexToColor(frameAttributes.getBackgroundBlur())), 0, 0, null);
+        g.drawImage(applyDarkening(
+                ImageUtils.getLocalImage(getSeasonalBackground()),
+                hexToColor(frameAttributes.getBackgroundBlur())), 0, 0, null);
     }
 
     private String getSeasonalBackground(){
@@ -60,16 +62,31 @@ public class Panel extends JPanel {
         BufferedImage darkenedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = darkenedImage.createGraphics();
 
-        //Image
+        // Накладываем изображение
         g2d.drawImage(image, 0, 0, null);
 
-        //Color
-        g2d.setColor(darkeningColor);
-        g2d.fillRect(0, 0, width, height);
+        // Создаем новый BufferedImage с прозрачностью
+        BufferedImage alphaImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D gAlpha = alphaImage.createGraphics();
+
+        // Заполняем изображение прозрачным цветом
+        gAlpha.setColor(new Color(0, 0, 0, 0));
+        gAlpha.fillRect(0, 0, width, height);
+
+        // Наносим затемнение с учетом альфа-канала
+        gAlpha.setColor(darkeningColor);
+        gAlpha.setComposite(AlphaComposite.SrcOver.derive(0.5f)); // Пример установки прозрачности в 50%
+        gAlpha.fillRect(0, 0, width, height);
+
+        // Накладываем изображение с примененным альфа-каналом на изначальное изображение
+        g2d.drawImage(alphaImage, 0, 0, null);
 
         g2d.dispose();
+        gAlpha.dispose();
+
         return darkenedImage;
     }
+
 
     public JPanel createGroupPanel(PanelAttributes panelOptions, String groupName) {
         LayoutManager layoutManager = null;
@@ -150,7 +167,7 @@ public class Panel extends JPanel {
         switch (layout.toLowerCase()) {
             case "flow":
                 return new FlowLayout();
-            case "border":
+            case "borderColor":
                 return new BorderLayout();
             case "grid":
                 return new GridLayout();
@@ -162,6 +179,15 @@ public class Panel extends JPanel {
                 Engine.LOGGER.error("Invalid layout type: " + layout);
                 return null;
         }
+    }
+
+    private Object getBackgroundData(String data){
+        if(data.startsWith("img(") && data.endsWith(")")){
+            return ImageUtils.getLocalImage(data);
+        } else if(data.contains("#")){
+            return hexToColor(data);
+        }
+        return null;
     }
 
     private int getPanelBounds(String bounds, int index){

@@ -5,19 +5,14 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 public class Button extends JButton implements MouseListener, MouseMotionListener {
     private Color hoverColor;
-    private boolean entered = false;
-    private boolean pressed = false;
-    public BufferedImage defaultTX;
-    public BufferedImage rolloverTX;
-    public BufferedImage pressedTX;
-    public BufferedImage lockedTX;
+    private Timer disableTimer;
+    private boolean entered = false, pressed = false;
+    public BufferedImage defaultTX,rolloverTX,pressedTX,lockedTX;
     private final ComponentFactory componentFactory;
     private final ComponentAttributes buttonAttributes;
 
@@ -32,6 +27,7 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
         setFocusPainted(false);
         setOpaque(componentFactory.style.isOpaque());
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        //this.initCoolDown(this.componentFactory.getComponentAttribute().getCoolDown());
     }
 
     public Button(ComponentFactory componentFactory, ImageIcon icon) {
@@ -53,6 +49,16 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
 
         setLayout(new BorderLayout());
         add(iconLabel, BorderLayout.CENTER);
+        //this.initCoolDown(this.componentFactory.getComponentAttribute().getCoolDown());
+    }
+
+    private void initCoolDown(int mSec){
+        if(mSec > 0) {
+            disableTimer = new Timer(mSec, e -> {
+                setEnabled(true);
+                disableTimer.stop();
+            });
+        }
     }
 
     @Override
@@ -105,6 +111,10 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
     public void mousePressed(MouseEvent e) {
         if (isEnabled() && e.getButton() == MouseEvent.BUTTON1) {
             ButtonClick();
+            /* if(this.componentFactory.getComponentAttribute().getCoolDown() > 0) {
+                setEnabled(false);
+                disableTimer.start();
+            } */
         }
     }
 

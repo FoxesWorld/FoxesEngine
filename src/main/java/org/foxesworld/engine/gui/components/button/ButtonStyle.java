@@ -11,14 +11,12 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class ButtonStyle {
 	public boolean visible = true;
-	public  int width;
-	public int height;
-	public String font;
-	public String color;
+	public  int width,height;
+	public String font,color;
 	public float fontSize;
 	public ComponentFactory.Align align;
 	public BufferedImage texture;
-	private ComponentFactory componentFactory;
+	private final ComponentFactory componentFactory;
 	public ButtonStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;
 		this.width = componentFactory.style.getWidth();
@@ -36,9 +34,17 @@ public class ButtonStyle {
 		button.setHoverColor(hexToColor(this.componentFactory.style.getHoverColor()));
 		button.setForeground(hexToColor(color));
 		int i = texture.getHeight() / 4;
-		button.defaultTX = texture.getSubimage(0, 0, texture.getWidth(), i);
-		button.rolloverTX = texture.getSubimage(0, i, texture.getWidth(), i);
-		button.pressedTX = texture.getSubimage(0, i * 2, texture.getWidth(), i);
-		button.lockedTX = texture.getSubimage(0, i * 3, texture.getWidth(), i);
+		button.defaultTX = getTexture(0, 0, texture.getWidth(), i);
+		button.rolloverTX = getTexture(0, i, texture.getWidth(), i);
+		button.pressedTX = getTexture(0, i * 2, texture.getWidth(), i);
+		button.lockedTX = getTexture(0, i * 3, texture.getWidth(), i);
+	}
+
+	public BufferedImage getTexture(int startX, int startY, int subWidth, int subHeight) {
+		BufferedImage buttTexture = texture.getSubimage(startX, startY, subWidth, subHeight);
+		if(componentFactory.style.getBorderRadius() != 0) {
+			return (BufferedImage) ImageUtils.getRoundedImage(buttTexture, componentFactory.style.getBorderRadius());
+		}
+		return buttTexture;
 	}
 }

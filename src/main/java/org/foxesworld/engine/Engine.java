@@ -8,7 +8,7 @@ import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.GuiBuilderListener;
-import org.foxesworld.engine.gui.GuiProperties;
+import org.foxesworld.engine.gui.FileProperties;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.engine.gui.components.panel.PanelVisibility;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
-    private final GuiProperties guiProperties;
+    private final FileProperties fileProperties;
     protected LoadingManager loadingManager;
     private final String configFiles;
     private final String appTitle;
@@ -59,7 +59,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.engineData = new EngineData();
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
-        guiProperties = new GuiProperties(this);
+        fileProperties = new FileProperties(this);
         System.setProperty("log.dir", System.getProperty("user.dir"));
         LOGGER = LogManager.getLogger(Engine.class);
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
@@ -74,8 +74,8 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         this.POSTrequest = new HTTPrequest(this, "POST");
     }
 
-    public abstract void init(Engine engine);
-    protected abstract void preInit(Engine engine);
+    public abstract void init();
+    protected abstract void preInit();
     @Override
     public abstract void onPanelsBuilt();
     @Override
@@ -175,8 +175,8 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public void setInit(boolean init) {
         this.init = init;
     }
-    public GuiProperties getGuiProperties() {
-        return guiProperties;
+    public FileProperties getFileProperties() {
+        return fileProperties;
     }
     public LoadingManager getLoadingManager() {
         return loadingManager;
