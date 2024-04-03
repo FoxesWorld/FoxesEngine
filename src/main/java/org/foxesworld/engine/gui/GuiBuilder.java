@@ -1,6 +1,5 @@
 package org.foxesworld.engine.gui;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
