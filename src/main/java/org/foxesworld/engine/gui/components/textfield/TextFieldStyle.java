@@ -32,6 +32,9 @@ public class TextFieldStyle {
 		this.font = componentFactory.style.getFont();
 		this.fontSize = componentFactory.style.getFontSize();
 		this.texture = ImageUtils.getLocalImage(componentFactory.style.getTexture());
+		if(componentFactory.style.getBorderRadius() != 0) {
+			this.texture = (BufferedImage) ImageUtils.getRoundedImage(this.texture, componentFactory.style.getBorderRadius());
+		}
 	}
 
 	private void setBorder(StyleAttributes styleAttributes){

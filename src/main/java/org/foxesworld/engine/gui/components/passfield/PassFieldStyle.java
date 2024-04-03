@@ -24,6 +24,9 @@ public class PassFieldStyle {
     public PassFieldStyle(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
         this.texture = ImageUtils.getLocalImage(componentFactory.style.getTexture());
+        if(componentFactory.style.getBorderRadius() != 0) {
+            this.texture = (BufferedImage) ImageUtils.getRoundedImage(this.texture, componentFactory.style.getBorderRadius());
+        }
         this.textColor = hexToColor(componentFactory.style.getColor());
         this.caretColor = hexToColor(componentFactory.style.getCaretColor());
         this.echoChar = "*";

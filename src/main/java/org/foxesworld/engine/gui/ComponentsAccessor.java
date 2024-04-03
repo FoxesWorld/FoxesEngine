@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.components.slider.Slider;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -14,22 +15,38 @@ public class ComponentsAccessor {
     private final String panelId;
     private final Map<String, JComponent> componentMap = new HashMap<>();
     private final List<JComponent> componentList = new ArrayList<>();
+    private final Map<String, String> formCredentials = new HashMap<>();
 
-    public ComponentsAccessor(GuiBuilder guiBuilder, String panelId){
+    public ComponentsAccessor(GuiBuilder guiBuilder, String panelId) {
         this.guiBuilder = guiBuilder;
         this.panelId = panelId;
-        this.selectComponents();
+        collectDataAndSelectComponents();
     }
 
-    private void selectComponents(){
-        for (JComponent component : this.guiBuilder.getComponentsMap().get(panelId)){
-            this.componentMap.put(component.getName(), component);
-            this.componentList.add(component);
-            Engine.LOGGER.debug("Selecting " + component.getName());
+    private void collectDataAndSelectComponents() {
+        List<JComponent> components = guiBuilder.getComponentsMap().get(panelId);
+        if (components != null) {
+            for (JComponent component : components) {
+                String name = component.getName();
+                if (name != null && !name.isEmpty()) {
+                    componentMap.put(name, component);
+                    componentList.add(component);
+
+                    String value = "";
+                    if (component instanceof JTextField) {
+                        value = ((JTextField) component).getText();
+                    } else if (component instanceof JCheckBox) {
+                        value = String.valueOf(((JCheckBox) component).isSelected());
+                    } else if(component instanceof Slider){
+                        value = String.valueOf(((Slider) component).getValue());
+                    }
+                    formCredentials.put(name, value);
+                }
+            }
         }
     }
 
-    protected Map<String, JComponent> getComponentMap() {
+    public Map<String, JComponent> getComponentMap() {
         return componentMap;
     }
 
@@ -37,7 +54,11 @@ public class ComponentsAccessor {
         return componentList;
     }
 
-    protected JComponent getComponent(String id) {
+    public Map<String, String> getFormCredentials() {
+        return formCredentials;
+    }
+
+    public JComponent getComponent(String id) {
         return componentMap.get(id);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class EngineData {
     private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
+    private String[] styles;
     private int downloadThreads;
     private List<RequestProperty> requestProperties;
     private List<TweakClasses> tweakClasses;
@@ -55,6 +56,11 @@ public class EngineData {
     public Map<String, Object> getFiles() {
         return files;
     }
+
+    public String[] getStyles() {
+        return styles;
+    }
+
     public EngineData initEngineValues(String propertyPath) {
         InputStream inputStream = Engine.class.getClassLoader().getResourceAsStream(propertyPath);
         if (inputStream != null) {

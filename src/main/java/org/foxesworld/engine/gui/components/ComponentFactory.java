@@ -141,11 +141,25 @@ public class ComponentFactory {
                 textfieldStyle.apply(textfield);
                 textfield.setName(componentAttributes.getComponentId());
                 textfield.setBounds(xPos, yPos, textfieldStyle.width, textfieldStyle.height);
-                textfield.setActionCommand(componentAttributes.getComponentId());
+                //extfield.setActionCommand(componentAttributes.getComponentId());
                 textfield.addActionListener(engine);
                 if(componentAttributes.getInitialValue() != null) textfield.setText(componentAttributes.getInitialValue());
                 return textfield;
             }
+
+            /*
+            case "textArea" -> {
+                TextAreaStyle textAreaStyle = new TextAreaStyle(this);
+                TextArea textArea = new TextArea(this);
+                textAreaStyle.apply(textArea);
+                textArea.setName(componentAttributes.getComponentId());
+                textArea.setBounds(xPos, yPos, textAreaStyle.width, textAreaStyle.height);
+                //textArea.setActionCommand(componentAttributes.getComponentId());
+                //textArea.addActionListener(engine);
+                if(componentAttributes.getInitialValue() != null) textArea.setText(componentAttributes.getInitialValue());
+                return textArea;
+            }
+            */
 
             case "passField" -> {
                 PassFieldStyle passfieldStyle = new PassFieldStyle(this);
