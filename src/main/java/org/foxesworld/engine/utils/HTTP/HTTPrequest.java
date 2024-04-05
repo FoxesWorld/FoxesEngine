@@ -21,13 +21,13 @@ public class HTTPrequest {
 
     public HTTPrequest(Engine engine, String requestMethod) {
         this.engine = engine;
-        engine.getLOGGER().debug("HTTP " + requestMethod + " init");
+        Engine.LOGGER.debug("HTTP " + requestMethod + " init");
         this.requestMethod = requestMethod;
     }
 
-    public String send(String queryUrl, Map<String, String> parameters) {
+    public String send(Map<String, String> parameters) {
         try {
-            URL url = new URL(queryUrl);
+            URL url = new URL(engine.getEngineData().getBindUrl());
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod(this.requestMethod);
             this.setRequestProperties(httpURLConnection, engine.getEngineData().getRequestProperties());
@@ -57,6 +57,7 @@ public class HTTPrequest {
                 httpURLConnection.disconnect();
         }
     }
+
 
     private StringBuilder getBoundary(int length, int radix) {
         StringBuilder boundary = new StringBuilder();

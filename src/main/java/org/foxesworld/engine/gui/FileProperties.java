@@ -6,10 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 public class FileProperties {
-    private String frameTpl;
-    private String mainFrame;
-    private String localeFile;
-    private String soundsFile;
+    private String frameTpl, mainFrame,localeFile,soundsFile;
 
     public FileProperties(Engine engine){
         Map<String, Object> guiList = engine.getEngineData().getFiles();
@@ -22,19 +19,19 @@ public class FileProperties {
             } catch (NoSuchFieldException | IllegalAccessException ignored) {}
         }
     }
-
+    @SuppressWarnings("unused")
     public String getFrameTpl() {
         return frameTpl;
     }
-
+    @SuppressWarnings("unused")
     public String getMainFrame() {
         return mainFrame;
     }
-
+    @SuppressWarnings("unused")
     public String getLocaleFile() {
         return localeFile;
     }
-
+    @SuppressWarnings("unused")
     public String getSoundsFile() {
         return soundsFile;
     }

@@ -4,7 +4,6 @@ import org.apache.logging.log4j.Logger;
 import org.foxesworld.engine.game.GameLauncher;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,21 +16,14 @@ public class FileGuard {
     private final String[] basicIgnoreDirs = {"saves", "resourcepacks", "shaderpacks", "logs", "config"};
     private final GameLauncher gameLauncher;
     private final Logger logger;
-
     private int totalFiles = 0;
     private int checkedFiles = 0;
     private int filesDeleted = 0;
 
     @SuppressWarnings("unused")
-    public FileGuard(GameLauncher gameLauncher) {
+    public FileGuard(GameLauncher gameLauncher, List<String> checkList) {
         this.gameLauncher = gameLauncher;
-        this.checkList = Arrays.asList(
-                gameLauncher.buildClientDir(),
-                gameLauncher.buildVersionDir(),
-                gameLauncher.buildLibrariesPath(),
-                gameLauncher.buildNativesPath()
-        );
-
+        this.checkList = checkList;
         this.ignoreList = new HashSet<>();
         this.buildBasicIgnoreList();
         this.logger = this.gameLauncher.getLogger();
@@ -87,7 +79,7 @@ public class FileGuard {
             for (File file : files) {
                 if (file.isFile()) {
                     fileGuardListener.onFileCheck(file);
-                    String checkPath = file.getPath().replace(this.gameLauncher.buildGameDir(), "").replace("\\", "/");
+                    String checkPath = file.getPath().replace(this.gameLauncher.getPathBuilders().buildGameDir(), "").replace("\\", "/");
                     if (!filesToKeep.contains(checkPath) && !this.isUserConfig(file) && !isInIgnoreList(file)){ //&& !this.isUserConfig(file) && !isInIgnoreList(file)) {
                         boolean deleted = file.delete();
                         if (deleted) {
@@ -110,7 +102,7 @@ public class FileGuard {
     }
 
     private boolean isInIgnoreList(File file) {
-        String filePath = file.getPath().replace(this.gameLauncher.buildGameDir(), "").replace("\\", "/");
+        String filePath = file.getPath().replace(this.gameLauncher.getPathBuilders().buildGameDir(), "").replace("\\", "/");
         for (String mask : this.ignoreList) {
             if (filePath.startsWith(mask.replace("\\", "/"))) {
                 return true;
@@ -121,7 +113,7 @@ public class FileGuard {
 
     private void buildBasicIgnoreList() {
         for (String dir : this.basicIgnoreDirs) {
-            String thisDir = gameLauncher.buildClientDir().replace(gameLauncher.buildGameDir(), "") + File.separator + dir;
+            String thisDir = gameLauncher.getPathBuilders().buildClientDir().replace(gameLauncher.getPathBuilders().buildGameDir(), "") + File.separator + dir;
             this.ignoreList.add(thisDir);
         }
     }
@@ -129,7 +121,7 @@ public class FileGuard {
     public void addIgnoreDirs(String dirs) {
         if (dirs != null) {
             for (String dir : dirs.split(",")) {
-                String thisDir = gameLauncher.buildClientDir().replace(gameLauncher.buildGameDir(), "") + File.separator + dir;
+                String thisDir = gameLauncher.getPathBuilders().buildClientDir().replace(gameLauncher.getPathBuilders().buildGameDir(), "") + File.separator + dir;
                 this.ignoreList.add(thisDir);
             }
         }
@@ -144,8 +136,9 @@ public class FileGuard {
                 for (File f : file.listFiles())
                     recursiveDelete(f);
                 file.delete();
-            } else
+            } else {
                 file.delete();
+            }
         } catch (Exception ignored) {
         }
     }

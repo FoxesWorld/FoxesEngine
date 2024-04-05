@@ -1,7 +1,10 @@
 package org.foxesworld.engine.game;
 
+import org.foxesworld.engine.Engine;
+
 public enum ClientType {
     fmlclient,
+    forgeclient,
     modified,
     fabricclient;
 
@@ -14,6 +17,7 @@ public enum ClientType {
                 }
             }
         }
-        throw new IllegalArgumentException("No constant with name " + str + " found for enum ClientType");
+        Engine.LOGGER.warn("No constant with name " + str + " found for enum ClientType");
+        return null;
     }
 }

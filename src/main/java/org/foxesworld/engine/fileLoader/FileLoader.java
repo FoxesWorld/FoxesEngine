@@ -51,7 +51,7 @@ public class FileLoader {
         request.put("version", version);
         request.put("client", client);
         request.put("platform", String.valueOf(getPlatformNumber()));
-        FileAttributes[] fileAttributes = new Gson().fromJson(POSTrequest.send(engine.getEngineData().getBindUrl(), request), FileAttributes[].class);
+        FileAttributes[] fileAttributes = new Gson().fromJson(POSTrequest.send(request), FileAttributes[].class);
         loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title", 800);
         for (FileAttributes file : fileAttributes) {
             file.setReplaceMask(this.replaceMask);
@@ -152,7 +152,7 @@ public class FileLoader {
         Map<String, String> request = new HashMap<>();
         request.put("sysRequest", "getJre");
         request.put("jreVersion", jreVersion);
-        FileAttributes jreFile = new Gson().fromJson(POSTrequest.send(engine.getEngineData().getBindUrl(), request), FileAttributes.class);
+        FileAttributes jreFile = new Gson().fromJson(POSTrequest.send(request), FileAttributes.class);
         jreFile.setReplaceMask(this.replaceMask);
         return jreFile;
     }

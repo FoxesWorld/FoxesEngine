@@ -24,6 +24,7 @@ public class DownloadUtils {
         this.progressLabel = (JLabel) engine.getGuiBuilder().getComponentById("progressLabel");
     }
 
+
     @SuppressWarnings("unused")
     public void downloader(String downloadFile, String savePath, long totalSize) {
         this.progressBar.add(this.progressLabel);
@@ -56,7 +57,7 @@ public class DownloadUtils {
                     percent = (int) (downloaded * 100 / totalSize);
                     SwingUtilities.invokeLater(() -> {
                         progressBar.setValue(percent);
-                        progressLabel.setText(getFileSize((int) downloaded) + "Mb /" + getFileSize(Math.toIntExact(totalSize)) + "Mb");
+                        progressLabel.setText(getFileSizeMb((int) downloaded) + "Mb /" + getFileSizeMb(Math.toIntExact(totalSize)) + "Mb");
                     });
                 }
             }
@@ -67,7 +68,7 @@ public class DownloadUtils {
             throw new RuntimeException(e);
         }
     }
-
+    @SuppressWarnings("unused")
     public void unpack(String path, File dir_to) {
         File fileZip = new File(path);
         try (ZipFile zip = new ZipFile(path, StandardCharsets.UTF_8)) {
@@ -100,15 +101,7 @@ public class DownloadUtils {
         }
         fileZip.delete();
     }
-
-
-    private double getFileSize(String url) throws IOException {
-        URL furl = new URL(url);
-        double fileSizeBytes = furl.openConnection().getContentLength();
-        return fileSizeBytes / (1024.0 * 1024.0);
-    }
-
-    private int getFileSize(int kbSize) {
+    private int getFileSizeMb(int kbSize) {
         return (int) (kbSize / (1024.0 * 1024.0));
     }
 }

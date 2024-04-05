@@ -1,4 +1,4 @@
-package org.foxesworld;
+package org.foxesworld.engine;
 
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.GuiBuilder;

@@ -1,4 +1,4 @@
-package org.foxesworld.engine.gui;
+package  org.foxesworld.engine.gui;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
@@ -18,20 +18,20 @@ import java.util.Map;
 
 public class GuiBuilder {
     private final Engine engine;
-    private final HashMap<String, List<JComponent>> componentsMap = new HashMap<>();
-    private final HashMap<String, JPanel> panelsMap = new HashMap<>();
-    private final HashMap<String, List<String>> childsNparents = new HashMap<>();
-    private final HashMap<String, JPanel> loadPanels = new HashMap<>();
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
+    private final HashMap<String, JPanel> panelsMap = new HashMap<>();
+    private final HashMap<String, List<JComponent>> componentsMap = new HashMap<>();
+    private final HashMap<String, List<String>> childsNparents = new HashMap<>();
+    private final HashMap<String, JPanel> loadPanels = new HashMap<>();
     private GuiBuilderListener guiBuilderListener;
     private boolean additionalPanelsBuilt = false;
 
     public GuiBuilder(Engine engine) {
         this.engine = engine;
+        this.frameConstructor = engine.getFrame();
+        this.componentFactory = new ComponentFactory(engine);
         Engine.getLOGGER().debug("=== GUI BUILDER ===");
-        frameConstructor = engine.getFrame();
-        componentFactory = new ComponentFactory(engine);
     }
 
     public void buildGui(String framePath, JPanel parent) {
@@ -44,6 +44,7 @@ public class GuiBuilder {
         return gson.fromJson(new InputStreamReader(GuiBuilder.class.getClassLoader().getResourceAsStream(framePath)), FrameAttributes.class);
     }
 
+    @SuppressWarnings("unused")
     public List<Component> getAllChildComponents(String parentPanel) {
         List<Component> components = new ArrayList<>();
         for (String thisChild : childsNparents.get(parentPanel)) {
@@ -63,6 +64,7 @@ public class GuiBuilder {
         return null;
     }
 
+    @SuppressWarnings("unused")
     public void setLabelText(String componentId, String text) {
         JComponent component = getComponentById(componentId);
         if (component instanceof JLabel) {
@@ -70,12 +72,15 @@ public class GuiBuilder {
         }
     }
 
+    @SuppressWarnings("unused")
     public void setLabelIcon(String componentId, ImageIcon icon) {
         JComponent component = getComponentById(componentId);
         if (component instanceof JLabel) {
             ((JLabel) component).setIcon(icon);
         }
     }
+
+    @SuppressWarnings("unused")
     public void setLabelText(String componentId, String text, boolean html) {
         JComponent component = getComponentById(componentId);
         if (component instanceof JLabel) {
@@ -153,6 +158,7 @@ public class GuiBuilder {
     public HashMap<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }
+    @SuppressWarnings("unused")
     public void addPanelToMap(JPanel panel) {
         this.panelsMap.put(panel.getName(), panel);
     }
@@ -161,6 +167,7 @@ public class GuiBuilder {
         return panelsMap;
     }
 
+    @SuppressWarnings("unused")
     public HashMap<String, List<String>> getChildsNparents() {
         return childsNparents;
     }

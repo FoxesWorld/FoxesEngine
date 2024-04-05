@@ -13,7 +13,6 @@ public  abstract class ActionHandler {
     public Engine getEngine() {
         return engine;
     }
-
     public ServerAttributes getCurrentServer() {
         return currentServer;
     }

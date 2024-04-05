@@ -1,6 +1,5 @@
 package org.foxesworld.engine.gui;
 
-import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.slider.Slider;
 
 import javax.swing.*;
@@ -8,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@SuppressWarnings("unused")
 public class ComponentsAccessor {
 
     private final GuiBuilder guiBuilder;
@@ -16,7 +15,7 @@ public class ComponentsAccessor {
     private final Map<String, JComponent> componentMap = new HashMap<>();
     private final List<JComponent> componentList = new ArrayList<>();
     private final Map<String, String> formCredentials = new HashMap<>();
-
+    @SuppressWarnings("unused")
     public ComponentsAccessor(GuiBuilder guiBuilder, String panelId) {
         this.guiBuilder = guiBuilder;
         this.panelId = panelId;
@@ -45,19 +44,19 @@ public class ComponentsAccessor {
             }
         }
     }
-
+    @SuppressWarnings("unused")
     public Map<String, JComponent> getComponentMap() {
         return componentMap;
     }
-
+    @SuppressWarnings("unused")
     public List<JComponent> getComponentList() {
         return componentList;
     }
-
+    @SuppressWarnings("unused")
     public Map<String, String> getFormCredentials() {
         return formCredentials;
     }
-
+    @SuppressWarnings("unused")
     public JComponent getComponent(String id) {
         return componentMap.get(id);
     }

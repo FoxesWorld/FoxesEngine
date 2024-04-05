@@ -18,6 +18,6 @@ public abstract class User {
         skinData.put("sysRequest", "skin");
         skinData.put("show", "head");
         skinData.put("login", login);
-        return this.engine.getPOSTrequest().send(this.engine.getEngineData().getBindUrl(), skinData);
+        return this.engine.getPOSTrequest().send(skinData);
     }
 }

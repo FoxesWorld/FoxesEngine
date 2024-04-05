@@ -6,6 +6,7 @@ import org.foxesworld.engine.gui.components.button.ButtonStyle;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.checkbox.CheckboxStyle;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
+import org.foxesworld.engine.gui.components.dropBox.DropBoxStyle;
 import org.foxesworld.engine.gui.components.label.Label;
 import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.components.multiButton.MultiButton;
@@ -14,7 +15,6 @@ import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.passfield.PassFieldStyle;
 import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
 import org.foxesworld.engine.gui.components.scrollBar.CustomScrollBar;
-import org.foxesworld.engine.gui.components.dropBox.DropBoxStyle;
 import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
@@ -23,6 +23,7 @@ import org.foxesworld.engine.gui.components.textfield.TextField;
 import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
+import org.foxesworld.engine.utils.IconUtils;
 import org.foxesworld.engine.utils.ImageUtils;
 import org.foxesworld.engine.utils.SpriteAnimation;
 
@@ -43,8 +44,6 @@ public class ComponentFactory {
 
     public StyleAttributes style = null;
     private ComponentAttributes componentAttribute;
-    private String[] scrollBoxArr = {""};
-
     private  String[] bounds ={};
     private ComponentFactoryListener componentFactoryListener;
 
@@ -82,10 +81,7 @@ public class ComponentFactory {
                 Label label = new Label(this);
                 labelStyle.apply(label);
                 if(componentAttributes.getImageIcon() != null) {
-                    ImageIcon icon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
-                    if(componentAttribute.getBorderRadius() != 0) {
-                        icon = new ImageIcon(ImageUtils.getRoundedImage(icon.getImage(), componentAttribute.getBorderRadius()));
-                    }
+                    ImageIcon icon = IconUtils.getIcon(componentAttributes);
                     label.setIcon(icon);
                 }
 
@@ -194,7 +190,6 @@ public class ComponentFactory {
                 } else {
                     button = new Button(this, LANG.getString(componentAttributes.getLocaleKey()));
                 }
-
                 buttonStyle.apply(button);
                 button.setName(componentAttributes.getComponentId());
                 button.setActionCommand(componentAttributes.getComponentId());
@@ -298,10 +293,6 @@ public class ComponentFactory {
 
     public enum Align {
         LEFT, CENTER, RIGHT
-    }
-
-    public void setScrollBoxArr(String[] scrollBoxArr) {
-        this.scrollBoxArr = scrollBoxArr;
     }
 
     public String[] getBounds() {

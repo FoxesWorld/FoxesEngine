@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class ComponentAttributes {
     @SuppressWarnings("unused")
-    private int rowNum, colNum, imgCount, fontSize;
+    private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
     @SuppressWarnings("unused")
     private boolean enabled, opaque;
     @SuppressWarnings("unused")
@@ -15,9 +15,6 @@ public class ComponentAttributes {
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     @SuppressWarnings("unused")
     private Map<String, OptionGroups> groups;
-    @SuppressWarnings("unused")
-    private int selectedIndex = 0;
-
     @SuppressWarnings("unused")
     public void setInitialValue(String initialValue) {
         this.initialValue = initialValue;
