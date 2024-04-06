@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.foxesworld.engine.game.argsReader.libraries.Library;
+import org.foxesworld.engine.game.argsReader.libraries.LibraryReader;
 import org.foxesworld.engine.utils.helper.JVMHelper;
 
 import java.io.File;
@@ -18,11 +20,15 @@ import java.util.regex.Pattern;
 
 public class ArgsReader {
     private JsonArray jvmArguments, gameArguments;
+    private LibraryReader libraryReader;
     private final String path;
+    private String mainClass, assets;
+    private boolean authLib;
 
     public ArgsReader(String path){
         this.path = path;
         if(new File(path).exists()) {
+            this.libraryReader = new LibraryReader(path);
             this.readArgs();
         }
     }
@@ -32,6 +38,10 @@ public class ArgsReader {
             FileReader fileReader = new FileReader(path);
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonObject = (JsonObject) jsonParser.parse(fileReader);
+
+            mainClass = jsonObject.get("mainClass").getAsString();
+            authLib = jsonObject.get("authLib").getAsBoolean();
+            assets = jsonObject.get("assets").getAsString();
 
             jvmArguments = jsonObject.getAsJsonObject("arguments").getAsJsonArray("jvm");
             gameArguments = jsonObject.getAsJsonObject("arguments").getAsJsonArray("game");
@@ -132,5 +142,21 @@ public class ArgsReader {
 
     public JsonArray getGameArguments() {
         return gameArguments;
+    }
+
+    public String getMainClass() {
+        return mainClass;
+    }
+
+    public String getAssets() {
+        return assets;
+    }
+
+    public boolean isAuthLib() {
+        return authLib;
+    }
+
+    public LibraryReader getLibraryReader() {
+        return libraryReader;
     }
 }

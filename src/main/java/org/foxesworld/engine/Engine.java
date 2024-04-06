@@ -94,10 +94,10 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
 
     @SuppressWarnings("unused")
-    public void restartApplication(int xmx) {
+    public void restartApplication(int xmx, String jvmDir) {
         String path = Config.getFullPath();
         ArrayList params = new ArrayList();
-        params.add(path + "/runtime/"+ this.getEngineData().getProgramRuntime() + "/bin/java");
+        params.add(path + "/runtime/"+ jvmDir + "/bin/java");
         params.add("-Xmx"+xmx+"M");
         params.add("-jar");
         params.add(appPath().substring(1));

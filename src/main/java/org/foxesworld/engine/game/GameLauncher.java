@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public abstract class GameLauncher {
-
     protected GameListener gameListener;
     protected ServerAttributes gameClient;
     protected final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -45,17 +44,6 @@ public abstract class GameLauncher {
     public Logger getLogger() {
         return logger;
     }
-    protected void loadAuthLib(String accessToken, String UUID, String userProperties) {
-        try {
-            classLoader.loadClass("com.mojang.authlib.Agent");
-            processArgs.add("--userType=legacy");
-            processArgs.add("--accessToken=" + accessToken);
-            processArgs.add("--uuid=" + UUID);
-            processArgs.add("--userProperties={}");
-        } catch (ClassNotFoundException e2) {
-            processArgs.add("--session=" + accessToken);
-        }
-    }
 
     public void setStarted(boolean started) {
         isStarted = started;
@@ -75,7 +63,6 @@ public abstract class GameLauncher {
         this.logger.debug("Assets " + getPathBuilders().buildAssetsPath());
         this.logger.debug("#############################");
     }
-
     protected void checkDangerousParams() {
         for (String t : toTest) {
             String env = System.getenv(t);
@@ -88,26 +75,17 @@ public abstract class GameLauncher {
             }
         }
     }
-
     public boolean isStarted() {
         return isStarted;
     }
-
     public void setGameListener(GameListener gameListener) {
         this.gameListener = gameListener;
     }
-
     protected int getIntVer() {
         return intVer;
     }
-
-
     public String getCurrentJre() {
         return this.gameClient.getJreVersion();
-    }
-
-    protected String getArgsFile() {
-        return this.pathBuilders.buildVersionDir() + File.separator + this.gameClient.getServerVersion() + ".json";
     }
 
     public URLClassLoader getClassLoader() {
@@ -122,6 +100,18 @@ public abstract class GameLauncher {
         return engine;
     }
 
+    protected void addArgsToProcess(List<String> args){
+        processArgs.addAll(args);
+    }
+
+    protected String getVersion(){
+        String version = gameClient.getServerVersion();
+        if (gameClient.getServerVersion().contains("-")) {
+            version = gameClient.getServerVersion().split("-")[0];
+        }
+        return  version;
+    }
+
     public static class pathBuilders {
         private  GameLauncher gameLauncher;
         public pathBuilders(GameLauncher gameLauncher){
@@ -133,6 +123,9 @@ public abstract class GameLauncher {
 
         public String buildVersionDir() {
             return buildGameDir() + "versions" + File.separator + this.gameLauncher.gameClient.getServerVersion();
+        }
+        public String getArgsFile() {
+            return this.buildVersionDir() + File.separator + this.gameLauncher.gameClient.getServerVersion() + ".json";
         }
         public String buildLibrariesPath() {
             return buildVersionDir() + File.separator + "libraries";
@@ -147,7 +140,6 @@ public abstract class GameLauncher {
         public String buildMinecraftJarPath() {
             return buildVersionDir() + File.separator + this.gameLauncher.gameClient.getServerVersion() + ".jar";
         }
-
         public String buildClientDir() {
             File clientDir = new File(buildGameDir() + "clients" + File.separator + this.gameLauncher.gameClient.getServerName());
             if (!clientDir.isDirectory()) {
@@ -165,6 +157,15 @@ public abstract class GameLauncher {
             return runtimeDir;
         }
     }
+
+    public void setArgsReader(ArgsReader argsReader) {
+        this.argsReader = argsReader;
+    }
+
+    public ArgsReader getArgsReader() {
+        return argsReader;
+    }
+
     public GameLauncher.pathBuilders getPathBuilders() {
         return pathBuilders;
     }
