@@ -1,8 +1,8 @@
 package org.foxesworld.engine;
 
 import com.google.gson.Gson;
-import org.foxesworld.engine.game.TweakClasses;
 import org.foxesworld.engine.utils.HTTP.RequestProperty;
+import org.foxesworld.engine.utils.TweakClasses;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,7 +13,8 @@ import java.util.Map;
 public class EngineData {
     private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
     private String[] styles;
-    private int downloadThreads;
+
+    private DownloadManager downloadManager;
     private List<RequestProperty> requestProperties;
     private List<TweakClasses> tweakClasses;
     private Map<String, Object> files;
@@ -38,9 +39,11 @@ public class EngineData {
     public String getVkAPIversion() {
         return vkAPIversion;
     }
-    public int getDownloadThreads() {
-        return downloadThreads;
+
+    public DownloadManager getDownloadManager() {
+        return downloadManager;
     }
+
     public List<RequestProperty> getRequestProperties() {
         return requestProperties;
     }
@@ -59,6 +62,33 @@ public class EngineData {
 
     public String[] getStyles() {
         return styles;
+    }
+
+
+    public static class DownloadManager {
+        private int downloadThreads;
+        private List<ReplaceMask> replaceMasks;
+
+        public int getDownloadThreads() {
+            return downloadThreads;
+        }
+
+        public List<ReplaceMask> getReplaceMasks() {
+            return replaceMasks;
+        }
+    }
+
+    public static class ReplaceMask {
+        private String mask;
+        private String replace;
+
+        public String getMask() {
+            return mask;
+        }
+
+        public String getReplace() {
+            return replace;
+        }
     }
 
     public EngineData initEngineValues(String propertyPath) {

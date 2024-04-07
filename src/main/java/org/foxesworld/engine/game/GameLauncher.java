@@ -29,27 +29,18 @@ public abstract class GameLauncher {
     private final String[] toTest = {"_JAVA_OPTIONS", "_JAVA_OPTS", "JAVA_OPTS", "JAVA_OPTIONS"};
     protected URLClassLoader classLoader;
     protected final List<String> processArgs = new ArrayList<>();
-    protected boolean isStarted;
+    @Deprecated
     protected abstract StringBuilder collectLibraries();
-    protected URLClassLoader createClassLoader(List<URL> libraryURLs) {
+    public void createClassLoader(List<URL> libraryURLs) {
         URL[] urls = libraryURLs.toArray(new URL[0]);
-        return new URLClassLoader(urls, getClass().getClassLoader());
+        this.classLoader = new URLClassLoader(urls, getClass().getClassLoader());
     }
     protected abstract void setJreArgs();
-
     protected abstract void setGameArgs();
     protected abstract String addTweakClass();
-
     protected abstract void launchGame();
     public Logger getLogger() {
         return logger;
-    }
-
-    public void setStarted(boolean started) {
-        isStarted = started;
-        if (!isStarted) {
-            executorService.shutdown();
-        }
     }
 
     protected  void printDebug(){
@@ -74,9 +65,6 @@ public abstract class GameLauncher {
                 }
             }
         }
-    }
-    public boolean isStarted() {
-        return isStarted;
     }
     public void setGameListener(GameListener gameListener) {
         this.gameListener = gameListener;
@@ -128,7 +116,7 @@ public abstract class GameLauncher {
             return this.buildVersionDir() + File.separator + this.gameLauncher.gameClient.getServerVersion() + ".json";
         }
         public String buildLibrariesPath() {
-            return buildVersionDir() + File.separator + "libraries";
+            return buildGameDir() + "libraries";
         }
         public String buildNativesPath() {
             return buildVersionDir() + File.separator + "natives";
@@ -157,7 +145,6 @@ public abstract class GameLauncher {
             return runtimeDir;
         }
     }
-
     public void setArgsReader(ArgsReader argsReader) {
         this.argsReader = argsReader;
     }
@@ -165,8 +152,11 @@ public abstract class GameLauncher {
     public ArgsReader getArgsReader() {
         return argsReader;
     }
-
     public GameLauncher.pathBuilders getPathBuilders() {
         return pathBuilders;
+    }
+
+    public void setClassLoader(URLClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 }

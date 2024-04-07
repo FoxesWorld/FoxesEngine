@@ -1,4 +1,4 @@
-package org.foxesworld.engine.game;
+package org.foxesworld.engine.utils;
 
 public class TweakClasses {
     @SuppressWarnings("unused")

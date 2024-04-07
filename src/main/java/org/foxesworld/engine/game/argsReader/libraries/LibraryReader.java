@@ -1,12 +1,17 @@
 package org.foxesworld.engine.game.argsReader.libraries;
 
-import com.google.gson.*;
 
+import com.google.gson.*;
+import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.game.GameLauncher;
+import org.foxesworld.engine.game.argsReader.ArgsReader;
+
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -14,38 +19,37 @@ import java.util.List;
 
 public class LibraryReader {
 
-    private String path;
-    private List<URL> libraryURLs = new LinkedList<>();
-    public LibraryReader(String path) {
-        this.path = path;
+    private final String path, currentOS;
+    private final GameLauncher gameLauncher;
+
+    public LibraryReader(ArgsReader argsReader) {
+        this.gameLauncher = argsReader.getGameLauncher();
+        this.path = this.gameLauncher.getPathBuilders().getArgsFile();
+        currentOS = determineCurrentOS();
     }
+
     public List<Library> readLibraries() {
         List<Library> libraries = new ArrayList<>();
-        try {
-            FileReader fileReader = new FileReader(path);
-            JsonParser jsonParser = new JsonParser();
-            JsonObject jsonObject = (JsonObject) jsonParser.parse(fileReader);
-
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+            JsonObject jsonObject = new Gson().fromJson(reader, JsonObject.class);
             JsonArray librariesArray = jsonObject.getAsJsonArray("libraries");
+            Engine.LOGGER.debug("Total libraries to process: {}", librariesArray.size());
             for (JsonElement libraryElement : librariesArray) {
                 JsonObject libraryObject = libraryElement.getAsJsonObject();
-                Library library = convertToLibrary(libraryObject);
-                // Check rules, natives, and classifiers before adding the library
-                if (checkRules(libraryObject) && checkNatives(libraryObject) && checkClassifiers(libraryObject)) {
+                if (isLibraryAllowed(libraryObject)) {
+                    Library library = convertToLibrary(libraryObject);
+                    Engine.LOGGER.debug("Adding {} for {} ENV", library.getName(), determineCurrentOS());
                     libraries.add(library);
                 }
             }
-
-            fileReader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Engine.LOGGER.error("Error reading libraries file {}: {}", path, e.getMessage());
         }
         return libraries;
     }
 
-    private Library convertToLibrary(JsonObject libraryObject) {
-        Gson gson = new GsonBuilder().create();
-        return gson.fromJson(libraryObject, Library.class);
+    private boolean isLibraryAllowed(JsonObject libraryObject) {
+        return checkRules(libraryObject) && checkPlatform(libraryObject, "natives") && checkPlatform(libraryObject, "classifiers");
     }
 
     private boolean checkRules(JsonObject libraryObject) {
@@ -56,24 +60,23 @@ public class LibraryReader {
         boolean allow = false;
         boolean disallow = false;
 
-            for (JsonElement ruleElement : rulesArray) {
-                JsonObject ruleObject = ruleElement.getAsJsonObject();
-                String action = ruleObject.get("action").getAsString();
+        for (JsonElement ruleElement : rulesArray) {
+            JsonObject ruleObject = ruleElement.getAsJsonObject();
+            String action = ruleObject.get("action").getAsString();
 
-                if ("allow".equals(action)) {
-                    allow = true;
-                }
-                else if ("disallow".equals(action)) {
-                    if (isRuleApplicable(ruleObject)) {
-                        disallow = true;
-                    }
+            if ("allow".equals(action)) {
+                allow = true;
+            } else if ("disallow".equals(action)) {
+                if (isRuleApplicable(ruleObject)) {
+                    disallow = true;
+                    Engine.LOGGER.debug("Rule disallowed: {}", ruleObject);
                 }
             }
+        }
 
         return allow && !disallow;
     }
 
-
     private boolean isRuleApplicable(JsonObject rule) {
         if (rule != null && rule.has("os")) {
             String osName = System.getProperty("os.name").toLowerCase();
@@ -87,20 +90,10 @@ public class LibraryReader {
         return true;
     }
 
-    private boolean checkNatives(JsonObject libraryObject) {
-        JsonObject nativesObject = libraryObject.getAsJsonObject("natives");
-        if (nativesObject != null) {
-            String currentOS = determineCurrentOS();
-            return nativesObject.has(currentOS);
-        }
-        return true;
-    }
-
-    private boolean checkClassifiers(JsonObject libraryObject) {
-        JsonObject classifiersObject = libraryObject.getAsJsonObject("classifiers");
-        if (classifiersObject != null) {
-            String currentOS = determineCurrentOS();
-            return classifiersObject.has(currentOS);
+    private boolean checkPlatform(JsonObject libraryObject, String platform) {
+        JsonObject platformObject = libraryObject.getAsJsonObject(platform);
+        if (platformObject != null) {
+            return platformObject.has(currentOS);
         }
         return true;
     }
@@ -118,128 +111,33 @@ public class LibraryReader {
         }
     }
 
+    @SuppressWarnings("unused")
     public String getLibrariesAsString(String libDir) {
         StringBuilder stringBuilder = new StringBuilder();
         List<Library> libraries = readLibraries();
-        URL libraryURL = null;
+        List<URL> libraryURLs = new LinkedList<>();
         for (Library library : libraries) {
+            System.out.println(library.getName()); // Debugging
             String fullPath = libDir + File.separator + library.getArtifact().getPath();
             if (new File(fullPath).exists()) {
                 stringBuilder.append(fullPath).append(File.pathSeparator);
-
                 try {
-                    libraryURL = Paths.get(fullPath).toUri().toURL();
+                    libraryURLs.add(Paths.get(fullPath).toUri().toURL());
                 } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
+                    // Log the error message
+                    Engine.LOGGER.error("Error creating URL for library {}: {}", fullPath, e.getMessage());
+                    e.printStackTrace();
                 }
-                libraryURLs.add(libraryURL);
+            } else {
+                System.out.println("Library file " + fullPath + " not found"); // Debugging
             }
         }
+        gameLauncher.createClassLoader(libraryURLs);
         return stringBuilder.toString();
     }
 
-    public List<URL> getLibraryURLs() {
-        return libraryURLs;
+    private Library convertToLibrary(JsonObject libraryObject) {
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(libraryObject, Library.class);
     }
 }
-
-
-/*
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-public class LibraryReader {
-
-    private String path;
-    public LibraryReader(String path){
-        this.path = path;
-    }
-
-    public List<Library> readLibraries() {
-        List<Library> libraries = new ArrayList<>();
-        try {
-            FileReader fileReader = new FileReader(path);
-            JsonParser jsonParser = new JsonParser();
-            JsonObject jsonObject = (JsonObject) jsonParser.parse(fileReader);
-
-            JsonArray librariesArray = jsonObject.getAsJsonArray("libraries");
-            for (JsonElement libraryElement : librariesArray) {
-                JsonObject libraryObject = libraryElement.getAsJsonObject();
-                Gson gson = new GsonBuilder().create();
-                Library library = gson.fromJson(libraryObject, Library.class);
-                if (checkRules(libraryObject) && checkNatives(libraryObject)) {
-                    libraries.add(library);
-                }
-            }
-
-            fileReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return libraries;
-    }
-
-    private boolean checkRules(JsonObject libraryObject) {
-        JsonArray rulesArray = libraryObject.getAsJsonArray("rules");
-        if (rulesArray != null) {
-            for (JsonElement ruleElement : rulesArray) {
-                JsonObject ruleObject = ruleElement.getAsJsonObject();
-                if (!isRuleApplicable(ruleObject)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean isRuleApplicable(JsonObject rule) {
-        if (rule != null && rule.has("os")) {
-            String osName = System.getProperty("os.name").toLowerCase();
-            JsonObject osObject = rule.getAsJsonObject("os");
-            if (osObject.entrySet().isEmpty()) {
-                return true;
-            }
-            String ruleOS = osObject.get("name").getAsString().toLowerCase();
-            return osName.contains(ruleOS);
-        }
-        return true;
-    }
-
-    private boolean checkNatives(JsonObject libraryObject) {
-        JsonObject nativesObject = libraryObject.getAsJsonObject("natives");
-        if (nativesObject != null) {
-            String currentOS = determineCurrentOS();
-            if (nativesObject.has(currentOS)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private String determineCurrentOS() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.contains("win")) {
-            return "windows";
-        } else if (osName.contains("mac")) {
-            return "osx";
-        } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
-            return "linux";
-        } else {
-            return osName;
-        }
-    }
-
-}
-*/

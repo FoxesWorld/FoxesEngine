@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.foxesworld.engine.game.GameLauncher;
 import org.foxesworld.engine.game.argsReader.libraries.Library;
 import org.foxesworld.engine.game.argsReader.libraries.LibraryReader;
 import org.foxesworld.engine.utils.helper.JVMHelper;
@@ -22,13 +23,15 @@ public class ArgsReader {
     private JsonArray jvmArguments, gameArguments;
     private LibraryReader libraryReader;
     private final String path;
+    private GameLauncher gameLauncher;
     private String mainClass, assets;
     private boolean authLib;
 
-    public ArgsReader(String path){
-        this.path = path;
+    public ArgsReader(GameLauncher gameLauncher){
+        this.gameLauncher = gameLauncher;
+        this.path = gameLauncher.getPathBuilders().getArgsFile();
         if(new File(path).exists()) {
-            this.libraryReader = new LibraryReader(path);
+            this.libraryReader = new LibraryReader(this);
             this.readArgs();
         }
     }
@@ -109,7 +112,6 @@ public class ArgsReader {
             return false;
         }
     }
-
     public List<String> replaceMask(JsonArray arguments, Map<String, String> variables) {
         List<String> argsAndValues = new ArrayList<>();
         for (JsonElement argumentElement : arguments) {
@@ -154,6 +156,10 @@ public class ArgsReader {
 
     public boolean isAuthLib() {
         return authLib;
+    }
+
+    public GameLauncher getGameLauncher() {
+        return gameLauncher;
     }
 
     public LibraryReader getLibraryReader() {

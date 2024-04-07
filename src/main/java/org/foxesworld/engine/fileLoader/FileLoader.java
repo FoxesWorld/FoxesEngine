@@ -39,36 +39,31 @@ public class FileLoader {
         this.POSTrequest = engine.getPOSTrequest();
         this.homeDir = Config.getFullPath();
         this.downloadUtils = new DownloadUtils(engine);
-        this.executorService = Executors.newFixedThreadPool(this.engine.getEngineData().getDownloadThreads());
+        this.executorService = Executors.newFixedThreadPool(this.engine.getEngineData().getDownloadManager().getDownloadThreads());
         this.loadingManager = this.engine.getLoadingManager();
     }
 
     @SuppressWarnings("unused")
     public void getFilesToDownload() {
         loadingManager.toggleLoader();
-        Map<String, String> request = new HashMap<>();
-        request.put("sysRequest", "loadFiles");
-        request.put("version", version);
-        request.put("client", client);
-        request.put("platform", String.valueOf(getPlatformNumber()));
-        FileAttributes[] fileAttributes = new Gson().fromJson(POSTrequest.send(request), FileAttributes[].class);
+        FileAttributes[] fileAttributes = this.getDownloadList(client, version, getPlatformNumber());
         loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title", 800);
         for (FileAttributes file : fileAttributes) {
-            file.setReplaceMask(this.replaceMask);
-
-            String fileWithoutMask = file.getFilename().replace(file.getReplaceMask(), "");
-            String fullPath = this.homeDir +  fileWithoutMask;
-            //if(md5Func.md5(fullPath).equals(file.getHash())) {
-            addFileToKeep(fileWithoutMask);
-            Engine.getLOGGER().debug("Adding to keep " + fullPath);
-            //} else {
-            //    Engine.getLOGGER().debug("Incorrect hash for " + fullPath);
-            //}
+            this.fileLoaderListener.onFileAdd(file);
         }
         Engine.getLOGGER().info("Keeping " + filesToKeep.size() + " files");
         loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title", 800);
         this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
         fileLoaderListener.onFilesRead();
+    }
+
+    private FileAttributes[] getDownloadList(String client, String version, int platfom){
+        Map<String, String> request = new HashMap<>();
+        request.put("sysRequest", "loadFiles");
+        request.put("version", version);
+        request.put("client", client);
+        request.put("platform", String.valueOf(platfom));
+        return new Gson().fromJson(POSTrequest.send(request), FileAttributes[].class);
     }
 
     private boolean shouldDownloadFile(FileAttributes fileSection) {
@@ -91,7 +86,6 @@ public class FileLoader {
         fileAttributes.forEach(file -> executorService.execute(() -> {
             String localPath = file.getFilename().replace(file.getReplaceMask(), "");
             fileLoaderListener.onNewFileFound(file, localPath, totalSizeFinal);
-
             // Incrementing a counter
             filesDownloaded.incrementAndGet();
 
