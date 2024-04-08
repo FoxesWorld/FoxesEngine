@@ -2,7 +2,6 @@ package org.foxesworld.engine;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.utils.HTTP.RequestProperty;
-import org.foxesworld.engine.utils.TweakClasses;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +15,7 @@ public class EngineData {
 
     private DownloadManager downloadManager;
     private List<RequestProperty> requestProperties;
-    private List<TweakClasses> tweakClasses;
+    private String[] tweakClasses;
     private Map<String, Object> files;
     public String getBindUrl() {
         return bindUrl;
@@ -47,7 +46,7 @@ public class EngineData {
     public List<RequestProperty> getRequestProperties() {
         return requestProperties;
     }
-    public List<TweakClasses> getTweakClasses() {
+    public String[] getTweakClasses() {
         return tweakClasses;
     }
     public String getLogLevel() {

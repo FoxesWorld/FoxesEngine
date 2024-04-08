@@ -18,6 +18,18 @@ public class Library {
     public Artifact getArtifact() {
         return artifact;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRules(List<Rule> rules) {
+        this.rules = rules;
+    }
+
+    public void setArtifact(Artifact artifact) {
+        this.artifact = artifact;
+    }
 }
 
 class Rule {
@@ -47,6 +59,13 @@ class Artifact {
     private String path;
     private String url;
 
+    public Artifact(String sha1, int size, String path, String url) {
+        this.path = path;
+        this.url = url;
+        this.sha1 = sha1;
+        this.size = size;
+    }
+
     public String getSha1() {
         return sha1;
     }
@@ -61,5 +80,21 @@ class Artifact {
 
     public String getUrl() {
         return url;
+    }
+
+    public void setSha1(String sha1) {
+        this.sha1 = sha1;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
