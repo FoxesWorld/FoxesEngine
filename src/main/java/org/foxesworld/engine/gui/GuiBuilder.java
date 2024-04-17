@@ -1,4 +1,4 @@
-package  org.foxesworld.engine.gui;
+package org.foxesworld.engine.gui;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
@@ -64,15 +64,6 @@ public class GuiBuilder {
         return null;
     }
 
-    @Deprecated
-    public Map<String, JComponent> getPanelsComponents(String panelName){
-        Map<String, JComponent> panelComponents = new HashMap<>();
-        for(JComponent component: componentsMap.get(panelName)){
-            panelComponents.put(component.getName(), component);
-        }
-        return panelComponents;
-    }
-
     private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
         if (panels != null) {
             for (Map.Entry<String, OptionGroups> entry : panels.entrySet()) {
@@ -112,6 +103,8 @@ public class GuiBuilder {
             }
         }
     }
+
+
 
     public void buildAdditionalPanels() {
         if (!additionalPanelsBuilt) {

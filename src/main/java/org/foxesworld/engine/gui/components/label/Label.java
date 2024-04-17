@@ -14,7 +14,9 @@ public class Label extends JLabel {
 	private static final long serialVersionUID = 1L;
 
 	public Label(ComponentFactory componentFactory) {
-		setText(componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
+		if(componentFactory.getComponentAttribute().getLocaleKey() != null) {
+			setText("<html>" + componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()) + "</html>");
+		}
 		setOpaque(componentFactory.style.isOpaque());
 		setPreferredSize(new Dimension(Integer.parseInt(componentFactory.getBounds()[2]), Integer.parseInt(componentFactory.getBounds()[3])));
 		if(componentFactory.getComponentAttribute().getAlignment() != null) {

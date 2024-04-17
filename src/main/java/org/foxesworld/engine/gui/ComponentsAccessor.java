@@ -30,19 +30,22 @@ public class ComponentsAccessor {
                 if (name != null && !name.isEmpty()) {
                     componentMap.put(name, component);
                     componentList.add(component);
-
-                    String value = "";
-                    if (component instanceof JTextField) {
-                        value = ((JTextField) component).getText();
-                    } else if (component instanceof JCheckBox) {
-                        value = String.valueOf(((JCheckBox) component).isSelected());
-                    } else if(component instanceof Slider){
-                        value = String.valueOf(((Slider) component).getValue());
-                    }
-                    formCredentials.put(name, value);
+                    formCredentials.put(name, getValue(component));
                 }
             }
         }
+    }
+    private String getValue(JComponent component){
+        String value = "";
+        if (component instanceof JTextField) {
+            value = ((JTextField) component).getText();
+        } else if (component instanceof JCheckBox) {
+            value = String.valueOf(((JCheckBox) component).isSelected());
+        } else if(component instanceof Slider){
+            value = String.valueOf(((Slider) component).getValue());
+        }
+
+        return  value;
     }
     @SuppressWarnings("unused")
     public Map<String, JComponent> getComponentMap() {
@@ -61,3 +64,4 @@ public class ComponentsAccessor {
         return componentMap.get(id);
     }
 }
+

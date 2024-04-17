@@ -14,12 +14,13 @@ import java.awt.image.Kernel;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import static org.foxesworld.engine.utils.HashUtils.sha1;
 
@@ -88,21 +89,27 @@ public class ImageUtils {
             File cacheFile = new File(cacheFilePath);
 
             if (!cacheFile.exists()) {
-                BufferedImage image = loadImageFromUrl(imageUrl);
-                if (image != null) {
-                    imgCache.put(cacheKey, image);
-                    cacheFile.getParentFile().mkdirs();
-                    ImageIO.write(image, "png", cacheFile);
-                    Engine.LOGGER.info("Image downloaded and cached: {}", imageUrl);
-                    return image;
-                }
+                CompletableFuture<Void> downloadFuture = CompletableFuture.runAsync(() -> {
+                    Downloader.downloadFile(imageUrl, Path.of(cacheFilePath), cacheKey);
+                });
+
+                downloadFuture.thenRun(() -> {
+                    try {
+                        BufferedImage image = ImageIO.read(cacheFile);
+                        if (image != null) {
+                            imgCache.put(cacheKey, image);
+                            ImageIO.write(image, "png", cacheFile);
+                            Engine.LOGGER.info("Image downloaded and cached: {}", imageUrl);
+                        }
+                    } catch (IOException ignored) {}
+                }).join();
             } else {
                 BufferedImage image = ImageIO.read(cacheFile);
                 imgCache.put(cacheKey, image);
                 return image;
             }
         } catch (IOException e) {
-            Engine.LOGGER.error("Error loading image from URL: {}", imageUrl, e);
+            Engine.LOGGER.error("Error handling image: {}", imageUrl, e);
         }
         return ifNotFound;
     }
