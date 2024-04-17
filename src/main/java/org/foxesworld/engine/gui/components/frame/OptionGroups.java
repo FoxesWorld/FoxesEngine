@@ -9,7 +9,7 @@ import java.util.Map;
 public class OptionGroups {
     private PanelAttributes panelOptions;
     private List<ComponentAttributes> childComponents;
-    private Map<String, OptionGroups> groups;
+    private Map<String, OptionGroups> panels;
 
     public PanelAttributes getPanelOptions() {
         return panelOptions;
@@ -18,6 +18,6 @@ public class OptionGroups {
         return childComponents;
     }
     public Map<String, OptionGroups> getGroups() {
-        return groups;
+        return panels;
     }
 }

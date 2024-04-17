@@ -20,6 +20,7 @@ import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.FontUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 import org.foxesworld.engine.utils.LoadingManager;
+import org.foxesworld.engine.utils.OS;
 import org.foxesworld.engine.utils.ServerInfo;
 import org.foxesworld.engine.gui.ActionHandler;
 
@@ -35,6 +36,7 @@ import java.util.Map;
 
 public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
     private final FileProperties fileProperties;
+    public static String currentOS = "";
     protected LoadingManager loadingManager;
     private final String configFiles;
     private final String appTitle;
@@ -56,6 +58,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public ActionHandler actionHandler;
     private boolean init = false;
     public Engine(String configFiles) {
+        currentOS = OS.determineCurrentOS();
         this.engineData = new EngineData();
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
@@ -79,7 +82,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     @Override
     public abstract void onPanelsBuilt();
     @Override
-    public abstract void onPanelBuild(Map<String, OptionGroups> groups, String componentGroup, JPanel parentPanel);
+    public abstract void onPanelBuild(Map<String, OptionGroups> panels, String componentGroup, JPanel parentPanel);
     @Override
     public abstract void actionPerformed(ActionEvent e);
     protected void loadMainPanel(String path) {

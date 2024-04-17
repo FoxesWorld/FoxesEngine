@@ -46,7 +46,7 @@ public class Main  extends Engine {
     }
 
     @Override
-    public void onPanelBuild(Map<String, OptionGroups> groups, String componentGroup, JPanel parentPanel) {
+    public void onPanelBuild(Map<String, OptionGroups> panels, String componentGroup, JPanel parentPanel) {
 
     }
 

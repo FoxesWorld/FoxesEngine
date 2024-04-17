@@ -5,21 +5,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.foxesworld.engine.game.GameLauncher;
-import org.foxesworld.engine.game.argsReader.libraries.Library;
 import org.foxesworld.engine.game.argsReader.libraries.LibraryReader;
-import org.foxesworld.engine.utils.helper.JVMHelper;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ArgsReader {
+    private final  RuleChecker ruleChecker;
     private JsonArray jvmArguments, gameArguments;
     private LibraryReader libraryReader;
     private final String path;
@@ -30,6 +28,7 @@ public class ArgsReader {
     public ArgsReader(GameLauncher gameLauncher){
         this.gameLauncher = gameLauncher;
         this.path = gameLauncher.getPathBuilders().getArgsFile();
+        this.ruleChecker = new RuleChecker();
         if(new File(path).exists()) {
             this.libraryReader = new LibraryReader(this);
             this.readArgs();
@@ -85,32 +84,11 @@ public class ArgsReader {
     private boolean hasApplicableRule(JsonArray rulesArray) {
         for (JsonElement ruleElement : rulesArray) {
             JsonObject ruleObject = ruleElement.getAsJsonObject();
-            if (isRuleApplicable(ruleObject) || ruleObject == null) {
+            if (ruleChecker.isRuleApplicable(ruleObject) || ruleObject == null) {
                 return true;
             }
         }
         return false;
-    }
-
-
-
-    private boolean isRuleApplicable(JsonObject rule) {
-        if (rule != null && rule.has("os")) {
-            String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-            JVMHelper.OS currentOS = JVMHelper.OS.byName(osName);
-
-            JsonObject osRule = rule.getAsJsonObject("os");
-
-            if (osRule.entrySet().isEmpty()) {
-                return true;
-            }
-            String ruleOSName = osRule.get("name").getAsString().toLowerCase(Locale.ENGLISH);
-            JVMHelper.OS ruleOS = JVMHelper.OS.byName(ruleOSName);
-
-            return currentOS == ruleOS;
-        }  else {
-            return false;
-        }
     }
     public List<String> replaceMask(JsonArray arguments, Map<String, String> variables) {
         List<String> argsAndValues = new ArrayList<>();

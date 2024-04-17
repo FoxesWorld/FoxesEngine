@@ -14,7 +14,7 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     @SuppressWarnings("unused")
-    private Map<String, OptionGroups> groups;
+    private Map<String, OptionGroups> panels;
     @SuppressWarnings("unused")
     public void setInitialValue(String initialValue) {
         this.initialValue = initialValue;
@@ -152,7 +152,7 @@ public class ComponentAttributes {
 
     @SuppressWarnings("unused")
     public Map<String, OptionGroups> getGroups() {
-        return groups;
+        return panels;
     }
 
     @SuppressWarnings("unused")

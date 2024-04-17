@@ -1,7 +1,9 @@
 package org.foxesworld.engine.user;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.utils.ImageUtils;
 
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,4 +22,5 @@ public abstract class User {
         skinData.put("login", login);
         return this.engine.getPOSTrequest().send(skinData);
     }
+
 }

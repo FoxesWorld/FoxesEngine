@@ -52,7 +52,7 @@ public class GuiBuilder {
         }
         return components;
     }
-
+    @Deprecated
     public JComponent getComponentById(String id) {
         for (Map.Entry<String, List<JComponent>> panelsMapEntry : componentsMap.entrySet()) {
             for (JComponent component : panelsMapEntry.getValue()) {
@@ -64,36 +64,18 @@ public class GuiBuilder {
         return null;
     }
 
-    @SuppressWarnings("unused")
-    public void setLabelText(String componentId, String text) {
-        JComponent component = getComponentById(componentId);
-        if (component instanceof JLabel) {
-            ((JLabel) component).setText(text);
+    @Deprecated
+    public Map<String, JComponent> getPanelsComponents(String panelName){
+        Map<String, JComponent> panelComponents = new HashMap<>();
+        for(JComponent component: componentsMap.get(panelName)){
+            panelComponents.put(component.getName(), component);
         }
+        return panelComponents;
     }
 
-    @SuppressWarnings("unused")
-    public void setLabelIcon(String componentId, ImageIcon icon) {
-        JComponent component = getComponentById(componentId);
-        if (component instanceof JLabel) {
-            ((JLabel) component).setIcon(icon);
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void setLabelText(String componentId, String text, boolean html) {
-        JComponent component = getComponentById(componentId);
-        if (component instanceof JLabel) {
-            if (html) {
-                text = "<html>" + text + "</html>";
-            }
-            ((JLabel) component).setText(text);
-        }
-    }
-
-    private void buildPanels(Map<String, OptionGroups> groups, JPanel parentPanel) {
-        if (groups != null) {
-            for (Map.Entry<String, OptionGroups> entry : groups.entrySet()) {
+    private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
+        if (panels != null) {
+            for (Map.Entry<String, OptionGroups> entry : panels.entrySet()) {
                 String componentGroup = entry.getKey();
                 OptionGroups optionGroups = entry.getValue();
                 JPanel thisPanel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup);
@@ -102,7 +84,7 @@ public class GuiBuilder {
                 processChildComponents(optionGroups.getChildComponents(), thisPanel);
                 if (!panelsMap.containsKey(componentGroup)) {
                     addPanelGroup(parentPanel, thisPanel);
-                    guiBuilderListener.onPanelBuild(groups, componentGroup, parentPanel);
+                    guiBuilderListener.onPanelBuild(panels, componentGroup, parentPanel);
                 }
                 buildPanels(optionGroups.getGroups(), thisPanel);
                 childsNparents.computeIfAbsent(parentPanel.getName(), k -> new ArrayList<>()).add(thisPanel.getName());
@@ -179,4 +161,5 @@ public class GuiBuilder {
     public ComponentFactory getComponentFactory() {
         return componentFactory;
     }
+
 }

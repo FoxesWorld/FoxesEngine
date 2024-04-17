@@ -11,31 +11,43 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import static org.foxesworld.engine.utils.HashUtils.sha1;
 
 public class ImageUtils {
 
-    public static Map<String, BufferedImage> imgs = new HashMap<>();
+    private static final Map<String, BufferedImage> imgCache = new HashMap<>();
 
     public static BufferedImage getLocalImage(String name) {
-        try {
-            if (imgs.containsKey(name)) {
-                return imgs.get(name);
-            }
+        if (imgCache.containsKey(name)) {
+            return imgCache.get(name);
+        }
 
-            BufferedImage img = ImageIO.read(ImageUtils.class.getClassLoader().getResourceAsStream(name));
-            imgs.put(name, img);
-            return img;
-        } catch (Exception e) {
-            Engine.LOGGER.error("Failed to open local image: " + name);
+        try {
+            InputStream inputStream = ImageUtils.class.getClassLoader().getResourceAsStream(name);
+            if (inputStream != null) {
+                BufferedImage img = ImageIO.read(inputStream);
+                imgCache.put(name, img);
+                return img;
+            } else {
+                Engine.LOGGER.error("Failed to open local image: {}", name);
+                return new BufferedImage(9, 9, BufferedImage.TYPE_INT_ARGB);
+            }
+        } catch (IOException e) {
+            Engine.LOGGER.error("Failed to open local image: {}", name, e);
             return new BufferedImage(9, 9, BufferedImage.TYPE_INT_ARGB);
         }
     }
+
 
     public static BufferedImage base64ToBufferedImage(String base64Image) {
         try {
@@ -52,6 +64,10 @@ public class ImageUtils {
 
     public static BufferedImage loadImageFromUrl(String imageUrl) {
         try {
+            if (!isValidUrl(imageUrl)) {
+                return null;
+            }
+
             URL url = new URL(imageUrl);
             return ImageIO.read(url);
         } catch (IOException e) {
@@ -60,7 +76,49 @@ public class ImageUtils {
         }
     }
 
-    public static Image getRoundedImage(Image image, int cornerRadius) {
+    public static BufferedImage getCachedUrlImg(String imageUrl, String cachePath, BufferedImage ifNotFound) {
+        try {
+            String cacheKey = sha1(imageUrl);
+
+            if (imgCache.containsKey(cacheKey)) {
+                return imgCache.get(cacheKey);
+            }
+
+            String cacheFilePath = "cache" + File.separator + cachePath + File.separator + cacheKey;
+            File cacheFile = new File(cacheFilePath);
+
+            if (!cacheFile.exists()) {
+                BufferedImage image = loadImageFromUrl(imageUrl);
+                if (image != null) {
+                    imgCache.put(cacheKey, image);
+                    cacheFile.getParentFile().mkdirs();
+                    ImageIO.write(image, "png", cacheFile);
+                    Engine.LOGGER.info("Image downloaded and cached: {}", imageUrl);
+                    return image;
+                }
+            } else {
+                BufferedImage image = ImageIO.read(cacheFile);
+                imgCache.put(cacheKey, image);
+                return image;
+            }
+        } catch (IOException e) {
+            Engine.LOGGER.error("Error loading image from URL: {}", imageUrl, e);
+        }
+        return ifNotFound;
+    }
+
+    private static boolean isValidUrl(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("HEAD");
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    public static BufferedImage getRoundedImage(Image image, int cornerRadius) {
         int width = image.getWidth(null);
         int height = image.getHeight(null);
 
@@ -70,12 +128,19 @@ public class ImageUtils {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-        g2.setClip(new RoundRectangle2D.Float(0, 0, width, height, cornerRadius, cornerRadius));
+        Shape shape;
+        if (width == height) {
+            shape = new Ellipse2D.Float(0, 0, width, height);
+        } else {
+            shape = new RoundRectangle2D.Float(0, 0, width, height, cornerRadius, cornerRadius);
+        }
+        g2.setClip(shape);
         g2.drawImage(image, 0, 0, null);
         g2.dispose();
 
         return roundedImage;
     }
+
 
     public static Image getRoundedImage(Image image, int width, int height) {
         BufferedImage roundedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -152,6 +217,24 @@ public class ImageUtils {
         }
         g2d.dispose();
         return img;
+    }
+
+    private String getImageHash(BufferedImage image) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", outputStream);
+            byte[] data = outputStream.toByteArray();
+            byte[] hashBytes = digest.digest(data);
+            StringBuilder hashBuilder = new StringBuilder();
+            for (byte b : hashBytes) {
+                hashBuilder.append(String.format("%02x", b));
+            }
+            return hashBuilder.toString();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 

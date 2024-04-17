@@ -17,15 +17,11 @@ public enum LabelAlignment {
     }
 
     public static LabelAlignment fromString(String text) {
-        switch (text.toUpperCase()) {
-            case "LEFT":
-                return LEFT;
-            case "CENTER":
-                return CENTER;
-            case "RIGHT":
-                return RIGHT;
-            default:
-                throw new IllegalArgumentException("Invalid alignment value: " + text);
-        }
+        return switch (text.toUpperCase()) {
+            case "LEFT" -> LEFT;
+            case "CENTER" -> CENTER;
+            case "RIGHT" -> RIGHT;
+            default -> throw new IllegalArgumentException("Invalid alignment value: " + text);
+        };
     }
 }

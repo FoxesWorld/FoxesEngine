@@ -59,7 +59,6 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         addMouseListener(this);
         addMouseMotionListener(this);
         setFocusable(true);
-
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -105,8 +104,9 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         for (int i = 0; i < values.length; ++i) {
             drawPanel(g, i);
             if (i == selected) {
-                g.drawImage(point, 200, panelTX.getHeight() * i + 10, this);
+                g.drawImage(point, 205, panelTX.getHeight() * i + 10, this);
             }
+            //System.out.println(values[i]);
         }
         g.drawString(values[selected], 10, selectedTX.getHeight() * (values.length + 1) - g.getFontMetrics().getHeight() / 2 - 5);
     }

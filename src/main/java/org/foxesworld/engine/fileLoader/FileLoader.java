@@ -78,10 +78,12 @@ public class FileLoader {
         Engine.getLOGGER().debug("~-=== Downloading " + totalFiles + " files ===-~");
         if (totalFiles == 0) {
             fileLoaderListener.onFilesLoaded();
+        } else  {
+            fileLoaderListener.onDownloadStart();
         }
 
-        engine.getPanelVisibility().displayPanel("loggedForm->false|newsForm->false|download->true");
-        engine.getLoadingManager().toggleLoader();
+        //engine.getPanelVisibility().displayPanel("loggedForm->false|newsForm->false|download->true");
+        //engine.getLoadingManager().toggleLoader();
         final long totalSizeFinal = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
         fileAttributes.forEach(file -> executorService.execute(() -> {
             String localPath = file.getFilename().replace(file.getReplaceMask(), "");

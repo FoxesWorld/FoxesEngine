@@ -8,7 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 @SuppressWarnings("unused")
-public final class md5Func {
+public final class HashUtils {
     public static String md5(String filename) {
         if (new File(filename).isDirectory()) {
             Engine.LOGGER.warn("RUNNING IN IDE!!!");
@@ -56,6 +56,27 @@ public final class md5Func {
             } catch (Exception ignored) {
             }
         }
+    }
+
+    public static String sha1(String input)
+    {
+        String hash = null;
+        try
+        {
+            MessageDigest m = MessageDigest.getInstance("SHA1");
+            byte[] result = m.digest(input.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < result.length; i++)
+            {
+                sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            hash = sb.toString();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return hash;
     }
 }
 

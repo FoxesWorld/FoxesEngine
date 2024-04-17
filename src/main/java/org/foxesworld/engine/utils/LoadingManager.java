@@ -12,8 +12,8 @@ public class LoadingManager extends JFrame {
 
     private final SpriteAnimation spriteAnimation;
     private final Engine engine;
-    private String loadingText = "loading.msg";
-    private String loadingTitle = "loading.title";
+    private String loadingText;
+    private String loadingTitle;
     private final Timer loadingTimer;
     private final int dotLimit = 4;
     private JLabel loaderText, titleLabel;
@@ -25,6 +25,8 @@ public class LoadingManager extends JFrame {
 
     public LoadingManager(Engine engine) {
         this.engine = engine;
+        loadingText = engine.getLANG().getString("loading.msg");
+        loadingTitle = engine.getLANG().getString("loading.title");
         this.spriteAnimation = new SpriteAnimation("assets/ui/sprites/loaderGrid.png", 3, 5, 50, new Rectangle(30, 30, 64, 64));
         this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
 

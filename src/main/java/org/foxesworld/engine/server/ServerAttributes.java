@@ -5,7 +5,8 @@ public class ServerAttributes {
     @SuppressWarnings("unused")
     private int id, port;
     @SuppressWarnings("unused")
-    private String serverName, serverVersion, mainClass, jreVersion, forgeVersion, forgeGroup, serverImage, serverDescription, mcpVersion, client, host, ignoreDirs;
+    private String serverName, serverVersion, jreVersion,  serverImage, serverDescription, client, host, ignoreDirs, modsInfo;
+    //mainClass, forgeVersion, forgeGroup, mcpVersion
 
     @SuppressWarnings("unused")
     public int getId() {
@@ -23,28 +24,8 @@ public class ServerAttributes {
     }
 
     @SuppressWarnings("unused")
-    public String getMainClass() {
-        return mainClass;
-    }
-
-    @SuppressWarnings("unused")
     public String getJreVersion() {
         return jreVersion;
-    }
-
-    @SuppressWarnings("unused")
-    public String getForgeVersion() {
-        return forgeVersion;
-    }
-
-    @SuppressWarnings("unused")
-    public String getMcpVersion() {
-        return mcpVersion;
-    }
-
-    @SuppressWarnings("unused")
-    public String getForgeGroup() {
-        return forgeGroup;
     }
 
     @SuppressWarnings("unused")
@@ -75,5 +56,9 @@ public class ServerAttributes {
     @SuppressWarnings("unused")
     public String getIgnoreDirs() {
         return ignoreDirs;
+    }
+
+    public String getModsInfo() {
+        return modsInfo;
     }
 }

@@ -29,8 +29,6 @@ public abstract class GameLauncher {
     private final String[] toTest = {"_JAVA_OPTIONS", "_JAVA_OPTS", "JAVA_OPTS", "JAVA_OPTIONS"};
     protected URLClassLoader classLoader;
     protected final List<String> processArgs = new ArrayList<>();
-    @Deprecated
-    protected abstract StringBuilder collectLibraries();
     public void createClassLoader(List<URL> libraryURLs) {
         URL[] urls = libraryURLs.toArray(new URL[0]);
         this.classLoader = new URLClassLoader(urls, getClass().getClassLoader());
@@ -61,7 +59,7 @@ public abstract class GameLauncher {
                 env = env.toLowerCase(Locale.US);
                 if (env.contains("-cp") || env.contains("-classpath") || env.contains("-javaagent")
                         || env.contains("-agentpath") || env.contains("-agentlib")) {
-                    throw new SecurityException("JavaAgent in global options not allow");
+                    throw new SecurityException("JavaAgent in global options not allowed!");
                 }
             }
         }

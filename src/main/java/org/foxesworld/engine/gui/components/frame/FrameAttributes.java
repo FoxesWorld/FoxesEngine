@@ -18,7 +18,7 @@ public class FrameAttributes {
     private String winterImage;
     private String backgroundBlur;
     private boolean undecorated;
-    private Map<String, OptionGroups> groups;
+    private Map<String, OptionGroups> panels;
     private List<ComponentAttributes> childComponents;
 
     public String getAppTitle() {
@@ -70,7 +70,7 @@ public class FrameAttributes {
     }
 
     public Map<String, OptionGroups> getGroups() {
-        return groups;
+        return panels;
     }
 
     public List<ComponentAttributes> getChildComponents() {

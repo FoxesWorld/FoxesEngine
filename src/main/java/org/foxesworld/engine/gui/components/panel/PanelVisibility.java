@@ -3,8 +3,11 @@ package org.foxesworld.engine.gui.components.panel;
 import org.foxesworld.engine.Engine;
 
 import javax.swing.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PanelVisibility {
+    private final Map<String, Boolean> activePanels = new HashMap<>();
 
     private  Engine engine;
 
@@ -31,6 +34,10 @@ public class PanelVisibility {
             if (groupPanel != null) {
                 groupPanel.setVisible(displayValue);
             }
+            activePanels.put(panelName, displayValue);
         }
+    }
+    public Map<String, Boolean> getActivePanels() {
+        return activePanels;
     }
 }
