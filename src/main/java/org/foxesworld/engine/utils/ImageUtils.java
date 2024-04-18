@@ -20,12 +20,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import static org.foxesworld.engine.utils.HashUtils.sha1;
 
 public class ImageUtils {
-
     private static final Map<String, BufferedImage> imgCache = new HashMap<>();
 
     public static BufferedImage getLocalImage(String name) {
@@ -89,29 +87,28 @@ public class ImageUtils {
             File cacheFile = new File(cacheFilePath);
 
             if (!cacheFile.exists()) {
-                CompletableFuture<Void> downloadFuture = CompletableFuture.runAsync(() -> {
-                    Downloader.downloadFile(imageUrl, Path.of(cacheFilePath), cacheKey);
-                });
-
-                downloadFuture.thenRun(() -> {
-                    try {
-                        BufferedImage image = ImageIO.read(cacheFile);
-                        if (image != null) {
-                            imgCache.put(cacheKey, image);
-                            ImageIO.write(image, "png", cacheFile);
-                            Engine.LOGGER.info("Image downloaded and cached: {}", imageUrl);
-                        }
-                    } catch (IOException ignored) {}
-                }).join();
+                BufferedImage image = loadImageFromUrl(imageUrl);
+                if (image != null) {
+                    imgCache.put(cacheKey, image);
+                    cacheFile.getParentFile().mkdirs();
+                    ImageIO.write(image, "png", cacheFile);
+                    Engine.LOGGER.info("Image downloaded and cached: {}", imageUrl);
+                    return image;
+                }
             } else {
                 BufferedImage image = ImageIO.read(cacheFile);
                 imgCache.put(cacheKey, image);
                 return image;
             }
         } catch (IOException e) {
-            Engine.LOGGER.error("Error handling image: {}", imageUrl, e);
+            Engine.LOGGER.error("Error loading image from URL: {}", imageUrl, e);
         }
         return ifNotFound;
+    }
+
+    private static String getFileNameFromUrl(String urlString) {
+        String[] parts = urlString.split("/");
+        return parts[parts.length - 1];
     }
 
     private static boolean isValidUrl(String urlString) {
@@ -254,10 +251,9 @@ public class ImageUtils {
         return img;
     }
 
-    public static BufferedImage blurImage(BufferedImage image) {
-        float ninth = 0.11111111f;
+    public static BufferedImage blurImage(BufferedImage image, float ninth) {
         float[] blurKernel = new float[]{ninth, ninth, ninth, ninth, ninth, ninth, ninth, ninth, ninth};
-        HashMap<RenderingHints.Key, Object> map = new HashMap<RenderingHints.Key, Object>();
+        HashMap<RenderingHints.Key, Object> map = new HashMap<>();
         map.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         map.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         map.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -318,4 +314,3 @@ public class ImageUtils {
         return spritesOut;
     }
 }
-
