@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -25,7 +26,7 @@ public class DownloadUtils {
     }
 
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void downloader(String downloadFile, String savePath, long totalSize) {
         this.progressBar.add(this.progressLabel);
         String Durl = engine.getEngineData().getBindUrl() + downloadFile;
@@ -57,7 +58,7 @@ public class DownloadUtils {
                     percent = (int) (downloaded * 100 / totalSize);
                     SwingUtilities.invokeLater(() -> {
                         progressBar.setValue(percent);
-                        progressLabel.setText(getFileSizeMb((int) downloaded) + "Mb /" + getFileSizeMb(Math.toIntExact(totalSize)) + "Mb");
+                        progressLabel.setText(formatFileSize((int) downloaded) + "/" + formatFileSize(totalSize));
                     });
                 }
             }
@@ -68,7 +69,25 @@ public class DownloadUtils {
             throw new RuntimeException(e);
         }
     }
-    @SuppressWarnings("unused")
+
+    private String formatFileSize(long sizeInBytes) {
+        if (sizeInBytes < 1024) {
+            return sizeInBytes + " bytes";
+        } else if (sizeInBytes < 1024 * 1024) {
+            double sizeInKb = sizeInBytes / 1024.0;
+            return String.format("%.2f KB", sizeInKb);
+        } else if (sizeInBytes < 1024 * 1024 * 1024) {
+            double sizeInMb = sizeInBytes / (1024.0 * 1024.0);
+            return String.format("%.2f MB", sizeInMb);
+        } else {
+            double sizeInGb = sizeInBytes / (1024.0 * 1024.0 * 1024.0);
+            return String.format("%.2f GB", sizeInGb);
+        }
+    }
+
+
+
+    @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void unpack(String path, File dir_to) {
         File fileZip = new File(path);
         try (ZipFile zip = new ZipFile(path, StandardCharsets.UTF_8)) {
