@@ -14,6 +14,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class DownloadUtils {
+    /* TODO
+    * We shouldn't assign progressBar componets here
+    * We should only send the result of loading progress
+    * Components assignment should be done on class Impl
+    * */
     private final Engine engine;
     private final JLabel progressLabel;
     private final JProgressBar progressBar;
@@ -24,7 +29,6 @@ public class DownloadUtils {
         this.progressBar = (JProgressBar) engine.getGuiBuilder().getComponentById("progressBar");
         this.progressLabel = (JLabel) engine.getGuiBuilder().getComponentById("progressLabel");
     }
-
 
     @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void downloader(String downloadFile, String savePath, long totalSize) {
@@ -58,7 +62,7 @@ public class DownloadUtils {
                     percent = (int) (downloaded * 100 / totalSize);
                     SwingUtilities.invokeLater(() -> {
                         progressBar.setValue(percent);
-                        progressLabel.setText(formatFileSize((int) downloaded) + "/" + formatFileSize(totalSize));
+                        progressLabel.setText(formatFileSize((int) downloaded) + " / " + formatFileSize(totalSize));
                     });
                 }
             }
