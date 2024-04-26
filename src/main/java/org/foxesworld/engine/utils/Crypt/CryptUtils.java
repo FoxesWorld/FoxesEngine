@@ -10,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+@Deprecated
 public class CryptUtils {
 
     private final CryptHelper cryptHelper;
@@ -28,7 +29,7 @@ public class CryptUtils {
             cipher.init(2, skey);
             output = cipher.doFinal(cryptHelper.getDecoder().decode(input));
         } catch (InvalidKeyException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException e) {
-            this.engine.getLOGGER().error("Key is not valid for: " + input);
+            Engine.getLOGGER().error("Key is not valid for: " + input);
         }
         assert output != null;
         return new String(output);
@@ -43,7 +44,7 @@ public class CryptUtils {
             crypted = cipher.doFinal(input.getBytes());
         } catch (InvalidKeyException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException e) {
             e.printStackTrace();
-            this.engine.getLOGGER().error("Key must be 16 symbols!", 0, true);
+            Engine.getLOGGER().error("Key must be 16 symbols!");
         }
         assert crypted != null;
         return new String(cryptHelper.getEncoder().encode(crypted));

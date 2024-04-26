@@ -19,28 +19,30 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public class FileLoader {
-    private final Engine engine;
     private final HTTPrequest POSTrequest;
     private final LoadingManager loadingManager;
     private final Set<String> filesToKeep = new HashSet<>();
     private final String homeDir, client, version;
+    private String fileExtension;
     private String replaceMask;
     private final DownloadUtils downloadUtils;
     private final ExecutorService executorService;
     private final AtomicInteger filesDownloaded = new AtomicInteger(0);
     private FileLoaderListener fileLoaderListener;
     private List<FileAttributes> fileAttributes;
+    private FileAttributes currentFile;
+    private long totalSize;
 
     @SuppressWarnings("unused")
     public FileLoader(ActionHandler actionHandler) {
-        this.engine = actionHandler.getEngine();
+        Engine engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
         this.POSTrequest = engine.getPOSTrequest();
         this.homeDir = Config.getFullPath();
         this.downloadUtils = new DownloadUtils(engine);
-        this.executorService = Executors.newFixedThreadPool(this.engine.getEngineData().getDownloadManager().getDownloadThreads());
-        this.loadingManager = this.engine.getLoadingManager();
+        this.executorService = Executors.newFixedThreadPool(engine.getEngineData().getDownloadManager().getDownloadThreads());
+        this.loadingManager = engine.getLoadingManager();
     }
 
     @SuppressWarnings("unused")
@@ -75,23 +77,20 @@ public class FileLoader {
     @SuppressWarnings("unused")
     public void downloadFiles() {
         int totalFiles = fileAttributes.size();
-        Engine.getLOGGER().debug("~-=== Downloading " + totalFiles + " files ===-~");
         if (totalFiles == 0) {
             fileLoaderListener.onFilesLoaded();
-        } else  {
+        } else {
             fileLoaderListener.onDownloadStart();
         }
 
-        //engine.getPanelVisibility().displayPanel("loggedForm->false|newsForm->false|download->true");
-        //engine.getLoadingManager().toggleLoader();
-        final long totalSizeFinal = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
+        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
+
         fileAttributes.forEach(file -> executorService.execute(() -> {
-            String localPath = file.getFilename().replace(file.getReplaceMask(), "");
-            fileLoaderListener.onNewFileFound(file, localPath, totalSizeFinal);
-            // Incrementing a counter
+            this.currentFile = file;
+            fileExtension = getFileExtension(file.getFilename());
+            fileLoaderListener.onNewFileFound(this);
             filesDownloaded.incrementAndGet();
 
-            // Checking if all files are loaded
             if (filesDownloaded.get() == totalFiles) {
                 fileLoaderListener.onFilesLoaded();
             }
@@ -131,18 +130,26 @@ public class FileLoader {
     public int getPlatformNumber() {
         String osName = System.getProperty("os.name").toLowerCase();
         if (osName.contains("win")) {
-            return 1; // Windows
+            return 1;
         } else if (osName.contains("mac")) {
-            return 2; // macOS
+            return 2;
         } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("uni")) {
-            return 3; // Unix / Linux
+            return 3;
         } else if (osName.contains("sunos")) {
-            return 4; // Solaris
+            return 4;
         } else {
-            return 0; // Other or Unknown
+            return 0;
         }
     }
 
+    private String getFileExtension(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
+            return "file";
+        } else {
+            return fileName.substring(dotIndex + 1).toLowerCase();
+        }
+    }
     @SuppressWarnings("unused")
     public FileAttributes addJreToLoad(String jreVersion) {
         Map<String, String> request = new HashMap<>();
@@ -179,5 +186,16 @@ public class FileLoader {
     @SuppressWarnings("unused")
     public String getHomeDir() {
         return homeDir;
+    }
+    @SuppressWarnings("unused")
+    public String getFileType() {
+        return fileExtension;
+    }
+    public FileAttributes getCurrentFile() {
+        return currentFile;
+    }
+
+    public long getTotalSize() {
+        return totalSize;
     }
 }

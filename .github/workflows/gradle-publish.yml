@@ -26,14 +26,24 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+          - name: Create local.properties
+            run: touch ${{ github.workspace }}/local.properties
+          - name: Setup name in local.properties
+            run: echo 'github.package.username=${{ github.actor }}' >> ${{ github.workspace }}/local.properties
+          - name: Setup GH PAC in local.properties
+            run: echo 'github.package.password=${{ secrets.PAT }}' >> ${{ github.workspace }}/local.properties
+          - name: Setup gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 7.5
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+      - name: Build with gradle
+        run: ./gradlew build
+
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
-
-    - name: Build with Gradle
-      run: ./gradlew build
 
     # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
     # the publishing section of your build.gradle

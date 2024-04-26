@@ -229,4 +229,8 @@ public class LoadingManager extends JFrame {
             startLoading();
         }
     }
+
+    public Timer getLoadingTimer() {
+        return loadingTimer;
+    }
 }

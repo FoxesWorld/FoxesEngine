@@ -73,6 +73,7 @@ public class FileGuard {
         return count;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void removeEmptyFolders(String dir, List<Boolean> parent_contains_files, boolean first_launch) {
         File file = new File(dir);
         if (!file.exists()) file.mkdirs();
@@ -127,7 +128,7 @@ public class FileGuard {
                 if (file.isFile()) {
                     fileGuardListener.onFileCheck(file);
                     String checkPath = file.getPath().replace(this.gameLauncher.getPathBuilders().buildGameDir(), "").replace("\\", "/");
-                    if (!filesToKeep.contains(checkPath) && !this.isUserConfig(file) && !isInIgnoreList(file)) { //&& !this.isUserConfig(file) && !isInIgnoreList(file)) {
+                    if (!filesToKeep.contains(checkPath) && !this.isUserConfig(file) && !isInIgnoreList(file)) {
                         boolean deleted = file.delete();
                         if (deleted) {
                             logger.debug("Deleted unlisted file: " + checkPath);
@@ -175,7 +176,7 @@ public class FileGuard {
         }
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void recursiveDelete(File file) {
         try {
             if (!file.exists())

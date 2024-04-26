@@ -45,3 +45,4 @@ bin/
 /src/main/resources/config/
 /src/main/resources/engine.json
 /src/main/resources/log4j2.xml
+/cache/

@@ -9,31 +9,22 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class DownloadUtils {
-    /* TODO
-    * We shouldn't assign progressBar componets here
-    * We should only send the result of loading progress
-    * Components assignment should be done on class Impl
-    * */
     private final Engine engine;
-    private final JLabel progressLabel;
-    private final JProgressBar progressBar;
+    private JLabel progressLabel;
+    private JProgressBar progressBar;
     private int percent;
     private long downloaded = 0;
     public DownloadUtils(Engine engine) {
         this.engine = engine;
-        this.progressBar = (JProgressBar) engine.getGuiBuilder().getComponentById("progressBar");
-        this.progressLabel = (JLabel) engine.getGuiBuilder().getComponentById("progressLabel");
     }
 
     @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void downloader(String downloadFile, String savePath, long totalSize) {
         this.progressBar.add(this.progressLabel);
-        String Durl = engine.getEngineData().getBindUrl() + downloadFile;
 
         File parentDir = new File(savePath).getParentFile();
         if (!parentDir.isDirectory()) {
@@ -42,7 +33,7 @@ public class DownloadUtils {
 
         try {
             //TODO use our HTTP class (Partly done)
-            URL url = new URL(Durl);
+            URL url = new URL(engine.getEngineData().getBindUrl() + downloadFile);
             HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             httpConnection.setDoOutput(false);
             httpConnection.setRequestMethod("GET");
@@ -54,7 +45,6 @@ public class DownloadUtils {
             byte[] buffer = new byte[65536];
 
             try (InputStream in = new BufferedInputStream(httpConnection.getInputStream())) {
-
                 int read;
                 while ((read = in.read(buffer, 0, buffer.length)) != -1) {
                     fileOutputStream.write(buffer, 0, read);
@@ -73,7 +63,6 @@ public class DownloadUtils {
             throw new RuntimeException(e);
         }
     }
-
     private String formatFileSize(long sizeInBytes) {
         if (sizeInBytes < 1024) {
             return sizeInBytes + " bytes";
@@ -88,9 +77,6 @@ public class DownloadUtils {
             return String.format("%.2f GB", sizeInGb);
         }
     }
-
-
-
     @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void unpack(String path, File dir_to) {
         File fileZip = new File(path);
@@ -100,7 +86,7 @@ public class DownloadUtils {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
-                    new File(dir_to + File.separator + entry.getName()).mkdirs(); // Use mkdirs() to create parent directories if they don't exist
+                    new File(dir_to + File.separator + entry.getName()).mkdirs();
                 } else {
                     zfiles.add(entry);
                 }
@@ -110,7 +96,7 @@ public class DownloadUtils {
                 try (InputStream in = zip.getInputStream(entry);
                      OutputStream out = new FileOutputStream(outFile)) {
                     if (!outFile.getParentFile().exists()) {
-                        outFile.getParentFile().mkdirs(); // Create parent directories if they don't exist
+                        outFile.getParentFile().mkdirs();
                     }
                     byte[] buffer = new byte[1024];
                     int len;
@@ -124,7 +110,14 @@ public class DownloadUtils {
         }
         fileZip.delete();
     }
-    private int getFileSizeMb(int kbSize) {
-        return (int) (kbSize / (1024.0 * 1024.0));
+
+    @SuppressWarnings("unused")
+    public void setProgressLabel(JLabel progressLabel) {
+        this.progressLabel = progressLabel;
+    }
+
+    @SuppressWarnings("unused")
+    public void setProgressBar(JProgressBar progressBar) {
+        this.progressBar = progressBar;
     }
 }
