@@ -8,8 +8,7 @@ import java.util.Map;
 public class FrameAttributes {
     private String appTitle;
     private String appIcon;
-    private int width;
-    private int height;
+    private int width, height;
     private boolean resizable;
     private String backgroundImage;
     private String springImage;

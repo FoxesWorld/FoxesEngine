@@ -6,6 +6,7 @@ import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.utils.CurrentMonth;
 import org.foxesworld.engine.utils.DragListener;
 import org.foxesworld.engine.utils.ImageUtils;
+import org.foxesworld.engine.utils.loadManager.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -153,8 +154,8 @@ public class Panel extends JPanel {
             groupPanel.requestFocus();
         }
 
-        String bounds = panelOptions.getBounds();
-        groupPanel.setBounds(getPanelBounds(bounds, 0), getPanelBounds(bounds, 1), getPanelBounds(bounds, 2), getPanelBounds(bounds, 3));
+        Bounds bounds = panelOptions.getBounds();
+        groupPanel.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
         if(panelOptions.getLayout() != null) {
             layoutManager = this.getLayout(panelOptions.getLayout(), groupPanel);
             groupPanel.setLayout(layoutManager);
@@ -179,19 +180,6 @@ public class Panel extends JPanel {
                 Engine.LOGGER.error("Invalid layout type: " + layout);
                 return null;
         }
-    }
-
-    private Object getBackgroundData(String data){
-        if(data.startsWith("img(") && data.endsWith(")")){
-            return ImageUtils.getLocalImage(data);
-        } else if(data.contains("#")){
-            return hexToColor(data);
-        }
-        return null;
-    }
-
-    private int getPanelBounds(String bounds, int index){
-        return Integer.parseInt(bounds.split(",")[index]);
     }
 
     private void createBorder(JPanel groupPanel, String border) {

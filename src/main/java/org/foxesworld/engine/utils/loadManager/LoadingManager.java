@@ -12,9 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 
+import static org.foxesworld.engine.utils.FontUtils.hexToColor;
+
 public class LoadingManager extends JFrame {
 
     private List<SpriteAnimation> spriteAnimation = new ArrayList<>();
+    private List<JPanel> backgrondPanel;
     private final Engine engine;
     private String loadingText;
     private String loadingTitle;
@@ -32,7 +35,8 @@ public class LoadingManager extends JFrame {
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
         for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
-            this.spriteAnimation.add(new SpriteAnimation(attributes.getPath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
+            this.spriteAnimation.add(new SpriteAnimation(attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
+            this.backgrondPanel.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor()));
         }
 
         this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
@@ -44,8 +48,7 @@ public class LoadingManager extends JFrame {
         setUndecorated(true);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         SpriteAnimation currentLoader = spriteAnimation.get(index);
-
-        JPanel backgroundPanel = createBackgroundPanel();
+        JPanel backgroundPanel = this.backgrondPanel.get(index);
         setContentPane(backgroundPanel);
 
         currentLoader.setBounds(currentLoader.getSpriteRect());
@@ -61,14 +64,14 @@ public class LoadingManager extends JFrame {
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
     }
 
-    private JPanel createBackgroundPanel() {
+    private JPanel createBackgroundPanel(String image, String color) {
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon backgroundIcon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage("assets/ui/img/bg/season/spring.png"), getWidth(), getHeight()));
+                ImageIcon backgroundIcon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(image), getWidth(), getHeight()));
                 g.drawImage(backgroundIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
-                g.setColor(new Color(127, 139, 149, 166));
+                g.setColor(hexToColor(color));
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
         };

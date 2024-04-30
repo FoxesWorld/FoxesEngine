@@ -18,7 +18,7 @@ public class Label extends JLabel {
 			setText("<html>" + componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()) + "</html>");
 		}
 		setOpaque(componentFactory.style.isOpaque());
-		setPreferredSize(new Dimension(Integer.parseInt(componentFactory.getBounds()[2]), Integer.parseInt(componentFactory.getBounds()[3])));
+		setPreferredSize(new Dimension(componentFactory.getBounds().getWidth(), componentFactory.getBounds().getHeight()));
 		if(componentFactory.getComponentAttribute().getAlignment() != null) {
 			setHorizontalAlignment(LabelAlignment.fromString(componentFactory.getComponentAttribute().getAlignment()).getType());
 		}

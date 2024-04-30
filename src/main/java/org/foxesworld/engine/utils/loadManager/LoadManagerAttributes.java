@@ -1,12 +1,20 @@
 package org.foxesworld.engine.utils.loadManager;
 
 public class LoadManagerAttributes {
-    private String path;
+    private String spritePath, bgPath, blurColor;
     private int rows, cols,delay;
     private Bounds bounds;
 
-    public String getPath() {
-        return path;
+    public String getSpritePath() {
+        return spritePath;
+    }
+
+    public String getBgPath() {
+        return bgPath;
+    }
+
+    public String getBlurColor() {
+        return blurColor;
     }
 
     public int getRows() {
