@@ -2,6 +2,7 @@ package org.foxesworld.engine;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.utils.HTTP.RequestProperty;
+import org.foxesworld.engine.utils.loadManager.LoadManagerAttributes;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +15,7 @@ public class EngineData {
     private String[] styles;
 
     private DownloadManager downloadManager;
+    private LoadManagerAttributes loadManager[];
     private List<RequestProperty> requestProperties;
     private String[] tweakClasses;
     private Map<String, Object> files;
@@ -42,7 +44,7 @@ public class EngineData {
     public DownloadManager getDownloadManager() {
         return downloadManager;
     }
-
+    public LoadManagerAttributes[] getLoadManager() { return  loadManager;};
     public List<RequestProperty> getRequestProperties() {
         return requestProperties;
     }

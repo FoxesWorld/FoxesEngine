@@ -1,16 +1,20 @@
-package org.foxesworld.engine.utils;
+package org.foxesworld.engine.utils.loadManager;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.utils.ImageUtils;
+import org.foxesworld.engine.utils.SpriteAnimation;
 
 import javax.swing.*;
+import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
 
 public class LoadingManager extends JFrame {
 
-    private final SpriteAnimation spriteAnimation;
+    private List<SpriteAnimation> spriteAnimation = new ArrayList<>();
     private final Engine engine;
     private String loadingText;
     private String loadingTitle;
@@ -27,7 +31,10 @@ public class LoadingManager extends JFrame {
         this.engine = engine;
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
-        this.spriteAnimation = new SpriteAnimation("assets/ui/sprites/loaderGrid.png", 3, 5, 50, new Rectangle(30, 30, 64, 64));
+        for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
+            this.spriteAnimation.add(new SpriteAnimation(attributes.getPath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getX(), attributes.getY(), attributes.getWidth(), attributes.getHeight())));
+        }
+
         this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
 
         initializeLoadingFrame();
@@ -36,12 +43,13 @@ public class LoadingManager extends JFrame {
     private void initializeLoadingFrame() {
         setUndecorated(true);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        SpriteAnimation currentLoader = spriteAnimation.get(0);
 
         JPanel backgroundPanel = createBackgroundPanel();
         setContentPane(backgroundPanel);
 
-        spriteAnimation.setBounds(spriteAnimation.getSpriteRect());
-        backgroundPanel.add(spriteAnimation);
+        currentLoader.setBounds(currentLoader.getSpriteRect());
+        backgroundPanel.add(currentLoader);
 
         titleLabel = createLabel(loadingTitle, 23, new Rectangle(120, 50, 300, 20), backgroundPanel);
         loaderText = createLabel(loadingText, 11, new Rectangle(120, 70, 400, 20), backgroundPanel);
