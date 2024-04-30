@@ -27,23 +27,23 @@ public class LoadingManager extends JFrame {
     private static final int FRAME_WIDTH = 500;
     private static final int FRAME_HEIGHT = 150;
 
-    public LoadingManager(Engine engine) {
+    public LoadingManager(Engine engine, int index) {
         this.engine = engine;
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
         for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
-            this.spriteAnimation.add(new SpriteAnimation(attributes.getPath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getX(), attributes.getY(), attributes.getWidth(), attributes.getHeight())));
+            this.spriteAnimation.add(new SpriteAnimation(attributes.getPath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
         }
 
         this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
 
-        initializeLoadingFrame();
+        initializeLoadingFrame(index);
     }
 
-    private void initializeLoadingFrame() {
+    private void initializeLoadingFrame(int index) {
         setUndecorated(true);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        SpriteAnimation currentLoader = spriteAnimation.get(0);
+        SpriteAnimation currentLoader = spriteAnimation.get(index);
 
         JPanel backgroundPanel = createBackgroundPanel();
         setContentPane(backgroundPanel);

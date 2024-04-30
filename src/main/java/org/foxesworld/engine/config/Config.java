@@ -1,5 +1,6 @@
 package org.foxesworld.engine.config;
 
+import com.google.gson.Gson;
 import org.foxesworld.cfgProvider.CfgProvider;
 import com.google.gson.GsonBuilder;
 
@@ -57,8 +58,13 @@ public abstract class Config {
     }
 
     public String configToJSON() {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(CONFIG);
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Config.class, new ConfigSerializer())
+                .create();
+        return gson.toJson(this);
     }
+
     @SuppressWarnings("unused")
     protected void setDirPathIndex(int index){
         CfgProvider.setBaseDirPathIndex(index);

@@ -27,23 +27,23 @@ public class SoundPlayer {
             try {
                 InputStream inputStream = SoundPlayer.class.getClassLoader().getResourceAsStream(path);
                 AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioInputStream);
-                if(path.contains("mus")){
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.15f;
-                } else {
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
-                }
-                setVolume(clip,  volume);
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioInputStream);
+                    if (path.contains("mus")) {
+                        volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.15f;
+                    } else {
+                        volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
+                    }
+                    setVolume(clip, volume);
 
-                if (loop) {
-                    clip.loop(Clip.LOOP_CONTINUOUSLY);
-                }
+                    if (loop) {
+                        clip.loop(Clip.LOOP_CONTINUOUSLY);
+                    }
 
-                clip.start();
-                activeClips.add(clip);
+                    clip.start();
+                    activeClips.add(clip);
             } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

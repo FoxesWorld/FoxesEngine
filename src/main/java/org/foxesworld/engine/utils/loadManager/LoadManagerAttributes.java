@@ -2,7 +2,8 @@ package org.foxesworld.engine.utils.loadManager;
 
 public class LoadManagerAttributes {
     private String path;
-    private int rows, cols,delay, x, y, width, height;
+    private int rows, cols,delay;
+    private Bounds bounds;
 
     public String getPath() {
         return path;
@@ -20,19 +21,7 @@ public class LoadManagerAttributes {
         return delay;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
+    public Bounds getBounds() {
+        return bounds;
     }
 }
