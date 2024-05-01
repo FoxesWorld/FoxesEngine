@@ -19,6 +19,7 @@ import java.util.Map;
 public class GuiBuilder {
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
+    private final  Engine engine;
     private final Map<String, JPanel> panelsMap = new HashMap<>();
     private final Map<String, List<JComponent>> componentsMap = new HashMap<>();
     private final Map<String, List<String>> childsNparents = new HashMap<>();
@@ -27,6 +28,7 @@ public class GuiBuilder {
     private boolean additionalPanelsBuilt = false;
 
     public GuiBuilder(Engine engine) {
+        this.engine = engine;
         this.frameConstructor = engine.getFrame();
         this.componentFactory = new ComponentFactory(engine);
         Engine.getLOGGER().debug("=== GUI BUILDER ===");
@@ -168,6 +170,9 @@ public class GuiBuilder {
 
     public void setGuiBuilderListener(GuiBuilderListener guiBuilderListener) {
         this.guiBuilderListener = guiBuilderListener;
+    }
+    public Engine getEngine() {
+        return engine;
     }
 
     public ComponentFactory getComponentFactory() {

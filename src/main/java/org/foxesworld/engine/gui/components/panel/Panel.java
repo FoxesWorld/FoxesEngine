@@ -168,7 +168,7 @@ public class Panel extends JPanel {
         switch (layout.toLowerCase()) {
             case "flow":
                 return new FlowLayout();
-            case "borderColor":
+            case "border":
                 return new BorderLayout();
             case "grid":
                 return new GridLayout();

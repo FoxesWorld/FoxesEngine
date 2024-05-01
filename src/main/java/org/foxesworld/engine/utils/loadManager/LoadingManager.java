@@ -17,7 +17,8 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 public class LoadingManager extends JFrame {
 
     private List<SpriteAnimation> spriteAnimation = new ArrayList<>();
-    private List<JPanel> backgrondPanel;
+    private  List<String> descColor = new ArrayList<>(), titleColor= new ArrayList<>();
+    private List<JPanel> backgrondPanel = new ArrayList<>();
     private final Engine engine;
     private String loadingText;
     private String loadingTitle;
@@ -37,6 +38,8 @@ public class LoadingManager extends JFrame {
         for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
             this.spriteAnimation.add(new SpriteAnimation(attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
             this.backgrondPanel.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor()));
+            descColor.add(attributes.getDescColor());
+            titleColor.add(attributes.getTitleColor());
         }
 
         this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
@@ -56,7 +59,8 @@ public class LoadingManager extends JFrame {
 
         titleLabel = createLabel(loadingTitle, 23, new Rectangle(120, 50, 300, 20), backgroundPanel);
         loaderText = createLabel(loadingText, 11, new Rectangle(120, 70, 400, 20), backgroundPanel);
-        loaderText.setForeground(new Color(239, 165, 50));
+        loaderText.setForeground(hexToColor(descColor.get(index)));
+        titleLabel.setForeground(hexToColor(titleColor.get(index)));
         setAlwaysOnTop(true);
 
         addFrameComponentListener();
@@ -69,8 +73,8 @@ public class LoadingManager extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon backgroundIcon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(image), getWidth(), getHeight()));
-                g.drawImage(backgroundIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
+                Image bgImg = ImageUtils.getScaledImage(ImageUtils.getLocalImage(image), getWidth(), getHeight());
+                g.drawImage(bgImg, 0, 0, getWidth(), getHeight(), this);
                 g.setColor(hexToColor(color));
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -215,14 +219,27 @@ public class LoadingManager extends JFrame {
         this.loadingText = engine.getLANG().getString(loadingText);
         this.loadingTitle = engine.getLANG().getString(loadingTitle);
         loaderText.setText(this.loadingText);
-        titleLabel.setText(this.loadingTitle + ".".repeat(dotLimit));
 
-        try {
-            Thread.sleep(sleep);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        Timer dotsTimer = new Timer(1000, new ActionListener() {
+            int dotCount = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dotCount++;
+                titleLabel.setText(loadingTitle + ".".repeat(dotCount));
+                if (dotCount >= dotLimit) {
+                    ((Timer) e.getSource()).stop();
+                }
+            }
+        });
+
+        dotsTimer.start();
+
+        Timer sleepTimer = new Timer(sleep, e -> dotsTimer.stop());
+        sleepTimer.setRepeats(true);
+        sleepTimer.start();
     }
+
 
     public void stopLoading() {
         if (isAnimating) {
