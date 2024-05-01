@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components;
 
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
+import org.foxesworld.engine.utils.loadManager.Bounds;
 
 import java.util.Map;
 
@@ -10,11 +11,13 @@ public class ComponentAttributes {
     @SuppressWarnings("unused")
     private boolean enabled, opaque;
     @SuppressWarnings("unused")
-    private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background,bounds, thumbImage, trackImage, alignment;
+    private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment;
     @SuppressWarnings("unused")
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     @SuppressWarnings("unused")
     private Map<String, OptionGroups> panels;
+    @SuppressWarnings("unused")
+    private Bounds bounds;
     @SuppressWarnings("unused")
     public void setInitialValue(String initialValue) {
         this.initialValue = initialValue;
@@ -141,7 +144,7 @@ public class ComponentAttributes {
     }
 
     @SuppressWarnings("unused")
-    public String getBounds() {
+    public Bounds getBounds() {
         return bounds;
     }
 
