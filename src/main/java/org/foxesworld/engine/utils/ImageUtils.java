@@ -14,14 +14,13 @@ import java.awt.image.Kernel;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.foxesworld.engine.utils.HashUtils.sha1;
+import static org.foxesworld.engine.utils.HashUtils.sha1String;
 
 public class ImageUtils {
     private static final Map<String, BufferedImage> imgCache = new HashMap<>();
@@ -77,7 +76,7 @@ public class ImageUtils {
 
     public static BufferedImage getCachedUrlImg(String imageUrl, String cachePath, BufferedImage ifNotFound) {
         try {
-            String cacheKey = sha1(imageUrl);
+            String cacheKey = sha1String(imageUrl);
 
             if (imgCache.containsKey(cacheKey)) {
                 return imgCache.get(cacheKey);

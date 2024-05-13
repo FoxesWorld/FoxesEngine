@@ -6,6 +6,7 @@ import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.game.GameLauncher;
 import org.foxesworld.engine.game.argsReader.ArgsReader;
 import org.foxesworld.engine.game.argsReader.RuleChecker;
+import org.foxesworld.engine.utils.HashUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,7 +23,7 @@ public class LibraryReader {
     private final RuleChecker ruleChecker;
     private final String path, currentOS;
     private final GameLauncher gameLauncher;
-    private List<Library> libraries = new ArrayList<>();
+    private List<Library> libraries = new ArrayList<>(); //Do not remove the initializer!11!!!1
     private long size;
 
     public LibraryReader(ArgsReader argsReader) {
@@ -35,16 +36,28 @@ public class LibraryReader {
 
     private List<Library> readLibraries() {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+            String libraryFullPath;
             JsonObject jsonObject = new Gson().fromJson(reader, JsonObject.class);
             JsonArray librariesArray = jsonObject.getAsJsonArray("libraries");
             Engine.LOGGER.debug("Total libraries to process: {}", librariesArray.size());
-            for (JsonElement libraryElement : librariesArray) {
-                JsonObject libraryObject = libraryElement.getAsJsonObject();
-                if (isLibraryAllowed(libraryObject)) {
-                    Library library = convertToLibrary(libraryObject);
-                    size+=library.getArtifact().getSize() / (1024 * 1024);
-                    Engine.LOGGER.debug("Adding {} for {} ENV", library.getName(), currentOS);
-                    libraries.add(library);
+            if (libraries.size() != librariesArray.size()) {
+                for (JsonElement libraryElement : librariesArray) {
+                    JsonObject libraryObject = libraryElement.getAsJsonObject();
+                    if (isLibraryAllowed(libraryObject)) {
+                        Library library = convertToLibrary(libraryObject);
+                        libraryFullPath = this.gameLauncher.getPathBuilders().buildLibrariesPath() + File.separator + library.getArtifact().getPath();
+                        if (new File(libraryFullPath).exists()) {
+                            if (library.getArtifact().getSha1().equals(HashUtils.calculateSHA1(libraryFullPath))) {
+                                size += library.getArtifact().getSize() / (1024 * 1024);
+                                Engine.LOGGER.debug("Adding {} for {} ENV", library.getName(), currentOS);
+                                libraries.add(library);
+                            } else {
+                                Engine.LOGGER.warn("Invalid hash for {} library skipped", libraryFullPath);
+                            }
+                        } else {
+                            Engine.LOGGER.warn("Library file not found {}", libraryFullPath);
+                        }
+                    }
                 }
             }
             Engine.LOGGER.debug("{} lib num {} {}mb", currentOS, libraries.size(), size);
