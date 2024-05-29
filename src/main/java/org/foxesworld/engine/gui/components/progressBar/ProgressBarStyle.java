@@ -7,21 +7,19 @@ import javax.swing.*;
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class ProgressBarStyle {
-    private String background;
-    private  String forgeground;
-    private  String border;
-    private ComponentFactory componentFactory;
+    private final String background, foreground,border;
+    private final ComponentFactory componentFactory;
 
     public ProgressBarStyle(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
-        this.background = componentFactory.style.getBackgroundImage();
-        this.forgeground = componentFactory.style.getBackground();
+        this.background = componentFactory.style.getBackground();
+        this.foreground = componentFactory.style.getColor();
         this.border = componentFactory.style.getBorderColor();
     }
 
     public void apply(JProgressBar progressBar) {
         progressBar.setBackground(hexToColor(background));
-        progressBar.setForeground(hexToColor(forgeground));
+        progressBar.setForeground(hexToColor(foreground));
         progressBar.setBorder(BorderFactory.createLineBorder(hexToColor(border)));
         setTexture(progressBar, componentFactory.style.getTexture());
     }
