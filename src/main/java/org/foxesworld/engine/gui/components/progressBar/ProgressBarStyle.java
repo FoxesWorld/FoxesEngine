@@ -21,10 +21,10 @@ public class ProgressBarStyle {
         progressBar.setBackground(hexToColor(background));
         progressBar.setForeground(hexToColor(foreground));
         progressBar.setBorder(BorderFactory.createLineBorder(hexToColor(border)));
-        setTexture(progressBar, componentFactory.style.getTexture());
+        this.setTexture(progressBar, componentFactory.style.getTexture());
     }
 
-    private static void setTexture(JProgressBar progressBar, String imagePath) {
+    private void setTexture(JProgressBar progressBar, String imagePath) {
         progressBar.setUI(new TexturedProgressBar(imagePath));
     }
 }
