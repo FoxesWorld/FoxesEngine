@@ -84,7 +84,6 @@ public class FileLoader {
         }
 
         totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
-
         fileAttributes.forEach(file -> executorService.execute(() -> {
             this.currentFile = file;
             fileExtension = getFileExtension(file.getFilename());

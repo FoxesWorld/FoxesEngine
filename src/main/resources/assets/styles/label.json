@@ -19,6 +19,12 @@
         "name": "Title",
         "font": "mcfont",
         "color": "#da3156"
+      },
+      "titleBold": {
+        "opaque": false,
+        "name": "Title",
+        "font": "mcfontBold",
+        "color": "#da3156"
       }
     }
   }

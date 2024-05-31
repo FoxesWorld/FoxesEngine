@@ -18,9 +18,9 @@ public class ProgressBarStyle {
     }
 
     public void apply(JProgressBar progressBar) {
-        progressBar.setBackground(hexToColor(background));
-        progressBar.setForeground(hexToColor(foreground));
         progressBar.setBorder(BorderFactory.createLineBorder(hexToColor(border)));
+        progressBar.setBackground(hexToColor(this.background));
+        progressBar.setForeground(hexToColor(this.foreground));
         this.setTexture(progressBar, componentFactory.style.getTexture());
     }
 

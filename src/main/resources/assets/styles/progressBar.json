@@ -2,6 +2,7 @@
   "styles": {
     "progressBar": {
       "progress": {
+        "opaque": false,
         "name": "Let's Rule the file kingdom!",
         "background": "#5e6959",
         "color": "#b0976b",
@@ -9,6 +10,7 @@
         "texture": "assets/ui/progressBar/progressBar.png"
       },
       "progressMini": {
+        "opaque": false,
         "name": "Let's get some files",
         "background": "#ff6188",
         "color": "#ffee61",
