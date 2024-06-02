@@ -3,7 +3,6 @@ package org.foxesworld.engine.utils.Crypt;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-@Deprecated
 public class CryptHelper {
     public Encoder getEncoder() {
         return new Encoder();
