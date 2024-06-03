@@ -15,7 +15,7 @@ public class Label extends JLabel {
 
 	public Label(ComponentFactory componentFactory) {
 		if(componentFactory.getComponentAttribute().getLocaleKey() != null) {
-			setText("<html>" + componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()) + "</html>");
+			setText(componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
 		}
 		setOpaque(componentFactory.style.isOpaque());
 		setPreferredSize(new Dimension(componentFactory.getBounds().getWidth(), componentFactory.getBounds().getHeight()));
@@ -33,10 +33,6 @@ public class Label extends JLabel {
 					Integer.parseInt(borders.getItem(2)),
 					Integer.parseInt(borders.getItem(3))));
 		}
-		//if(componentFactory.getComponentAttribute().getBackground()!=null) {
-		//	setBackground(hexToColor(componentFactory.getComponentAttribute().getBackground()));
-		//}
-
 	}
 
 	public void paintComponent(Graphics g) {

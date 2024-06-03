@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public class LanguageProvider {
     private final Map<String, Map<String, String>> localizationData = new HashMap<>();
     private final Set<String> sectionsSet = new HashSet<>();
@@ -26,7 +27,7 @@ public class LanguageProvider {
 
         try {
             Gson gson = new Gson();
-            InputStreamReader reader = new InputStreamReader(engine.getClass().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
+            InputStreamReader reader = new InputStreamReader(Engine.class.getClassLoader().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(reader);
             StringBuilder jsonStringBuilder = new StringBuilder();
             String line;
