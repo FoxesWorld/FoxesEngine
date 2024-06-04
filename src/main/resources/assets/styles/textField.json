@@ -14,7 +14,21 @@
         "caretColor": "#ff0000",
         "background": "#ffffff",
         "selectionColor": "#2dc5bb",
-        "texture": "assets/ui/input/textfield.png"
+        "texture": "assets/ui/input/textField.png"
+      },
+      "textFieldAlt": {
+        "name": "Pumpkin Power",
+        "font": "FSElliotPro-Heavy",
+        "fontSize": 12,
+        "width": 203,
+        "height": 38,
+        "paddingX": 10,
+        "paddingY": 15,
+        "borderRadius": 5,
+        "color": "#9f9a89",
+        "caretColor": "#9f9a89",
+        "background": "#ffffff",
+        "texture": "assets/ui/input/textField2.png"
       },
       "inputBox": {
         "name": "Dev textField",

@@ -59,7 +59,7 @@ public class FileLoader {
         fileLoaderListener.onFilesRead();
     }
 
-    private FileAttributes[] getDownloadList(String client, String version, int platfom){
+    private FileAttributes[] getDownloadList(String client, String version, int platfom) {
         Map<String, String> request = new HashMap<>();
         request.put("sysRequest", "loadFiles");
         request.put("version", version);

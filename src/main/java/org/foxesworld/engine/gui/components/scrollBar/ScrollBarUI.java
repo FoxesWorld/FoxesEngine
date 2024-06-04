@@ -1,22 +1,21 @@
 package org.foxesworld.engine.gui.components.scrollBar;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import org.foxesworld.engine.utils.ImageUtils;
 
-import javax.swing.*;
-import javax.swing.plaf.basic.BasicScrollBarUI;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-
 public class ScrollBarUI extends BasicScrollBarUI {
-    /* TODO
-    *   Components factory is not being used
-    *   Cause scrollBar is not an instance of JComponent */
-    private Image thumbImage;
-    private Image trackImage;
+    private Image thumbImage = ImageUtils.getLocalImage("assets/ui/scrollPane/thumb.png");
+    private Image trackImage = ImageUtils.getLocalImage("assets/ui/scrollPane/track.png");
 
     public ScrollBarUI() {
-        thumbImage = ImageUtils.getLocalImage("assets/ui/scrollPane/thumb.png");
-        trackImage = ImageUtils.getLocalImage("assets/ui/scrollPane/track.png");
     }
 
     @Override
@@ -39,20 +38,26 @@ public class ScrollBarUI extends BasicScrollBarUI {
 
     @Override
     protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-        if (thumbImage != null) {
+        if (this.thumbImage != null) {
             g.translate(thumbBounds.x, thumbBounds.y);
-            AffineTransform transform = AffineTransform.getScaleInstance(thumbBounds.width / (double) thumbImage.getWidth(null), thumbBounds.height / (double) thumbImage.getHeight(null));
-            ((Graphics2D) g).drawImage(thumbImage, transform, null);
+            AffineTransform transform = AffineTransform.getScaleInstance(
+                    (double)thumbBounds.width / (double)this.thumbImage.getWidth(null),
+                    (double)thumbBounds.height / (double)this.thumbImage.getHeight(null)
+            );
+            ((Graphics2D)g).drawImage(this.thumbImage, transform, null);
             g.translate(-thumbBounds.x, -thumbBounds.y);
         }
     }
 
     @Override
     protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-        if (trackImage != null) {
+        if (this.trackImage != null) {
             g.translate(trackBounds.x, trackBounds.y);
-            AffineTransform transform = AffineTransform.getScaleInstance(trackBounds.width / (double) trackImage.getWidth(null), trackBounds.height / (double) trackImage.getHeight(null));
-            ((Graphics2D) g).drawImage(trackImage, transform, null);
+            AffineTransform transform = AffineTransform.getScaleInstance(
+                    (double)trackBounds.width / (double)this.trackImage.getWidth(null),
+                    (double)trackBounds.height / (double)this.trackImage.getHeight(null)
+            );
+            ((Graphics2D)g).drawImage(this.trackImage, transform, null);
             g.translate(-trackBounds.x, -trackBounds.y);
         }
     }
@@ -60,6 +65,6 @@ public class ScrollBarUI extends BasicScrollBarUI {
     @Override
     protected void setThumbBounds(int x, int y, int width, int height) {
         super.setThumbBounds(x, y, width, height);
-        scrollbar.repaint();
+        this.scrollbar.repaint();
     }
 }
