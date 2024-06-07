@@ -81,7 +81,7 @@ public class GuiBuilder {
     }
 
     private JPanel createPanel(OptionGroups optionGroups, String componentGroup) {
-        JPanel thisPanel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup);
+        JPanel thisPanel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup, this.frameConstructor);
         thisPanel.setName(componentGroup);
         thisPanel.setVisible(optionGroups.getPanelOptions().isVisible());
         return thisPanel;

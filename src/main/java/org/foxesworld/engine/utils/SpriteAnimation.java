@@ -1,5 +1,7 @@
 package org.foxesworld.engine.utils;
 
+import org.foxesworld.engine.Engine;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,8 +12,8 @@ public class SpriteAnimation extends JComponent {
     private int currentFrame = 0;
     private final Rectangle spriteRect;
 
-    public SpriteAnimation(String path, int rows, int columns, int delay, Rectangle spriteRect) {
-        this.spriteSheet = ImageUtils.getLocalImage(path);
+    public SpriteAnimation(Engine engine, String path, int rows, int columns, int delay, Rectangle spriteRect) {
+        this.spriteSheet = engine.getImageUtils().getLocalImage(path);
         this.rows = rows;
         this.columns = columns;
         this.spriteRect = spriteRect;

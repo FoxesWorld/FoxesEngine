@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.scrollBar;
 
+/*
 import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
@@ -11,7 +12,7 @@ import java.awt.event.MouseWheelListener;
 
 public class CustomScrollBar extends JComponent {
 
-    /* EXPERIMENTAL */
+    // EXPERIMENTAL
     private final int minValue;
     private final int maxValue;
     private final int extent;
@@ -136,3 +137,4 @@ public class CustomScrollBar extends JComponent {
     }
 
 }
+ */

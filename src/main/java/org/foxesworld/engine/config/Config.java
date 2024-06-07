@@ -37,7 +37,7 @@ public abstract class Config {
     public void assignConfigValues(){
         for(Map.Entry<String, Object> configMap : this.CONFIG.entrySet()){
             try {
-                Field field = ObjectInputFilter.Config.class.getDeclaredField(configMap.getKey());
+                Field field = this.getClass().getDeclaredField(configMap.getKey());
                 if(field.hashCode()!= 0) {
                     field.set(this, configMap.getValue());
                 }
@@ -60,7 +60,7 @@ public abstract class Config {
     public String configToJSON() {
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Config.class, new ConfigSerializer())
+                .registerTypeAdapter(this.getClass(), new ConfigSerializer())
                 .create();
         return gson.toJson(this);
     }

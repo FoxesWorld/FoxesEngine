@@ -93,7 +93,7 @@ public class EngineData {
     }
 
     public EngineData initEngineValues(String propertyPath) {
-        InputStream inputStream = Engine.class.getClassLoader().getResourceAsStream(propertyPath);
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(propertyPath);
         if (inputStream != null) {
             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             return new Gson().fromJson(reader, EngineData.class);

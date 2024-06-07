@@ -25,7 +25,7 @@ public class ButtonStyle {
 		this.font = componentFactory.style.getFont();
 		this.fontSize = componentFactory.style.getFontSize();
 		this.align = ComponentFactory.Align.valueOf(componentFactory.style.getAlign());
-		this.texture = ImageUtils.getLocalImage(componentFactory.style.getTexture());
+		this.texture = this.componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
 	}
 	public void apply(Button button) {
 		button.setVisible(visible);
@@ -43,7 +43,7 @@ public class ButtonStyle {
 	public BufferedImage getTexture(int startX, int startY, int subWidth, int subHeight) {
 		BufferedImage buttTexture = texture.getSubimage(startX, startY, subWidth, subHeight);
 		if(componentFactory.style.getBorderRadius() != 0) {
-			return (BufferedImage) ImageUtils.getRoundedImage(buttTexture, componentFactory.style.getBorderRadius());
+			return (BufferedImage) this.componentFactory.engine.getImageUtils().getRoundedImage(buttTexture, componentFactory.style.getBorderRadius());
 		}
 		return buttTexture;
 	}

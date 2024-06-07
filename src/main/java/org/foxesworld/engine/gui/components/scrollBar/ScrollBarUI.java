@@ -9,13 +9,16 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.plaf.basic.BasicScrollBarUI;
-import org.foxesworld.engine.utils.ImageUtils;
+
+import org.foxesworld.engine.Engine;
 
 public class ScrollBarUI extends BasicScrollBarUI {
-    private Image thumbImage = ImageUtils.getLocalImage("assets/ui/scrollPane/thumb.png");
-    private Image trackImage = ImageUtils.getLocalImage("assets/ui/scrollPane/track.png");
+    private final Image thumbImage;
+    private final Image trackImage;
 
-    public ScrollBarUI() {
+    public ScrollBarUI(Engine engine) {
+        thumbImage = engine.getImageUtils().getLocalImage("assets/ui/scrollPane/thumb.png");
+        trackImage = engine.getImageUtils().getLocalImage("assets/ui/scrollPane/track.png");
     }
 
     @Override

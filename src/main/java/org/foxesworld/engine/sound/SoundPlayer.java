@@ -25,7 +25,7 @@ public class SoundPlayer {
         if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getCONFIG().get("enableSound")))) {
             float volume;
             try {
-                InputStream inputStream = SoundPlayer.class.getClassLoader().getResourceAsStream(path);
+                InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
                 AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
                     Clip clip = AudioSystem.getClip();
                     clip.open(audioInputStream);

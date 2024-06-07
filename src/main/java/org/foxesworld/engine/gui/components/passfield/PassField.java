@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.passfield;
 
+import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
@@ -9,13 +10,15 @@ import java.awt.image.BufferedImage;
 
 public class PassField extends JPasswordField {
     BufferedImage texture;
+    private  ComponentFactory componentFactory;
     private String placeholder;
     private boolean caretVisible = true;
     private int paddingX;
     private int paddingY;
     private Timer caretTimer;
 
-    public PassField(String placeholder) {
+    public PassField(ComponentFactory componentFactory, String placeholder) {
+        this.componentFactory = componentFactory;
         this.placeholder = placeholder;
         this.setOpaque(false);
 
@@ -61,7 +64,7 @@ public class PassField extends JPasswordField {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(ImageUtils.genButton(getWidth(), getHeight(), texture), 0, 0, getWidth(), getHeight(), null);
+        g2.drawImage(this.componentFactory.engine.getImageUtils().genButton(getWidth(), getHeight(), texture), 0, 0, getWidth(), getHeight(), null);
 
         if (!hasFocus() && getPassword().length == 0 && placeholder != null) {
             g2.drawString(placeholder, getInsets().left + paddingX, g.getFontMetrics().getMaxAscent() + getInsets().top + paddingY);

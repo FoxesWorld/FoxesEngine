@@ -29,7 +29,7 @@ public class StyleProvider {
         try {
             Gson gson = new Gson();
             InputStreamReader reader = new InputStreamReader(
-                    Objects.requireNonNull(StyleProvider.class.getClassLoader().getResourceAsStream(stylePath)),
+                    this.getClass().getClassLoader().getResourceAsStream(stylePath),
                     StandardCharsets.UTF_8
             );
             Engine.getLOGGER().debug("Loading " + component + " style from " + stylePath);

@@ -43,7 +43,7 @@ public class Panel extends JPanel {
 
     private void drawDarkenedBackground(Graphics g) {
         g.drawImage(applyDarkening(
-                ImageUtils.getLocalImage(getSeasonalBackground()),
+                this.frameConstructor.getAppFrame().getImageUtils().getLocalImage(getSeasonalBackground()),
                 hexToColor(frameAttributes.getBackgroundBlur())), 0, 0, null);
     }
 
@@ -89,7 +89,7 @@ public class Panel extends JPanel {
     }
 
 
-    public JPanel createGroupPanel(PanelAttributes panelOptions, String groupName) {
+    public JPanel createGroupPanel(PanelAttributes panelOptions, String groupName, FrameConstructor frameConstructor) {
         LayoutManager layoutManager = null;
 
         groupPanel = new JPanel(null, panelOptions.isDoubleBuffered()) {
@@ -100,7 +100,7 @@ public class Panel extends JPanel {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 if (panelOptions.getBackgroundImage() != null) {
-                    BufferedImage backgroundImage = ImageUtils.getLocalImage(panelOptions.getBackgroundImage());
+                    BufferedImage backgroundImage = frameConstructor.getAppFrame().getImageUtils().getLocalImage(panelOptions.getBackgroundImage());
                     g.drawImage(applyDarkening(backgroundImage, hexToColor(panelOptions.getBackground())), 0, 0, null);
                 }
 

@@ -7,13 +7,19 @@ import javax.swing.*;
 
 public class IconUtils {
 
-    public static ImageIcon getIcon(ComponentAttributes componentAttributes){
+    private  Engine engine;
+
+    public  IconUtils(Engine engine){
+        this.engine = engine;
+    }
+
+    public ImageIcon getIcon(ComponentAttributes componentAttributes){
         ImageIcon icon = null;
         String iconPath = componentAttributes.getImageIcon();
         if(iconPath.endsWith(".png") || iconPath.endsWith(".jpg")) {
-            icon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
+            icon = new ImageIcon(this.engine.getImageUtils().getScaledImage(this.engine.getImageUtils().getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
             if (componentAttributes.getBorderRadius() != 0) {
-                icon = new ImageIcon(ImageUtils.getRoundedImage(icon.getImage(), componentAttributes.getBorderRadius()));
+                icon = new ImageIcon(this.engine.getImageUtils().getRoundedImage(icon.getImage(), componentAttributes.getBorderRadius()));
             }
         } else if(iconPath.endsWith(".svg")) {
             Engine.LOGGER.debug("Missing Batik!!!");

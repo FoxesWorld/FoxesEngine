@@ -19,6 +19,7 @@ import org.foxesworld.engine.sound.Sound;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.FontUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
+import org.foxesworld.engine.utils.ImageUtils;
 import org.foxesworld.engine.utils.loadManager.LoadingManager;
 import org.foxesworld.engine.utils.OS;
 import org.foxesworld.engine.utils.ServerInfo;
@@ -44,6 +45,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     protected Config config;
     protected LanguageProvider LANG;
     protected ServerInfo serverInfo;
+    protected ImageUtils imageUtils;
     private News news;
     public static Logger LOGGER;
     protected Discord discord;
@@ -64,7 +66,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         setEngineData(engineData.initEngineValues("engine.json"));
         fileProperties = new FileProperties(this);
         System.setProperty("log.dir", System.getProperty("user.dir"));
-        LOGGER = LogManager.getLogger(Engine.class);
+        LOGGER = LogManager.getLogger(this.getClass());
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
         LOGGER.info(appTitle + " started...");
@@ -75,6 +77,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
+        this.imageUtils = new ImageUtils(this);
     }
 
     public abstract void init();
@@ -90,7 +93,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
     public String appPath() {
         try {
-            return URLDecoder.decode(HTTPrequest.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
+            return URLDecoder.decode(this.POSTrequest.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
         } catch (java.net.URISyntaxException e) {
             return null;
         }
@@ -189,6 +192,10 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
     public News getNews() {
         return news;
+    }
+
+    public ImageUtils getImageUtils() {
+        return imageUtils;
     }
 
     public CryptUtils getCRYPTO() {

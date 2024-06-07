@@ -29,7 +29,7 @@ public class FrameConstructor extends JFrame {
     private void buildFrame(String path){
         Gson gson = new Gson();
         FrameAttributes frameAttributes;
-        InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(Engine.class.getClassLoader().getResourceAsStream(path)), StandardCharsets.UTF_8);
+        InputStreamReader reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path), StandardCharsets.UTF_8);
         frameAttributes = gson.fromJson(reader, FrameAttributes.class);
         buildFrame(frameAttributes);
     }
@@ -37,7 +37,7 @@ public class FrameConstructor extends JFrame {
     public void buildFrame(FrameAttributes frameAttributes) {
         engine.getLOGGER().info("Building FrameConstructor...");
 
-        setIconImage(ImageUtils.getLocalImage(frameAttributes.getAppIcon()));
+        setIconImage(this.engine.getImageUtils().getLocalImage(frameAttributes.getAppIcon()));
         setTitle(LANG.getString(frameAttributes.getAppTitle()));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(frameAttributes.getWidth(), frameAttributes.getHeight());

@@ -14,7 +14,6 @@ import org.foxesworld.engine.gui.components.multiButton.MultiButtonStyle;
 import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.passfield.PassFieldStyle;
 import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
-import org.foxesworld.engine.gui.components.scrollBar.CustomScrollBar;
 import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
@@ -39,6 +38,7 @@ public class ComponentFactory {
 
     public Engine engine;
     private final LanguageProvider LANG;
+    private final  IconUtils iconUtils;
     private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
     public StyleAttributes style = null;
     private ComponentAttributes componentAttribute;
@@ -47,6 +47,7 @@ public class ComponentFactory {
 
     public ComponentFactory(Engine engine){
         this.engine = engine;
+        this.iconUtils = new IconUtils(engine);
         this.LANG = engine.getLANG();
     }
     public JComponent createComponent(ComponentAttributes componentAttributes) {
@@ -76,7 +77,7 @@ public class ComponentFactory {
                 component = new Label(this);
                 labelStyle.apply((Label) component);
                 if(componentAttributes.getImageIcon() != null) {
-                    ImageIcon icon = IconUtils.getIcon(componentAttributes);
+                    ImageIcon icon = this.iconUtils.getIcon(componentAttributes);
                     ((Label) component).setIcon(icon);
                 }
 
@@ -141,7 +142,7 @@ public class ComponentFactory {
 
             case "passField" -> {
                 PassFieldStyle passfieldStyle = new PassFieldStyle(this);
-                component = new PassField(LANG.getString(componentAttributes.getLocaleKey()));
+                component = new PassField(this, LANG.getString(componentAttributes.getLocaleKey()));
                 passfieldStyle.apply((PassField) component);
                 component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), style.getFontSize()));
                 ((PassField)component).setActionCommand(componentAttributes.getComponentId());
@@ -165,7 +166,7 @@ public class ComponentFactory {
             case "button" -> {
                 ButtonStyle buttonStyle = new ButtonStyle(this);
                 if (componentAttributes.getImageIcon() != null) {
-                    ImageIcon icon = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
+                    ImageIcon icon = new ImageIcon(this.engine.getImageUtils().getScaledImage(this.engine.getImageUtils().getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
                     component = new Button(this, icon);
                 } else {
                     component = new Button(this, LANG.getString(componentAttributes.getLocaleKey()));
@@ -211,15 +212,15 @@ public class ComponentFactory {
             case "serverBox" -> {
                 ServerBoxStyle serverBoxStyle = new ServerBoxStyle(this);
                 component = new ServerBox();
-                ((ServerBox) component).updateBox(componentAttributes.getComponentId(), ImageUtils.getLocalImage(style.getTexture()).getSubimage(16, 0, 16, 16));
+                ((ServerBox) component).updateBox(componentAttributes.getComponentId(), this.engine.getImageUtils().getLocalImage(style.getTexture()).getSubimage(16, 0, 16, 16));
                 serverBoxStyle.apply((ServerBox) component);
                 component.setBackground(hexToColor(componentAttributes.getColor()));
                 component.setForeground(hexToColor(componentAttributes.getColor()));
             }
 
-            case "scrollBar" -> {
-                component = new CustomScrollBar(0, 100, 10);
-            }
+            //case "scrollBar" -> {
+                //component = new CustomScrollBar(0, 100, 10);
+            //}
 
             case "slider" -> {
                 component = new Slider(this);
@@ -235,7 +236,7 @@ public class ComponentFactory {
                 ((Slider) component).setPaintLabels(true);
                 ((Slider) component).setSnapToTicks(true);
                 if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
-                    ((Slider) component).setUI(new TexturedSliderUI((JSlider) component, style.getThumbImage(), style.getTrackImage()));
+                    ((Slider) component).setUI(new TexturedSliderUI(this, (JSlider) component, style.getThumbImage(), style.getTrackImage()));
                 }
             }
 

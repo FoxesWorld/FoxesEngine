@@ -21,7 +21,7 @@ public class CheckboxStyle {
         this.fontName = componentFactory.style.getFont();
         this.fontSize = componentFactory.style.getFontSize();
         this.color = hexToColor(componentFactory.style.getColor());
-        this.texture = ImageUtils.getLocalImage(componentFactory.style.getTexture());
+        this.texture = componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
     }
 
     public void apply(Checkbox checkbox) {

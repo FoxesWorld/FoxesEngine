@@ -27,7 +27,7 @@ public class LanguageProvider {
 
         try {
             Gson gson = new Gson();
-            InputStreamReader reader = new InputStreamReader(Engine.class.getClassLoader().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
+            InputStreamReader reader = new InputStreamReader(engine.getClass().getClassLoader().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(reader);
             StringBuilder jsonStringBuilder = new StringBuilder();
             String line;

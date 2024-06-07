@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.slider;
 
+import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
@@ -10,10 +11,10 @@ public class TexturedSliderUI extends BasicSliderUI {
     private final ImageIcon thumbImage;
     private final ImageIcon trackImage;
 
-    public TexturedSliderUI(JSlider slider, String thumbImage, String trackImage) {
+    public TexturedSliderUI(ComponentFactory componentFactory, JSlider slider, String thumbImage, String trackImage) {
         super(slider);
-        this.thumbImage = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(thumbImage), 14, 14));
-        this.trackImage = new ImageIcon(ImageUtils.getScaledImage(ImageUtils.getLocalImage(trackImage), slider.getWidth(), 8));
+        this.thumbImage = new ImageIcon(componentFactory.engine.getImageUtils().getScaledImage(componentFactory.engine.getImageUtils().getLocalImage(thumbImage), 14, 14));
+        this.trackImage = new ImageIcon(componentFactory.engine.getImageUtils().getScaledImage(componentFactory.engine.getImageUtils().getLocalImage(trackImage), slider.getWidth(), 8));
     }
 
     @Override

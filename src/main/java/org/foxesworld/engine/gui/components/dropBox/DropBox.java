@@ -89,7 +89,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     }
 
     private void drawOpenedState(Graphics2D g, int w) {
-        g.drawImage(ImageUtils.genButton(w, openedTX.getHeight(), openedTX), 0, getHeight() - openedTX.getHeight(), w, openedTX.getHeight(), null);
+        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(w, openedTX.getHeight(), openedTX), 0, getHeight() - openedTX.getHeight(), w, openedTX.getHeight(), null);
 
         int rightHeight = openedTX.getHeight() * (values.length + 1);
         int rightY = initialY + openedTX.getHeight() - rightHeight;
@@ -120,7 +120,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         }
 
         // Draw the button with rollover effect
-        g.drawImage(ImageUtils.genButton(w, rolloverTX.getHeight(), rolloverTX), 0, 0, w, rolloverTX.getHeight(), null);
+        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(w, rolloverTX.getHeight(), rolloverTX), 0, 0, w, rolloverTX.getHeight(), null);
 
         // Draw the text
         g.setColor(hoverColor); // Set the color for HOVER TEXT
@@ -135,7 +135,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
             return;
         }
 
-        g.drawImage(ImageUtils.genButton(w, defaultTX.getHeight(), defaultTX), 0, 0, w, defaultTX.getHeight(), null);
+        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(w, defaultTX.getHeight(), defaultTX), 0, 0, w, defaultTX.getHeight(), null);
         g.drawString(values[selected], 10, rolloverTX.getHeight() - g.getFontMetrics().getHeight() / 2 - 5);
     }
 
@@ -158,7 +158,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
         if (state == State.OPENED && y / openedTX.getHeight() < values.length) {
             selected = y / openedTX.getHeight();
-            entered = ImageUtils.contains(x, y, getX(), getY(), getWidth(), getHeight());
+            entered = this.componentFactory.engine.getImageUtils().contains(x, y, getX(), getY(), getWidth(), getHeight());
         }
 
         if (state == State.OPENED) {

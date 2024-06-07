@@ -25,6 +25,6 @@ public class ProgressBarStyle {
     }
 
     private void setTexture(JProgressBar progressBar, String imagePath) {
-        progressBar.setUI(new TexturedProgressBar(imagePath));
+        progressBar.setUI(new TexturedProgressBar(componentFactory, imagePath));
     }
 }

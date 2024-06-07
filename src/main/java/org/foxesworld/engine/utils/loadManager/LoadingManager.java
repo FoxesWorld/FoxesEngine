@@ -36,8 +36,8 @@ public class LoadingManager extends JFrame {
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
         for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
-            this.spriteAnimation.add(new SpriteAnimation(attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
-            this.backgrondPanel.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor()));
+            this.spriteAnimation.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
+            this.backgrondPanel.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor(), this.engine));
             descColor.add(attributes.getDescColor());
             titleColor.add(attributes.getTitleColor());
         }
@@ -68,12 +68,12 @@ public class LoadingManager extends JFrame {
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
     }
 
-    private JPanel createBackgroundPanel(String image, String color) {
+    private JPanel createBackgroundPanel(String image, String color, Engine engine) {
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Image bgImg = ImageUtils.getScaledImage(ImageUtils.getLocalImage(image), getWidth(), getHeight());
+                Image bgImg = engine.getImageUtils().getScaledImage(engine.getImageUtils().getLocalImage(image), getWidth(), getHeight());
                 g.drawImage(bgImg, 0, 0, getWidth(), getHeight(), this);
                 g.setColor(hexToColor(color));
                 g.fillRect(0, 0, getWidth(), getHeight());

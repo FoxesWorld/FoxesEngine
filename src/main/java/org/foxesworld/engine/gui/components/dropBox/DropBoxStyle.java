@@ -22,7 +22,7 @@ public class DropBoxStyle {
         this.fontName = componentFactory.style.getFont();
         this.fontSize = componentFactory.style.getFontSize();
         this.color = hexToColor(componentFactory.style.getColor());
-        this.texture = ImageUtils.getLocalImage(componentFactory.style.getTexture());
+        this.texture = componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
     }
 
     public void apply(DropBox dropBox) {
@@ -37,14 +37,14 @@ public class DropBoxStyle {
         dropBox.setOpenedTX(getTexture(0, dropBoxH * 2, dropBoxW, dropBoxH));
         dropBox.setPanelTX(getTexture(0, dropBoxH * 3, dropBoxW - 45, dropBoxH));
         dropBox.setSelectedTX(getTexture(0, dropBoxH * 4, dropBoxW - 45, dropBoxH));
-        dropBox.setPoint(ImageUtils.getLocalImage("assets/ui/icons/point.png"));
+        dropBox.setPoint(this.componentFactory.engine.getImageUtils().getLocalImage("assets/ui/icons/point.png"));
     }
 
     private BufferedImage getTexture(int x, int y, int width, int height){
         BufferedImage clippedTexture;
        clippedTexture =  this.texture.getSubimage(x, y, width, height);
         if(componentFactory.style.getBorderRadius() != 0) {
-            clippedTexture = (BufferedImage) ImageUtils.getRoundedImage(clippedTexture, componentFactory.style.getBorderRadius());
+            clippedTexture =  this.componentFactory.engine.getImageUtils().getRoundedImage(clippedTexture, componentFactory.style.getBorderRadius());
         }
         return  clippedTexture;
     }
