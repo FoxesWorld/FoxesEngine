@@ -24,6 +24,8 @@ import org.foxesworld.engine.utils.loadManager.LoadingManager;
 import org.foxesworld.engine.utils.OS;
 import org.foxesworld.engine.utils.ServerInfo;
 import org.foxesworld.engine.gui.ActionHandler;
+import oshi.SystemInfo;
+import oshi.hardware.GlobalMemory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -32,9 +34,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
     private final FileProperties fileProperties;
     public static String currentOS = "";
@@ -52,7 +56,10 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final FontUtils FONTUTILS;
     protected CryptUtils CRYPTO;
     protected FrameConstructor frameConstructor;
+    private final SystemInfo systemInfo;
+    private final GlobalMemory memory;
     private final PanelVisibility panelVisibility;
+    private final long freeMemory;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
     private EngineData engineData;
@@ -62,6 +69,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public Engine(String configFiles) {
         currentOS = OS.determineCurrentOS();
         this.engineData = new EngineData();
+        this.systemInfo = new SystemInfo();
+        this.memory = systemInfo.getHardware().getMemory();
+        this.freeMemory = memory.getAvailable();
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
         fileProperties = new FileProperties(this);
@@ -102,7 +112,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     @SuppressWarnings("unused")
     public void restartApplication(int xmx, String jvmDir) {
         String path = Config.getFullPath();
-        ArrayList params = new ArrayList();
+        List<String> params = new LinkedList<>();
         params.add(path + "/runtime/"+ jvmDir + "/bin/java");
         params.add("-Xmx"+xmx+"M");
         params.add("-jar");
@@ -115,7 +125,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
             builder.start();
             System.exit(-1);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Restart Error occured \n PLease try again" + e, "Restart Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Restart Error occurred \n PLease try again" + e, "Restart Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     public String[] getConfigFiles() {
@@ -193,11 +203,18 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public News getNews() {
         return news;
     }
-
     public ImageUtils getImageUtils() {
         return imageUtils;
     }
-
+    public SystemInfo getSystemInfo() {
+        return systemInfo;
+    }
+    public GlobalMemory getMemory() {
+        return memory;
+    }
+    public long getFreeMemory() {
+        return freeMemory;
+    }
     public CryptUtils getCRYPTO() {
         return CRYPTO;
     }
