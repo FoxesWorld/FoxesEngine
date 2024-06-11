@@ -7,7 +7,7 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
-import raven.toast.Notifications;
+import org.foxesworld.notification.Notification;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,14 +27,14 @@ public class GuiBuilder {
     private final Map<String, List<String>> childsNparents = new HashMap<>();
     private final Map<String, JPanel> loadPanels = new HashMap<>();
     private GuiBuilderListener guiBuilderListener;
-    private final Notifications notification;
+    private final Notification notification;
     private boolean additionalPanelsBuilt = false;
 
     public GuiBuilder(Engine engine) {
         this.engine = engine;
         this.frameConstructor = engine.getFrame();
         this.componentFactory = new ComponentFactory(engine);
-        notification = new Notifications();
+        notification = new Notification();
         notification.setJFrame(this.frameConstructor);
         Engine.getLOGGER().debug("=== GUI BUILDER ===");
     }
@@ -172,7 +172,7 @@ public class GuiBuilder {
     public Engine getEngine() {
         return engine;
     }
-    public Notifications getNotifications() {
+    public Notification getNotification() {
         return notification;
     }
     public ComponentFactory getComponentFactory() {
