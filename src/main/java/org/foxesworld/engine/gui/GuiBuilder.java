@@ -7,6 +7,7 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
+import raven.toast.Notifications;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,6 +33,7 @@ public class GuiBuilder {
         this.engine = engine;
         this.frameConstructor = engine.getFrame();
         this.componentFactory = new ComponentFactory(engine);
+        Notifications.getInstance().setJFrame(this.frameConstructor);
         Engine.getLOGGER().debug("=== GUI BUILDER ===");
     }
 

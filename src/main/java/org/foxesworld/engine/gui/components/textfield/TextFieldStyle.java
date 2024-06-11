@@ -2,7 +2,6 @@ package org.foxesworld.engine.gui.components.textfield;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
-import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.border.BevelBorder;
 import java.awt.*;
@@ -19,7 +18,7 @@ public class TextFieldStyle {
 	public String font;
 	public float fontSize;
 	public BufferedImage texture;
-	private ComponentFactory componentFactory;
+	private final ComponentFactory componentFactory;
 
 	public TextFieldStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;

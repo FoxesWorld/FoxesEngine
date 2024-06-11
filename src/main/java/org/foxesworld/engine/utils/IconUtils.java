@@ -1,9 +1,11 @@
 package org.foxesworld.engine.utils;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class IconUtils {
 
@@ -22,39 +24,13 @@ public class IconUtils {
                 icon = new ImageIcon(this.engine.getImageUtils().getRoundedImage(icon.getImage(), componentAttributes.getBorderRadius()));
             }
         } else if(iconPath.endsWith(".svg")) {
-            Engine.LOGGER.debug("Missing Batik!!!");
-            //icon = convertSVGToImage(ComponentFactory.class.getClassLoader().getResourceAsStream(iconPath), componentAttributes.getIconWidth(), componentAttributes.getIconHeight());
+            ImageIcon tmpIcon = new FlatSVGIcon(iconPath);
+            float scale = Math.min((float) componentAttributes.getIconHeight() / tmpIcon.getIconHeight(), (float) componentAttributes.getIconWidth() / tmpIcon.getIconHeight());
+            icon = new FlatSVGIcon(iconPath, scale);
         } else if(iconPath.endsWith(".gif")) {
+            Engine.LOGGER.error("GIF is not supported yet!");
         }
 
         return icon;
     }
-
-    /*
-    private static ImageIcon convertSVGToImage(InputStream svgInputStream, int width, int height) {
-        try {
-            String parser = XMLResourceDescriptor.getXMLParserClassName();
-            SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
-            Document svgDocument = factory.createDocument(null, svgInputStream);
-
-            PNGTranscoder transcoder = new PNGTranscoder();
-            transcoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) width);
-            transcoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) height);
-            TranscoderInput input = new TranscoderInput(svgDocument);
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            TranscoderOutput output = new TranscoderOutput(outputStream);
-
-            transcoder.transcode(input, output);
-
-            ByteArrayInputStream imageInputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            BufferedImage image = ImageIO.read(imageInputStream);
-
-            return new ImageIcon(image);
-        } catch (IOException | TranscoderException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    */
 }
