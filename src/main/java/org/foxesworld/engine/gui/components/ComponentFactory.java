@@ -23,7 +23,6 @@ import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.IconUtils;
-import org.foxesworld.engine.utils.ImageUtils;
 import org.foxesworld.engine.utils.loadManager.Bounds;
 
 import javax.swing.*;
@@ -34,6 +33,7 @@ import java.util.Objects;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
+@SuppressWarnings("unused")
 public class ComponentFactory {
 
     public Engine engine;
@@ -250,24 +250,22 @@ public class ComponentFactory {
         return  component;
     }
 
-    public LanguageProvider getLANG() {
-        return LANG;
-    }
 
-    @SuppressWarnings("unused")
     public void setComponentFactoryListener(ComponentFactoryListener componentFactoryListener) {
         this.componentFactoryListener = componentFactoryListener;
     }
-
-    @SuppressWarnings("unused")
     public enum Align {
         LEFT, CENTER, RIGHT
     }
-
+    public LanguageProvider getLANG() {
+        return LANG;
+    }
+    public IconUtils getIconUtils() {
+        return iconUtils;
+    }
     public Bounds getBounds() {
         return bounds;
     }
-
     public ComponentAttributes getComponentAttribute() {
         return componentAttribute;
     }
