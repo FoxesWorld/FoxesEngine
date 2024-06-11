@@ -27,13 +27,15 @@ public class GuiBuilder {
     private final Map<String, List<String>> childsNparents = new HashMap<>();
     private final Map<String, JPanel> loadPanels = new HashMap<>();
     private GuiBuilderListener guiBuilderListener;
+    private final Notifications notification;
     private boolean additionalPanelsBuilt = false;
 
     public GuiBuilder(Engine engine) {
         this.engine = engine;
         this.frameConstructor = engine.getFrame();
         this.componentFactory = new ComponentFactory(engine);
-        Notifications.getInstance().setJFrame(this.frameConstructor);
+        notification = new Notifications();
+        notification.setJFrame(this.frameConstructor);
         Engine.getLOGGER().debug("=== GUI BUILDER ===");
     }
 
@@ -152,32 +154,27 @@ public class GuiBuilder {
         parent.add(child);
         panelsMap.put(child.getName(), child);
     }
-
     public Map<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }
-
-    @SuppressWarnings("unused")
     public void addPanelToMap(JPanel panel) {
         this.panelsMap.put(panel.getName(), panel);
     }
-
     public Map<String, JPanel> getPanelsMap() {
         return panelsMap;
     }
-
-    @SuppressWarnings("unused")
     public Map<String, List<String>> getChildsNparents() {
         return childsNparents;
     }
-
     public void setGuiBuilderListener(GuiBuilderListener guiBuilderListener) {
         this.guiBuilderListener = guiBuilderListener;
     }
     public Engine getEngine() {
         return engine;
     }
-
+    public Notifications getNotifications() {
+        return notification;
+    }
     public ComponentFactory getComponentFactory() {
         return componentFactory;
     }
