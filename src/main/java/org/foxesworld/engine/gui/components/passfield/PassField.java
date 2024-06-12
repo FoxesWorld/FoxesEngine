@@ -17,28 +17,31 @@ public class PassField extends JPasswordField {
     private int paddingX;
     private int paddingY;
     private Timer caretTimer;
-    private final JLabel iconLabel;
     private boolean isPasswordVisible = false;
-    private final Icon showIcon;
-    private final Icon hideIcon;
+    private JLabel iconLabel;
+    private Icon showIcon;
+    private Icon hideIcon;
 
     public PassField(ComponentFactory componentFactory, String placeholder) {
         this.componentFactory = componentFactory;
         this.placeholder = placeholder;
-        this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
-        this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
+
         this.setOpaque(false);
 
-        // Initialize the icon label
-        iconLabel = new JLabel(showIcon);
-        iconLabel.setBorder(new EmptyBorder(0,0,0,10));
-        iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        iconLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                togglePasswordVisibility();
-            }
-        });
+        if(componentFactory.getComponentAttribute().isShowPass()) {
+            this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
+            this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
+            // Initialize the icon label
+            iconLabel = new JLabel(showIcon);
+            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 10));
+            iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            iconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    togglePasswordVisibility();
+                }
+            });
+        }
 
         setLayout(new BorderLayout());
         add(iconLabel, BorderLayout.EAST);
