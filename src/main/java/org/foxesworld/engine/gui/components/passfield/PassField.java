@@ -28,7 +28,7 @@ public class PassField extends JPasswordField {
 
         this.setOpaque(false);
 
-        if(componentFactory.getComponentAttribute().isShowPass()) {
+        if(componentFactory.getComponentAttribute().isrevealButton()) {
             this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
             this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
             // Initialize the icon label
@@ -41,10 +41,9 @@ public class PassField extends JPasswordField {
                     togglePasswordVisibility();
                 }
             });
+            setLayout(new BorderLayout());
+            add(iconLabel, BorderLayout.EAST);
         }
-
-        setLayout(new BorderLayout());
-        add(iconLabel, BorderLayout.EAST);
 
         this.addFocusListener(new FocusAdapter() {
             @Override
