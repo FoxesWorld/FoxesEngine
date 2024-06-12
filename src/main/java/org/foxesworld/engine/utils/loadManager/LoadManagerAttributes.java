@@ -1,5 +1,8 @@
 package org.foxesworld.engine.utils.loadManager;
 
+import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
+
+@SuppressWarnings("unused")
 public class LoadManagerAttributes {
     private String spritePath, bgPath, blurColor, titleColor, descColor;
     private int rows, cols,delay;

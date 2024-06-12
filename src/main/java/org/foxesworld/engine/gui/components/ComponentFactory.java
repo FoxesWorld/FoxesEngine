@@ -20,10 +20,10 @@ import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
+import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.IconUtils;
-import org.foxesworld.engine.utils.loadManager.Bounds;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

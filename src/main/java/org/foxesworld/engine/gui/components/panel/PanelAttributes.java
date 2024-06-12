@@ -1,6 +1,6 @@
 package org.foxesworld.engine.gui.components.panel;
 
-import org.foxesworld.engine.utils.loadManager.Bounds;
+import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
 
 @SuppressWarnings("unused")
 public class PanelAttributes {

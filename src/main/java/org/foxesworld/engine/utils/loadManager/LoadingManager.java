@@ -1,7 +1,6 @@
 package org.foxesworld.engine.utils.loadManager;
 
 import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.utils.ImageUtils;
 import org.foxesworld.engine.utils.SpriteAnimation;
 
 import javax.swing.*;

@@ -4,23 +4,44 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 public class PassField extends JPasswordField {
     BufferedImage texture;
-    private  ComponentFactory componentFactory;
-    private String placeholder;
+    private final ComponentFactory componentFactory;
+    private final String placeholder;
     private boolean caretVisible = true;
     private int paddingX;
     private int paddingY;
     private Timer caretTimer;
+    private final JLabel iconLabel;
+    private boolean isPasswordVisible = false;
+    private final Icon showIcon;
+    private final Icon hideIcon;
 
     public PassField(ComponentFactory componentFactory, String placeholder) {
         this.componentFactory = componentFactory;
         this.placeholder = placeholder;
+        this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
+        this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
         this.setOpaque(false);
+
+        // Initialize the icon label
+        iconLabel = new JLabel(showIcon);
+        iconLabel.setBorder(new EmptyBorder(0,0,0,10));
+        iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        iconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                togglePasswordVisibility();
+            }
+        });
+
+        setLayout(new BorderLayout());
+        add(iconLabel, BorderLayout.EAST);
 
         this.addFocusListener(new FocusAdapter() {
             @Override
@@ -61,6 +82,13 @@ public class PassField extends JPasswordField {
         repaint();
     }
 
+    private void togglePasswordVisibility() {
+        isPasswordVisible = !isPasswordVisible;
+        setEchoChar(isPasswordVisible ? (char) 0 : '*');
+        iconLabel.setIcon(isPasswordVisible ? hideIcon : showIcon);
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
@@ -77,11 +105,10 @@ public class PassField extends JPasswordField {
             int x = getInsets().left + paddingX;
             int y = g.getFontMetrics().getMaxAscent() + getInsets().top + paddingY;
 
-            g2.drawString(maskedPassword, x, y);
+            g2.drawString(isPasswordVisible ? new String(password) : maskedPassword, x, y);
 
-            // Draw the caret only when visible and the password field has focus
             if (isFocusOwner() && caretVisible) {
-                int caretX = x + g.getFontMetrics().stringWidth(maskedPassword.substring(0, getCaretPosition()));
+                int caretX = x + g.getFontMetrics().stringWidth(isPasswordVisible ? new String(password).substring(0, getCaretPosition()) : maskedPassword.substring(0, getCaretPosition()));
                 g2.drawLine(caretX, y - g.getFontMetrics().getAscent(), caretX, y + g.getFontMetrics().getDescent());
             }
         }

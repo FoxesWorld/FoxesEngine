@@ -5,15 +5,13 @@ import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.utils.CurrentMonth;
 import org.foxesworld.engine.utils.DragListener;
-import org.foxesworld.engine.utils.ImageUtils;
-import org.foxesworld.engine.utils.loadManager.Bounds;
+import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
