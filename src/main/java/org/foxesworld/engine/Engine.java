@@ -42,7 +42,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final FileProperties fileProperties;
     public static String currentOS = "";
     protected LoadingManager loadingManager;
-    private final String configFiles;
+    private final List<String> configFiles;
     private final String appTitle;
     protected Sound SOUND;
     protected Config config;
@@ -55,10 +55,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final FontUtils FONTUTILS;
     protected CryptUtils CRYPTO;
     protected FrameConstructor frameConstructor;
-    //private final SystemInfo systemInfo;
-    //private final GlobalMemory memory;
     private final PanelVisibility panelVisibility;
-    //private final long freeMemory;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
     private EngineData engineData;
@@ -66,12 +63,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public ActionHandler actionHandler;
     private boolean init = false;
 
-    public Engine(String configFiles) {
+    public Engine(List<String> configFiles) {
         currentOS = OS.determineCurrentOS();
         this.engineData = new EngineData();
-        //this.systemInfo = new SystemInfo();
-        //this.memory = systemInfo.getHardware().getMemory();
-        //this.freeMemory = memory.getAvailable();
         this.configFiles = configFiles;
         setEngineData(engineData.initEngineValues("engine.json"));
         fileProperties = new FileProperties(this);
@@ -82,7 +76,6 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         LOGGER.info(appTitle + " started...");
 
         this.FONTUTILS = new FontUtils(this);
-        //this.discord = new Discord(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
 
         this.GETrequest = new HTTPrequest(this, "GET");
@@ -110,7 +103,6 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         }
     }
 
-    @SuppressWarnings("unused")
     public void restartApplication(int xmx, String jvmDir) {
         String path = Config.getFullPath();
         List<String> params = new LinkedList<>();
@@ -129,8 +121,19 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
             JOptionPane.showMessageDialog(null, "Restart Error occurred \n PLease try again" + e, "Restart Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    public String[] getConfigFiles() {
-        return configFiles.split(",");
+
+    public void showDialog(String messageKey, String errorTitle, int warningMessage, boolean terminate) {
+        String errorMessage = this.getLANG().getString(messageKey);
+        this.getSOUND().playSound("other", messageKey);
+        UIManager.put("OptionPane.messageFont", this.getFONTUTILS().getFont("mcfont", 12));
+        JOptionPane.showMessageDialog(this.getFrame(), errorMessage, errorTitle, warningMessage);
+        if(terminate) {
+            System.exit(0);
+        }
+    }
+
+    public List<String> getConfigFiles() {
+        return configFiles;
     }
     protected boolean isInit() {
         return init;
@@ -207,17 +210,6 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public ImageUtils getImageUtils() {
         return imageUtils;
     }
-    /*
-    public SystemInfo getSystemInfo() {
-        return systemInfo;
-    }
-    public GlobalMemory getMemory() {
-        return memory;
-    }
-    public long getFreeMemory() {
-        return freeMemory;
-    }
-    */
     public CryptUtils getCRYPTO() {
         return CRYPTO;
     }

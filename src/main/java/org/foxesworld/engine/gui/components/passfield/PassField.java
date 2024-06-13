@@ -37,7 +37,12 @@ public class PassField extends JPasswordField {
             iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             iconLabel.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
+                    togglePasswordVisibility();
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
                     togglePasswordVisibility();
                 }
             });

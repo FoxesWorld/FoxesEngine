@@ -12,28 +12,24 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public abstract class Config {
 
     protected Map<String, Object> CONFIG;
     private String cfgFileExtension = "";
 
-    protected void addCfgFiles(String[] configFiles){
+    protected void addCfgFiles(List<String> configFiles){
         for(String cfgUnit: configFiles){
             String cfgFileName = cfgUnit + cfgFileExtension;
             new CfgProvider(cfgFileName);
         }
     }
 
-    @SuppressWarnings("unused")
     public abstract void addToConfig(Map<String, String> inputData, List values);
-    @SuppressWarnings("unused")
     public abstract void setConfigValue(String key, Object value);
-    @SuppressWarnings("unused")
     public abstract void clearConfigData(List<String> dataToClear, boolean write);
-    @SuppressWarnings("unused")
     public abstract void clearConfigData(String dataToClear, boolean write);
 
-    @SuppressWarnings("unused")
     public void assignConfigValues(){
         for(Map.Entry<String, Object> configMap : this.CONFIG.entrySet()){
             try {
@@ -65,11 +61,9 @@ public abstract class Config {
         return gson.toJson(this);
     }
 
-    @SuppressWarnings("unused")
     protected void setDirPathIndex(int index){
         CfgProvider.setBaseDirPathIndex(index);
     }
-    @SuppressWarnings("unused")
     protected  void setCfgExportDir(String dir){
         CfgProvider.setCfgExportDirName(dir);
     }
@@ -77,15 +71,13 @@ public abstract class Config {
         this.cfgFileExtension = ext;
         CfgProvider.setCfgFileExtension(ext);
     }
-    @SuppressWarnings("unused")
+
     protected Map<String, Map<String, Object>> getAllCfgMaps(){
         return CfgProvider.getAllCfgMaps();
     }
-
     public static String getFullPath() {
         return CfgProvider.getGameFullPath() + File.separator;
     }
-
     public Map<String, Object> getCONFIG() {
         return CONFIG;
     }

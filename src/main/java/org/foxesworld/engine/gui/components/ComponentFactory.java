@@ -18,6 +18,8 @@ import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
+import org.foxesworld.engine.gui.components.textArea.AreaStyle;
+import org.foxesworld.engine.gui.components.textArea.TextArea;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
 import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
@@ -85,6 +87,21 @@ public class ComponentFactory {
 
                 if(componentAttributes.getInitialValue() != null) {
                     ((Label) component).setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
+                }
+
+                if(componentAttributes.getColor() != null) {
+                    component.setForeground(hexToColor(componentAttributes.getColor()));
+                }
+            }
+
+            case "textArea" -> {
+                AreaStyle areaStyle = new AreaStyle(this);
+                component = new TextArea(this);
+                areaStyle.apply((TextArea) component);
+                component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
+
+                if(componentAttributes.getInitialValue() != null) {
+                    ((TextArea) component).setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
                 }
 
                 if(componentAttributes.getColor() != null) {
