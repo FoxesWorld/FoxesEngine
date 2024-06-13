@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components.button;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -16,8 +17,10 @@ public class ButtonStyle {
 	public ComponentFactory.Align align;
 	public BufferedImage texture;
 	private final ComponentFactory componentFactory;
+	private final ImageUtils imageUtils;
 	public ButtonStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;
+		this.imageUtils = this.componentFactory.engine.getImageUtils();
 		this.width = componentFactory.style.getWidth();
 		this.height = componentFactory.style.getHeight();
 		this.color = componentFactory.style.getColor();
@@ -33,10 +36,10 @@ public class ButtonStyle {
 		button.setHoverColor(hexToColor(this.componentFactory.style.getHoverColor()));
 		button.setForeground(hexToColor(color));
 		int i = texture.getHeight() / 4;
-		button.defaultTX = getTexture(0, 0, texture.getWidth(), i);
-		button.rolloverTX = getTexture(0, i, texture.getWidth(), i);
-		button.pressedTX = getTexture(0, i * 2, texture.getWidth(), i);
-		button.lockedTX = getTexture(0, i * 3, texture.getWidth(), i);
+		button.defaultTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(), 0, 0, texture.getWidth(), i);
+		button.rolloverTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(),0, i, texture.getWidth(), i);
+		button.pressedTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(),0, i * 2, texture.getWidth(), i);
+		button.lockedTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(),0, i * 3, texture.getWidth(), i);
 	}
 
 	public BufferedImage getTexture(int startX, int startY, int subWidth, int subHeight) {

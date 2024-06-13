@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components.slider;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicSliderUI;
@@ -15,6 +16,7 @@ public class TexturedSliderUI extends BasicSliderUI {
     private final BufferedImage thumbImageNormal;
     private final BufferedImage thumbImageHover;
     private final BufferedImage thumbImageDisabled;
+    private final ImageUtils imageUtils;
     private final ImageIcon trackImage;
     private BufferedImage currentThumbImage;
     private final ComponentFactory componentFactory;
@@ -22,28 +24,21 @@ public class TexturedSliderUI extends BasicSliderUI {
 
     public TexturedSliderUI(ComponentFactory componentFactory, JSlider slider, String thumbImage, String trackImage) {
         super(slider);
+        this.imageUtils = componentFactory.engine.getImageUtils();
         this.componentFactory = componentFactory;
 
         thumbTexture = componentFactory.engine.getImageUtils().getLocalImage(thumbImage);
         int thumbWidth = thumbTexture.getWidth() / 3;
         int thumbHeight = thumbTexture.getHeight();
 
-        this.thumbImageNormal = getTexture(thumbTexture, 0, 0, thumbWidth, thumbHeight);
-        this.thumbImageHover = getTexture(thumbTexture, thumbWidth, 0, thumbWidth, thumbHeight);
-        this.thumbImageDisabled = getTexture(thumbTexture, thumbWidth * 2, 0, thumbWidth, thumbHeight);
+        this.thumbImageNormal = this.imageUtils.getTexture(thumbTexture, componentFactory.style.getBorderRadius(),0, 0, thumbWidth, thumbHeight);
+        this.thumbImageHover = this.imageUtils.getTexture(thumbTexture, componentFactory.style.getBorderRadius(), thumbWidth, 0, thumbWidth, thumbHeight);
+        this.thumbImageDisabled = this.imageUtils.getTexture(thumbTexture, componentFactory.style.getBorderRadius(), thumbWidth * 2, 0, thumbWidth, thumbHeight);
         this.trackImage =  new ImageIcon(componentFactory.engine.getImageUtils().getScaledImage(componentFactory.engine.getImageUtils().getLocalImage(trackImage), slider.getWidth(), 10));
         this.currentThumbImage = thumbImageNormal;
 
         slider.addMouseListener(createMouseListener());
         slider.addMouseMotionListener((MouseMotionListener) createMouseListener());
-    }
-
-    private BufferedImage getTexture(BufferedImage source, int startX, int startY, int subWidth, int subHeight) {
-        BufferedImage subImage = source.getSubimage(startX, startY, subWidth, subHeight);
-        if (componentFactory.style.getBorderRadius() != 0) {
-            return componentFactory.engine.getImageUtils().getRoundedImage(subImage, componentFactory.style.getBorderRadius());
-        }
-        return subImage;
     }
 
     private MouseListener createMouseListener() {

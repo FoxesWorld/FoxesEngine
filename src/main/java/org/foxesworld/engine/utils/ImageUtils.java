@@ -52,6 +52,14 @@ public class ImageUtils {
         }
     }
 
+    public BufferedImage getTexture(BufferedImage source, int borderRadius, int startX, int startY, int subWidth, int subHeight) {
+        BufferedImage subImage = source.getSubimage(startX, startY, subWidth, subHeight);
+        if (borderRadius != 0) {
+            return this.getRoundedImage(subImage, borderRadius);
+        }
+        return subImage;
+    }
+
     public BufferedImage base64ToBufferedImage(String base64Image) {
         try {
             byte[] imageBytes = Base64.getDecoder().decode(base64Image);
