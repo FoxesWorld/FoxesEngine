@@ -52,7 +52,6 @@ public class ImageUtils {
         }
     }
 
-
     public BufferedImage base64ToBufferedImage(String base64Image) {
         try {
             byte[] imageBytes = Base64.getDecoder().decode(base64Image);

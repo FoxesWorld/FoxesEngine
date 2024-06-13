@@ -1,7 +1,6 @@
 package org.foxesworld.engine.gui.components.button;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -43,7 +42,7 @@ public class ButtonStyle {
 	public BufferedImage getTexture(int startX, int startY, int subWidth, int subHeight) {
 		BufferedImage buttTexture = texture.getSubimage(startX, startY, subWidth, subHeight);
 		if(componentFactory.style.getBorderRadius() != 0) {
-			return (BufferedImage) this.componentFactory.engine.getImageUtils().getRoundedImage(buttTexture, componentFactory.style.getBorderRadius());
+			return this.componentFactory.engine.getImageUtils().getRoundedImage(buttTexture, componentFactory.style.getBorderRadius());
 		}
 		return buttTexture;
 	}
