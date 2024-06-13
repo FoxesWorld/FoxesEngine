@@ -4,10 +4,10 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 
 import javax.swing.*;
 
+@SuppressWarnings("unused")
 public class Slider extends JSlider {
-    @SuppressWarnings("unused")
+
     private SliderListener sliderListener;
-    @SuppressWarnings("unused")
     private ComponentFactory componentFactory;
 
     public Slider(ComponentFactory componentFactory){
@@ -15,7 +15,6 @@ public class Slider extends JSlider {
         this.componentFactory = componentFactory;
     }
 
-    @SuppressWarnings("unused")
     public void setSliderListener(SliderListener sliderListener) {
         this.sliderListener = sliderListener;
         this.addChangeListener(e -> sliderListener.onSliderChange(this));

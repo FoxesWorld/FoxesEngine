@@ -22,7 +22,6 @@ import org.foxesworld.engine.gui.components.textArea.AreaStyle;
 import org.foxesworld.engine.gui.components.textArea.TextArea;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
-import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.IconUtils;
@@ -253,7 +252,7 @@ public class ComponentFactory {
                 ((Slider) component).setPaintLabels(true);
                 ((Slider) component).setSnapToTicks(true);
                 if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
-                    ((Slider) component).setUI(new TexturedSliderUI(this, (JSlider) component, style.getThumbImage(), style.getTrackImage()));
+                    ((Slider) component).setUI(new TexturedSliderUI(this, (Slider) component, style.getThumbImage(), style.getTrackImage()));
                 }
             }
 

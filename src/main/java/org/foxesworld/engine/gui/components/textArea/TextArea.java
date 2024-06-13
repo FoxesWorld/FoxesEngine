@@ -1,17 +1,12 @@
 package org.foxesworld.engine.gui.components.textArea;
 
-import com.formdev.flatlaf.extras.components.FlatTextArea;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.Serial;
 
-
-
-public class TextArea extends FlatTextArea {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class TextArea extends JTextArea {
 
     public TextArea(ComponentFactory componentFactory) {
         if(componentFactory.getComponentAttribute().getLocaleKey() != null) {

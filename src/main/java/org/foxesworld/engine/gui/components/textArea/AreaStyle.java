@@ -6,7 +6,6 @@ import java.awt.*;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-
 public class AreaStyle {
 	public String fontName;
 	public float fontSize;

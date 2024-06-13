@@ -1,6 +1,6 @@
 package org.foxesworld.engine.utils.loadManager;
 
-import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
+import org.foxesworld.engine.gui.components.Bounds;
 
 @SuppressWarnings("unused")
 public class LoadManagerAttributes {

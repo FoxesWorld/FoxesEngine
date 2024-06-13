@@ -11,7 +11,7 @@ public class TexturedSliderUI extends BasicSliderUI {
     private final ImageIcon thumbImage;
     private final ImageIcon trackImage;
 
-    public TexturedSliderUI(ComponentFactory componentFactory, JSlider slider, String thumbImage, String trackImage) {
+    public TexturedSliderUI(ComponentFactory componentFactory, Slider slider, String thumbImage, String trackImage) {
         super(slider);
         this.thumbImage = new ImageIcon(componentFactory.engine.getImageUtils().getScaledImage(componentFactory.engine.getImageUtils().getLocalImage(thumbImage), 14, 14));
         this.trackImage = new ImageIcon(componentFactory.engine.getImageUtils().getScaledImage(componentFactory.engine.getImageUtils().getLocalImage(trackImage), slider.getWidth(), 8));

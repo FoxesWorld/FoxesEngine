@@ -1,11 +1,11 @@
 package org.foxesworld.engine.gui.components.panel;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.components.Bounds;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.utils.CurrentMonth;
 import org.foxesworld.engine.utils.DragListener;
-import org.foxesworld.engine.gui.components.ComponentAttributes.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
