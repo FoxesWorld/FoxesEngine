@@ -1,7 +1,5 @@
 package org.foxesworld.engine.utils;
 
-import org.foxesworld.engine.Engine;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,11 +8,11 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+
 @SuppressWarnings("unused")
 public final class HashUtils {
     public static String md5(String filename) {
         if (new File(filename).isDirectory()) {
-            Engine.LOGGER.warn("RUNNING IN IDE!!!");
             return "IDE";
         }
         FileInputStream fis = null;

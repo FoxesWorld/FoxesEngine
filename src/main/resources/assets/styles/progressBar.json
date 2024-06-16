@@ -7,7 +7,7 @@
         "background": "#5e6959",
         "color": "#b0976b",
         "borderColor": "#183824",
-        "texture": "assets/ui/progressBar/progressBar.png"
+        "texture": "assets/ui/components/progressBar/progressBar.png"
       },
       "progressMini": {
         "opaque": false,
@@ -15,7 +15,7 @@
         "background": "#ff6188",
         "color": "#ffee61",
         "borderColor": "#183824",
-        "texture": "assets/ui/progressBar/progressBarMini.png"
+        "texture": "assets/ui/components/progressBar/progressBarMini.png"
       }
     }
   }

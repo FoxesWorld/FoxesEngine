@@ -46,12 +46,23 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
         JLabel iconLabel = new JLabel(icon);
         iconLabel.setHorizontalAlignment(JLabel.CENTER);
         iconLabel.setVerticalAlignment(JLabel.CENTER);
+        GridBagLayout gridBagLayout = new GridBagLayout();
+        setLayout(gridBagLayout);
 
-        setLayout(new BorderLayout());
-        add(iconLabel, BorderLayout.CENTER);
-        //this.initCoolDown(this.componentFactory.getComponentAttribute().getCoolDown());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        gridBagLayout.setConstraints(iconLabel, constraints);
+        add(iconLabel);
+
+        setPreferredSize(new Dimension(
+                componentFactory.getComponentAttribute().getIconWidth(),
+                componentFactory.getComponentAttribute().getIconHeight()));
     }
-
     private void initCoolDown(int mSec){
         if(mSec > 0) {
             disableTimer = new Timer(mSec, e -> {

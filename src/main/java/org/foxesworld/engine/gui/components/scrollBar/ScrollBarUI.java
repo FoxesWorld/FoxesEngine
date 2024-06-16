@@ -17,8 +17,8 @@ public class ScrollBarUI extends BasicScrollBarUI {
     private final Image trackImage;
 
     public ScrollBarUI(Engine engine) {
-        thumbImage = engine.getImageUtils().getLocalImage("assets/ui/scrollPane/thumb.png");
-        trackImage = engine.getImageUtils().getLocalImage("assets/ui/scrollPane/track.png");
+        thumbImage = engine.getImageUtils().getLocalImage("assets/ui/components/scrollPane/thumb.png");
+        trackImage = engine.getImageUtils().getLocalImage("assets/ui/components/scrollPane/track.png");
     }
 
     @Override

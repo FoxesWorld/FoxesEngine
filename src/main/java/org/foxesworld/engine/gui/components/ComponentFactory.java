@@ -39,7 +39,7 @@ public class ComponentFactory {
 
     public Engine engine;
     private final LanguageProvider LANG;
-    private final  IconUtils iconUtils;
+    private final IconUtils iconUtils;
     private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
     public StyleAttributes style = null;
     private ComponentAttributes componentAttribute;

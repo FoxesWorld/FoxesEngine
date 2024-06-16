@@ -3,8 +3,8 @@
     "scrollBar": {
       "scrollingDown": {
         "name": "Other Style",
-        "thumbImage": "assets/ui/scrollPane/thumb.png",
-        "trackImage": "assets/ui/scrollPane/track.png"
+        "thumbImage": "assets/ui/components/scrollPane/thumb.png",
+        "trackImage": "assets/ui/components/scrollPane/track.png"
       }
     }
   }

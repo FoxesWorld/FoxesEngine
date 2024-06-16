@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.frame;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.panel.Panel;
@@ -35,9 +36,12 @@ public class FrameConstructor extends JFrame {
     }
 
     public void buildFrame(FrameAttributes frameAttributes) {
-        engine.getLOGGER().info("Building FrameConstructor...");
-
-        setIconImage(this.engine.getImageUtils().getLocalImage(frameAttributes.getAppIcon()));
+        Engine.getLOGGER().info("Building FrameConstructor...");
+        if(!frameAttributes.getAppIcon().endsWith(".svg")) {
+            setIconImage(this.engine.getImageUtils().getLocalImage(frameAttributes.getAppIcon()));
+        } else {
+            setIconImage(new FlatSVGIcon(frameAttributes.getAppIcon(), 1).getImage());
+        }
         setTitle(LANG.getString(frameAttributes.getAppTitle()));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(frameAttributes.getWidth(), frameAttributes.getHeight());
