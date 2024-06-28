@@ -153,7 +153,7 @@ public class Panel extends JPanel {
         }
 
         Bounds bounds = panelOptions.getBounds();
-        groupPanel.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+        groupPanel.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
         if(panelOptions.getLayout() != null) {
             layoutManager = this.getLayout(panelOptions.getLayout(), groupPanel);
             groupPanel.setLayout(layoutManager);

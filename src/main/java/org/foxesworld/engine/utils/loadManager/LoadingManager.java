@@ -35,7 +35,7 @@ public class LoadingManager extends JFrame {
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
         for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
-            this.spriteAnimation.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getWidth(), attributes.getBounds().getHeight())));
+            this.spriteAnimation.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getSize().getWidth(), attributes.getBounds().getSize().getHeight())));
             this.backgrondPanel.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor(), this.engine));
             descColor.add(attributes.getDescColor());
             titleColor.add(attributes.getTitleColor());

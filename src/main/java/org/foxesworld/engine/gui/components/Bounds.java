@@ -1,7 +1,8 @@
 package org.foxesworld.engine.gui.components;
 
 public class Bounds {
-    private int x, y, width, height;
+    private int x, y;
+    private Size size;
 
     public int getX() {
         return x;
@@ -11,11 +12,7 @@ public class Bounds {
         return y;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
+    public Size getSize() {
+        return size;
     }
 }

@@ -70,7 +70,7 @@ public class ComponentFactory {
                 component = new JProgressBar();
                 progressBarStyle.apply((JProgressBar) component);
                 component.setName(componentAttributes.getComponentId());
-                component.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+                component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
             }
 
             case "label" -> {
@@ -187,7 +187,7 @@ public class ComponentFactory {
                 } else {
                     component = new Button(this, LANG.getString(componentAttributes.getLocaleKey()));
                 }
-                component.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+                component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
                 buttonStyle.apply((Button) component);
                 ((Button)component).setActionCommand(componentAttributes.getComponentId());
                 ((Button) component).addActionListener(engine);
@@ -240,7 +240,7 @@ public class ComponentFactory {
 
             case "slider" -> {
                 component = new Slider(this);
-                component.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+                component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
                 ((Slider) component).setMinimum(componentAttributes.getMinValue());
                 ((Slider) component).setMaximum(componentAttributes.getMaxValue());
                 if(componentAttributes.getInitialValue() != null) {
@@ -261,7 +261,7 @@ public class ComponentFactory {
 
         component.setName(componentAttributes.getComponentId());
         component.setOpaque(style.isOpaque());
-        component.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+        component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
 
         return  component;
     }
