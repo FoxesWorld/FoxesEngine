@@ -4,44 +4,47 @@ import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.utils.SpriteAnimation;
 
 import javax.swing.*;
-import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class LoadingManager extends JFrame {
 
-    private List<SpriteAnimation> spriteAnimation = new ArrayList<>();
-    private  List<String> descColor = new ArrayList<>(), titleColor= new ArrayList<>();
-    private List<JPanel> backgrondPanel = new ArrayList<>();
+    private final List<SpriteAnimation> spriteAnimations = new ArrayList<>();
+    private final List<String> descColors = new ArrayList<>();
+    private final List<String> titleColors = new ArrayList<>();
+    private final List<JPanel> backgroundPanels = new ArrayList<>();
     private final Engine engine;
     private String loadingText;
     private String loadingTitle;
     private final Timer loadingTimer;
     private final int dotLimit = 4;
     private JLabel loaderText, titleLabel;
-    private final int animationSpeed = 5;
-    private boolean isAnimating = false;
 
     private static final int FRAME_WIDTH = 500;
     private static final int FRAME_HEIGHT = 150;
+
+    private static final int ANIMATION_SPEED = 8;
+
+    private boolean animating = false;
 
     public LoadingManager(Engine engine, int index) {
         this.engine = engine;
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
-        for(LoadManagerAttributes attributes: engine.getEngineData().getLoadManager()){
-            this.spriteAnimation.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getSize().getWidth(), attributes.getBounds().getSize().getHeight())));
-            this.backgrondPanel.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor(), this.engine));
-            descColor.add(attributes.getDescColor());
-            titleColor.add(attributes.getTitleColor());
+        for (LoadManagerAttributes attributes : engine.getEngineData().getLoadManager()) {
+            spriteAnimations.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getSize().getWidth(), attributes.getBounds().getSize().getHeight())));
+            backgroundPanels.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor()));
+            descColors.add(attributes.getDescColor());
+            titleColors.add(attributes.getTitleColor());
         }
 
-        this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
+        loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
 
         initializeLoadingFrame(index);
     }
@@ -49,17 +52,17 @@ public class LoadingManager extends JFrame {
     private void initializeLoadingFrame(int index) {
         setUndecorated(true);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        SpriteAnimation currentLoader = spriteAnimation.get(index);
-        JPanel backgroundPanel = this.backgrondPanel.get(index);
+        SpriteAnimation currentLoader = spriteAnimations.get(index);
+        JPanel backgroundPanel = backgroundPanels.get(index);
         setContentPane(backgroundPanel);
 
         currentLoader.setBounds(currentLoader.getSpriteRect());
         backgroundPanel.add(currentLoader);
 
-        titleLabel = createLabel(loadingTitle, 23, new Rectangle(120, 50, 300, 20), backgroundPanel);
-        loaderText = createLabel(loadingText, 11, new Rectangle(120, 70, 400, 20), backgroundPanel);
-        loaderText.setForeground(hexToColor(descColor.get(index)));
-        titleLabel.setForeground(hexToColor(titleColor.get(index)));
+        titleLabel = createLabel(loadingTitle, 23, new Rectangle(120, 50, 300, 35), backgroundPanel);
+        loaderText = createLabel(loadingText, 11, new Rectangle(120, 75, 400, 20), backgroundPanel);
+        loaderText.setForeground(hexToColor(descColors.get(index)));
+        titleLabel.setForeground(hexToColor(titleColors.get(index)));
         setAlwaysOnTop(true);
 
         addFrameComponentListener();
@@ -67,7 +70,7 @@ public class LoadingManager extends JFrame {
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
     }
 
-    private JPanel createBackgroundPanel(String image, String color, Engine engine) {
+    private JPanel createBackgroundPanel(String image, String color) {
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -114,104 +117,75 @@ public class LoadingManager extends JFrame {
     }
 
     public void startLoading() {
-        setVisible(true);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        if (!isAnimating) {
-            startAnimation();
+        animateLoadingWindow(true);
+    }
+
+    public void stopLoading() {
+        animateLoadingWindow(false);
+    }
+
+    private void animateLoadingWindow(boolean isEntry) {
+        if (!animating) {
+            animating = true;
+            setVisible(true);
+
+            Point mainFrameCenter = getCenterPoint(engine.getFrame());
+            int startX = mainFrameCenter.x - getWidth() / 2;
+            int startY = isEntry ? engine.getFrame().getY() : getY();
+            int targetY = mainFrameCenter.y - getHeight() / 2;
+            float startOpacity = isEntry ? 0.0f : 1.0f;
+            float targetOpacity = isEntry ? 1.0f : 0.0f;
+            Timer animationTimer = new Timer(ANIMATION_SPEED, new ActionListener() {
+                int currentY = startY;
+                float currentOpacity = startOpacity;
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (isEntry) {
+                        if (currentY < targetY) {
+                            currentY += ANIMATION_SPEED;
+                            currentOpacity += 0.05f;
+                            currentOpacity = clampOpacity(currentOpacity);
+
+                            setLocation(startX, currentY);
+                            setOpacity(currentOpacity);
+                        } else {
+                            setLocation(startX, targetY);
+                            setOpacity(targetOpacity);
+                            ((Timer) e.getSource()).stop();
+                            animating = false;
+                            startLoadingAnimation();
+                        }
+                    } else {
+                        if (currentY > engine.getFrame().getY()) {
+                            currentY -= ANIMATION_SPEED;
+                            currentOpacity -= 0.05f;
+                            currentOpacity = clampOpacity(currentOpacity);
+
+                            setLocation(startX, currentY);
+                            setOpacity(currentOpacity);
+                        } else {
+                            setLocation(startX, engine.getFrame().getY());
+                            setOpacity(targetOpacity);
+                            ((Timer) e.getSource()).stop();
+                            animating = false;
+                            setVisible(false);
+                        }
+                    }
+                }
+            });
+            animationTimer.start();
         }
     }
 
-    private void startAnimation() {
-        isAnimating = true;
-        animateDown();
+    private float clampOpacity(float opacity) {
+        return Math.max(0.0f, Math.min(1.0f, opacity));
     }
 
-    private void animateDown() {
+
+    private void startLoadingAnimation() {
         loadingTimer.start();
-        updateLoadingFramePosition();
-
-        int targetY = engine.getFrame().getY() + engine.getFrame().getHeight() / 2 - getHeight() / 2;
-        int startY = engine.getFrame().getY();
-
-        Timer downTimer = new Timer(animationSpeed, new ActionListener() {
-            int currentY = startY;
-            final double acceleration = 0.12;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (currentY < targetY) {
-                    setLocation(getX(), currentY);
-                    currentY += acceleration * (targetY - currentY);
-
-                    float opacity = (currentY - startY) / (float) (targetY - startY);
-                    setOpacity(opacity);
-                } else {
-                    setLocation(getX(), targetY);
-                    setOpacity(1.0f);
-                    ((Timer) e.getSource()).stop();
-                    if (!loadingTimer.isRunning()) {
-                        oscillate();
-                    }
-                }
-            }
-        });
-        downTimer.start();
-    }
-
-    private void oscillate() {
-        int startX = getX();
-        int deltaY = 5;
-        int oscillationSpeed = 50;
-
-        Timer oscillationTimer = new Timer(oscillationSpeed, new ActionListener() {
-            int direction = 1;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setLocation(startX, getY() + direction * deltaY);
-                direction *= -1;
-
-                if (direction == 1) {
-                    setOpacity(1.0f);
-                }
-            }
-        });
-        oscillationTimer.setRepeats(false);
-        oscillationTimer.start();
-    }
-
-    private void animateUp() {
-        loadingTimer.start();
-        updateLoadingFramePosition();
-
-        Timer upTimer = new Timer(animationSpeed, new ActionListener() {
-            int targetHeight = 0;
-            float targetOpacity = 0.0f;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (getHeight() > targetHeight || getOpacity() > targetOpacity) {
-                    int newHeight = (int) (getHeight() * (1 - 0.12));
-                    float newOpacity = Math.max(0.0f, getOpacity() - 0.12f);
-
-                    setBounds(getX(), getY() - (getHeight() - newHeight), getWidth(), newHeight);
-                    setOpacity(newOpacity);
-                } else {
-                    ((Timer) e.getSource()).stop();
-                    stopLoading();
-                    setVisible(false);
-                }
-            }
-        });
-
-        upTimer.start();
-    }
-
-
-    public void setOpacity(float opacity) {
-        float clampedOpacity = Math.max(0.0f, Math.min(1.0f, opacity));
-        super.setOpacity(clampedOpacity);
-        repaint();
     }
 
     public void setLoadingText(String loadingText, String loadingTitle, int sleep) {
@@ -239,24 +213,15 @@ public class LoadingManager extends JFrame {
         sleepTimer.start();
     }
 
-
-    public void stopLoading() {
-        if (isAnimating) {
-            animateUp();
-            loadingTimer.stop();
-            isAnimating = false;
-        }
-    }
-
     public void toggleLoader() {
-        if (loadingTimer.isRunning()) {
+        if (isVisible()) {
             stopLoading();
-            this.dispose();
         } else {
             startLoading();
         }
     }
 
+    @SuppressWarnings("unused")
     public Timer getLoadingTimer() {
         return loadingTimer;
     }
