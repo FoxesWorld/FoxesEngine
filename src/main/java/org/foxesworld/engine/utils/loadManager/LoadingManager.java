@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-public class LoadingManager extends JFrame {
+public class LoadingManager extends JWindow {
 
     private final List<SpriteAnimation> spriteAnimations = new ArrayList<>();
     private final List<String> descColors = new ArrayList<>();
@@ -37,7 +37,6 @@ public class LoadingManager extends JFrame {
         this.engine = engine;
         loadingText = engine.getLANG().getString("loading.msg");
         loadingTitle = engine.getLANG().getString("loading.title");
-        setTitle(this.engine.getLANG().getString("loading.title"));
         for (LoadManagerAttributes attributes : engine.getEngineData().getLoadManager()) {
             spriteAnimations.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getSize().getWidth(), attributes.getBounds().getSize().getHeight())));
             backgroundPanels.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor()));
@@ -51,7 +50,6 @@ public class LoadingManager extends JFrame {
     }
 
     private void initializeLoadingFrame(int index) {
-        setUndecorated(true);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         SpriteAnimation currentLoader = spriteAnimations.get(index);
         JPanel backgroundPanel = backgroundPanels.get(index);
@@ -65,9 +63,8 @@ public class LoadingManager extends JFrame {
         loaderText.setForeground(hexToColor(descColors.get(index)));
         titleLabel.setForeground(hexToColor(titleColors.get(index)));
         setAlwaysOnTop(true);
-
+        setLocationRelativeTo(this.engine.getFrame());
         addFrameComponentListener();
-
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
     }
 
