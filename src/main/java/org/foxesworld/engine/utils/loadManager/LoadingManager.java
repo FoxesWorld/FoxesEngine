@@ -1,12 +1,14 @@
 package org.foxesworld.engine.utils.loadManager;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.utils.BezierCurve;
 import org.foxesworld.engine.utils.SpriteAnimation;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,6 @@ import java.util.List;
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class LoadingManager extends JWindow {
-
     private final List<SpriteAnimation> spriteAnimations = new ArrayList<>();
     private final List<String> descColors = new ArrayList<>();
     private final List<String> titleColors = new ArrayList<>();
@@ -26,10 +27,10 @@ public class LoadingManager extends JWindow {
     private final int dotLimit = 4;
     private JLabel loaderText, titleLabel;
 
-    private static final int FRAME_WIDTH = 500;
-    private static final int FRAME_HEIGHT = 150;
-
-    private static final int ANIMATION_SPEED = 8;
+    private final int FRAME_WIDTH = 500;
+    private final int FRAME_HEIGHT = 150;
+    private final int ANIMATION_DURATION = 300;
+    private final int ANIMATION_SPEED;
 
     private boolean animating = false;
 
@@ -45,7 +46,7 @@ public class LoadingManager extends JWindow {
         }
 
         loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
-
+        ANIMATION_SPEED = engine.getEngineData().getLoadManager()[index].getAnimSpeed();
         initializeLoadingFrame(index);
     }
 
@@ -114,15 +115,6 @@ public class LoadingManager extends JWindow {
         return new Point(centerX, centerY);
     }
 
-    public void startLoading() {
-        setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        animateLoadingWindow(true);
-    }
-
-    public void stopLoading() {
-        animateLoadingWindow(false);
-    }
-
     private void animateLoadingWindow(boolean isEntry) {
         if (!animating) {
             animating = true;
@@ -132,64 +124,53 @@ public class LoadingManager extends JWindow {
             int startX = mainFrameCenter.x - getWidth() / 2;
             int startY = isEntry ? engine.getFrame().getY() : getY();
             int targetY = mainFrameCenter.y - getHeight() / 2;
+            int endX = isEntry ? startX : engine.getFrame().getWidth();
             float startOpacity = isEntry ? 0.0f : 1.0f;
             float targetOpacity = isEntry ? 1.0f : 0.0f;
-            Timer animationTimer = new Timer(ANIMATION_SPEED, new ActionListener() {
-                int currentY = startY;
-                float currentOpacity = startOpacity;
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (isEntry) {
-                        if (currentY < targetY) {
-                            currentY += ANIMATION_SPEED;
-                            currentOpacity += 0.05f;
-                            currentOpacity = clampOpacity(currentOpacity);
-
-                            setLocation(startX, currentY);
-                            setOpacity(currentOpacity);
-                        } else {
-                            setLocation(startX, targetY);
-                            setOpacity(targetOpacity);
-                            ((Timer) e.getSource()).stop();
-                            animating = false;
-                            startLoadingAnimation();
-                        }
-                    } else {
-                        if (currentY > engine.getFrame().getY()) {
-                            currentY -= ANIMATION_SPEED;
-                            currentOpacity -= 0.05f;
-                            currentOpacity = clampOpacity(currentOpacity);
-
-                            setLocation(startX, currentY);
-                            setOpacity(currentOpacity);
-                        } else {
-                            setLocation(startX, engine.getFrame().getY());
-                            setOpacity(targetOpacity);
-                            ((Timer) e.getSource()).stop();
-                            animating = false;
-                            setVisible(false);
-                        }
-                    }
+            KeyframeAnimation animation = new KeyframeAnimation(this, ANIMATION_DURATION / ANIMATION_SPEED, () -> {
+                animating = false;
+                if (!isEntry) {
+                    setVisible(false);
                 }
             });
-            animationTimer.start();
+
+            if (isEntry) {
+                addEntryAnimationFrames(animation, startX, startY, targetY, startOpacity, targetOpacity);
+            } else {
+                addExitAnimationFrames(animation, startX, endX, targetY, startOpacity, targetOpacity);
+            }
+
+            animation.start();
         }
     }
 
-    private float clampOpacity(float opacity) {
-        return Math.max(0.0f, Math.min(1.0f, opacity));
+    private void addEntryAnimationFrames(KeyframeAnimation animation, int startX, int startY, int targetY, float startOpacity, float targetOpacity) {
+        BezierCurve curve = new BezierCurve(new Point2D.Float(startX, startY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY));
+        for (int i = 0; i < ANIMATION_SPEED; i++) {
+            float t = (float) i / (ANIMATION_SPEED - 1);
+            Point2D.Float point = curve.compute(t);
+            float opacity = startOpacity + (targetOpacity - startOpacity) * t;
+            animation.addKeyframe(opacity, new Point((int) point.getX(), (int) point.getY()), ANIMATION_DURATION / ANIMATION_SPEED);
+        }
     }
 
-
-    private void startLoadingAnimation() {
-        loadingTimer.start();
+    private void addExitAnimationFrames(KeyframeAnimation animation, int startX, int endX, int targetY, float startOpacity, float targetOpacity) {
+        BezierCurve curve = new BezierCurve(new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(endX, targetY), new Point2D.Float(endX, targetY));
+        for (int i = 0; i < ANIMATION_SPEED; i++) {
+            float t = (float) i / (ANIMATION_SPEED - 1);
+            Point2D.Float point = curve.compute(t);
+            float opacity = startOpacity + (targetOpacity - startOpacity) * t;
+            animation.addKeyframe(opacity, new Point((int) point.getX(), (int) point.getY()), ANIMATION_DURATION / ANIMATION_SPEED);
+        }
     }
 
     public void setLoadingText(String loadingText, String loadingTitle, int sleep) {
         this.loadingText = engine.getLANG().getString(loadingText);
         this.loadingTitle = engine.getLANG().getString(loadingTitle);
-        loaderText.setText(this.loadingText);
+        SwingUtilities.invokeLater(() -> {
+            loaderText.setText(this.loadingText);
+            titleLabel.setText(this.loadingTitle);
+        });
 
         Timer dotsTimer = new Timer(1000, new ActionListener() {
             int dotCount = 0;
@@ -197,7 +178,9 @@ public class LoadingManager extends JWindow {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dotCount++;
-                titleLabel.setText(loadingTitle + ".".repeat(dotCount));
+                SwingUtilities.invokeLater(() -> {
+                    titleLabel.setText(loadingTitle + ".".repeat(dotCount));
+                });
                 if (dotCount >= dotLimit) {
                     ((Timer) e.getSource()).stop();
                 }
@@ -211,11 +194,13 @@ public class LoadingManager extends JWindow {
         sleepTimer.start();
     }
 
+
     public void toggleLoader() {
         if (isVisible()) {
-            stopLoading();
+            animateLoadingWindow(false);
         } else {
-            startLoading();
+            setSize(FRAME_WIDTH, FRAME_HEIGHT);
+            animateLoadingWindow(true);
         }
     }
 

@@ -5,7 +5,7 @@ import org.foxesworld.engine.gui.components.Bounds;
 @SuppressWarnings("unused")
 public class LoadManagerAttributes {
     private String spritePath, bgPath, blurColor, titleColor, descColor;
-    private int rows, cols,delay;
+    private int rows, cols,delay,animSpeed;
     private Bounds bounds;
     public String getSpritePath() {
         return spritePath;
@@ -24,6 +24,9 @@ public class LoadManagerAttributes {
     }
     public int getDelay() {
         return delay;
+    }
+    public int getAnimSpeed() {
+        return animSpeed;
     }
     public Bounds getBounds() {
         return bounds;

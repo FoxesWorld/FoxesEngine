@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import javax.imageio.ImageIO;
 
+@SuppressWarnings("unused")
 public class GraphicsUtilities {
 
     private GraphicsUtilities() {
