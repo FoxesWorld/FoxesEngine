@@ -31,6 +31,7 @@ public class LoadingManager extends JWindow {
     private final int FRAME_HEIGHT = 150;
     private final int ANIMATION_DURATION = 300;
     private final int ANIMATION_SPEED;
+    private BezierCurve curve;
 
     private boolean animating = false;
 
@@ -133,7 +134,7 @@ public class LoadingManager extends JWindow {
                     setVisible(false);
                 }
             });
-
+            curve = new BezierCurve(new Point2D.Float(startX, startY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY));
             if (isEntry) {
                 addEntryAnimationFrames(animation, startX, startY, targetY, startOpacity, targetOpacity);
             } else {
@@ -145,7 +146,7 @@ public class LoadingManager extends JWindow {
     }
 
     private void addEntryAnimationFrames(KeyframeAnimation animation, int startX, int startY, int targetY, float startOpacity, float targetOpacity) {
-        BezierCurve curve = new BezierCurve(new Point2D.Float(startX, startY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY));
+        //curve = new BezierCurve(new Point2D.Float(startX, startY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY));
         for (int i = 0; i < ANIMATION_SPEED; i++) {
             float t = (float) i / (ANIMATION_SPEED - 1);
             Point2D.Float point = curve.compute(t);
@@ -155,7 +156,7 @@ public class LoadingManager extends JWindow {
     }
 
     private void addExitAnimationFrames(KeyframeAnimation animation, int startX, int endX, int targetY, float startOpacity, float targetOpacity) {
-        BezierCurve curve = new BezierCurve(new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(endX, targetY), new Point2D.Float(endX, targetY));
+        //curve = new BezierCurve(new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(endX, targetY), new Point2D.Float(endX, targetY));
         for (int i = 0; i < ANIMATION_SPEED; i++) {
             float t = (float) i / (ANIMATION_SPEED - 1);
             Point2D.Float point = curve.compute(t);
