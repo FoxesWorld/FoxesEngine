@@ -53,6 +53,17 @@ java {
     withSourcesJar()
 }
 
+task copyDll(type: Copy) {
+    from configurations.runtimeClasspath
+    into project.buildDir
+    include "*.dll"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+run {
+    systemProperty 'java.library.path', 'lib'
+}
+
 dependencies {
     implementation files('lib/foxesworld/cfgProvider-2.1.3-STABLE.jar')
     implementation files('lib/java-discord-rpc-2.0.2-all.jar')
