@@ -10,16 +10,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class LoadingManager extends JWindow {
-    private final List<SpriteAnimation> spriteAnimations = new ArrayList<>();
-    private final List<String> descColors = new ArrayList<>();
-    private final List<String> titleColors = new ArrayList<>();
-    private final List<JPanel> backgroundPanels = new ArrayList<>();
+    private final List<LoadManagerAttributes> attributesList;
     private final Engine engine;
     private String loadingText;
     private String loadingTitle;
@@ -27,8 +23,8 @@ public class LoadingManager extends JWindow {
     private final int dotLimit = 4;
     private JLabel loaderText, titleLabel;
 
-    private final int FRAME_WIDTH = 500;
-    private final int FRAME_HEIGHT = 150;
+    private static final int FRAME_WIDTH = 500;
+    private static final int FRAME_HEIGHT = 150;
     private final int ANIMATION_DURATION = 300;
     private final int ANIMATION_SPEED;
     private BezierCurve curve;
@@ -37,35 +33,37 @@ public class LoadingManager extends JWindow {
 
     public LoadingManager(Engine engine, int index) {
         this.engine = engine;
-        loadingText = engine.getLANG().getString("loading.msg");
-        loadingTitle = engine.getLANG().getString("loading.title");
-        for (LoadManagerAttributes attributes : engine.getEngineData().getLoadManager()) {
-            spriteAnimations.add(new SpriteAnimation(engine, attributes.getSpritePath(), attributes.getRows(), attributes.getCols(), attributes.getDelay(), new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(), attributes.getBounds().getSize().getWidth(), attributes.getBounds().getSize().getHeight())));
-            backgroundPanels.add(createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor()));
-            descColors.add(attributes.getDescColor());
-            titleColors.add(attributes.getTitleColor());
-        }
+        this.attributesList = List.of(engine.getEngineData().getLoadManager());
+        this.loadingText = engine.getLANG().getString("loading.msg");
+        this.loadingTitle = engine.getLANG().getString("loading.title");
 
-        loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
-        ANIMATION_SPEED = engine.getEngineData().getLoadManager()[index].getAnimSpeed();
+        this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
+        this.ANIMATION_SPEED = attributesList.get(index).getAnimSpeed();
+
         initializeLoadingFrame(index);
     }
 
     private void initializeLoadingFrame(int index) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        SpriteAnimation currentLoader = spriteAnimations.get(index);
-        JPanel backgroundPanel = backgroundPanels.get(index);
-        setContentPane(backgroundPanel);
 
+        LoadManagerAttributes attributes = attributesList.get(index);
+        JPanel backgroundPanel = createBackgroundPanel(attributes.getBgPath(), attributes.getBlurColor());
+        SpriteAnimation currentLoader = new SpriteAnimation(engine, attributes.getSpritePath(),
+                attributes.getRows(), attributes.getCols(), attributes.getDelay(),
+                new Rectangle(attributes.getBounds().getX(), attributes.getBounds().getY(),
+                        attributes.getBounds().getSize().getWidth(), attributes.getBounds().getSize().getHeight()));
+
+        setContentPane(backgroundPanel);
         currentLoader.setBounds(currentLoader.getSpriteRect());
         backgroundPanel.add(currentLoader);
 
         titleLabel = createLabel(loadingTitle, 23, new Rectangle(120, 50, 300, 35), backgroundPanel);
         loaderText = createLabel(loadingText, 11, new Rectangle(120, 75, 400, 20), backgroundPanel);
-        loaderText.setForeground(hexToColor(descColors.get(index)));
-        titleLabel.setForeground(hexToColor(titleColors.get(index)));
+        loaderText.setForeground(hexToColor(attributes.getDescColor()));
+        titleLabel.setForeground(hexToColor(attributes.getTitleColor()));
+
         setAlwaysOnTop(true);
-        setLocationRelativeTo(this.engine.getFrame());
+        setLocationRelativeTo(engine.getFrame());
         addFrameComponentListener();
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
     }
@@ -122,45 +120,38 @@ public class LoadingManager extends JWindow {
             setVisible(true);
 
             Point mainFrameCenter = getCenterPoint(engine.getFrame());
-            int startX = mainFrameCenter.x - getWidth() / 2;
-            int startY = isEntry ? engine.getFrame().getY() : getY();
-            int targetY = mainFrameCenter.y - getHeight() / 2;
+            int startX = mainFrameCenter.x - this.getWidth() / 2;
+            int startY = isEntry ? engine.getFrame().getY() - this.getHeight() : getY();
+            int targetY = mainFrameCenter.y - this.getHeight() / 2;
             int endX = isEntry ? startX : engine.getFrame().getWidth();
             float startOpacity = isEntry ? 0.0f : 1.0f;
             float targetOpacity = isEntry ? 1.0f : 0.0f;
+
             KeyframeAnimation animation = new KeyframeAnimation(this, ANIMATION_DURATION / ANIMATION_SPEED, () -> {
                 animating = false;
                 if (!isEntry) {
                     setVisible(false);
                 }
             });
-           if (isEntry) {
-                addEntryAnimationFrames(animation, startX, startY, targetY, startOpacity, targetOpacity);
-            } else {
-                addExitAnimationFrames(animation, startX, endX, targetY, startOpacity, targetOpacity);
-            }
 
+            addAnimationFrames(animation, startX, endX, startY, targetY, startOpacity, targetOpacity, isEntry);
             animation.start();
         }
     }
 
-    private void addEntryAnimationFrames(KeyframeAnimation animation, int startX, int startY, int targetY, float startOpacity, float targetOpacity) {
-        curve = new BezierCurve(new Point2D.Float(startX, startY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY));
+    private void addAnimationFrames(KeyframeAnimation animation, int startX, int endX, int startY, int targetY, float startOpacity, float targetOpacity, boolean isEntry) {
         for (int i = 0; i < ANIMATION_SPEED; i++) {
             float t = (float) i / (ANIMATION_SPEED - 1);
-            Point2D.Float point = curve.compute(t);
-            float opacity = startOpacity + (targetOpacity - startOpacity) * t;
-            animation.addKeyframe(opacity, new Point((int) point.getX(), (int) point.getY()), ANIMATION_DURATION / ANIMATION_SPEED);
-        }
-    }
 
-    private void addExitAnimationFrames(KeyframeAnimation animation, int startX, int endX, int targetY, float startOpacity, float targetOpacity) {
-        curve = new BezierCurve(new Point2D.Float(startX, targetY), new Point2D.Float(startX, targetY), new Point2D.Float(endX, targetY), new Point2D.Float(endX, targetY));
-        for (int i = 0; i < ANIMATION_SPEED; i++) {
-            float t = (float) i / (ANIMATION_SPEED - 1);
-            Point2D.Float point = curve.compute(t);
+            // Calculating current position
+            int x = isEntry ? startX : (int) (startX + (endX - startX) * t);
+            int y = isEntry ? (int) (startY + (targetY - startY) * t) : targetY;
+
+            // Calculating current opacity
             float opacity = startOpacity + (targetOpacity - startOpacity) * t;
-            animation.addKeyframe(opacity, new Point((int) point.getX(), (int) point.getY()), ANIMATION_DURATION / ANIMATION_SPEED);
+
+            // Adding keyframe
+            animation.addKeyframe(opacity, new Point(x, y), ANIMATION_DURATION / ANIMATION_SPEED);
         }
     }
 
@@ -171,29 +162,7 @@ public class LoadingManager extends JWindow {
             loaderText.setText(this.loadingText);
             titleLabel.setText(this.loadingTitle);
         });
-
-        Timer dotsTimer = new Timer(1000, new ActionListener() {
-            int dotCount = 0;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dotCount++;
-                SwingUtilities.invokeLater(() -> {
-                    titleLabel.setText(loadingTitle + ".".repeat(dotCount));
-                });
-                if (dotCount >= dotLimit) {
-                    ((Timer) e.getSource()).stop();
-                }
-            }
-        });
-
-        dotsTimer.start();
-
-        Timer sleepTimer = new Timer(sleep, e -> dotsTimer.stop());
-        sleepTimer.setRepeats(true);
-        sleepTimer.start();
     }
-
 
     public void toggleLoader() {
         if (isVisible()) {
