@@ -143,17 +143,26 @@ public class LoadingManager extends JWindow {
         for (int i = 0; i < ANIMATION_SPEED; i++) {
             float t = (float) i / (ANIMATION_SPEED - 1);
 
-            // Calculating current position
-            int x = isEntry ? startX : (int) (startX + (endX - startX) * t);
-            int y = isEntry ? (int) (startY + (targetY - startY) * t) : targetY;
+            // Using easing
+            float easedT = easeInOut(t);
 
-            // Calculating current opacity
-            float opacity = startOpacity + (targetOpacity - startOpacity) * t;
+            // Get current pos
+            int x = isEntry ? startX : (int) (startX + (endX - startX) * easedT);
+            int y = isEntry ? (int) (startY + (targetY - startY) * easedT) : targetY;
+
+            // Get current opasity
+            float opacity = startOpacity + (targetOpacity - startOpacity) * easedT;
 
             // Adding keyframe
             animation.addKeyframe(opacity, new Point(x, y), ANIMATION_DURATION / ANIMATION_SPEED);
         }
     }
+
+    // Non-linear method for (ease-in-out)
+    private float easeInOut(float t) {
+        return (float) (-0.5 * (Math.cos(Math.PI * t) - 1));
+    }
+
 
     public void setLoadingText(String loadingText, String loadingTitle, int sleep) {
         this.loadingText = engine.getLANG().getString(loadingText);
