@@ -1,41 +1,33 @@
 {
   "styles": {
     "button": {
-      "buttonMain": {
-        "name": "Woodpecker spirit",
+      "buttonGreen": {
+        "name": "Green Emerald",
         "font": "FSElliotPro-Heavy",
         "fontSize": 12,
-        "width": 101,
-        "height": 164,
-        "borderRadius": 10,
-        "color": "#807159",
-        "hoverColor": "#efa532",
+        "color": "#ffffff",
         "align": "CENTER",
-        "texture": "assets/ui/components/button/btnMain.png"
+        "texture": "assets/ui/button/buttonGreen.png"
       },
-      "btnSmallClean": {
-        "name": "Woodpecker spirit",
-        "font": "mcfont",
-        "fontSize": 12,
-        "width": 81,
-        "height": 136,
-        "borderRadius": 5,
-        "color": "#807159",
-        "hoverColor": "#efa532",
-        "align": "LEFT",
-        "texture": "assets/ui/components/button/btnSmallClean.png"
-
-      },
-      "btnBig": {
-        "name": "Woodpecker spirit",
+      "buttonRed": {
+        "name": "Red Lava",
         "font": "FSElliotPro-Heavy",
         "fontSize": 12,
-        "width": 101,
-        "height": 164,
-        "color": "#807159",
-        "hoverColor": "#efa532",
+        "width": 120,
+        "height": 34,
+        "color": "#ffffff",
         "align": "CENTER",
-        "texture": "assets/ui/components/button/btnBig.png"
+        "texture": "assets/ui/button/buttonRed.png"
+      },
+      "transparent": {
+        "name": "Red Lava",
+        "font": "",
+        "fontSize": 12,
+        "width": 120,
+        "height": 34,
+        "color": "#ffffff",
+        "align": "CENTER",
+        "texture": "assets/ui/button/transparent.png"
       }
     }
   }

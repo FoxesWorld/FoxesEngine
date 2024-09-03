@@ -2,20 +2,17 @@
   "styles": {
     "progressBar": {
       "progress": {
-        "opaque": false,
-        "name": "Let's Rule the file kingdom!",
+        "name": "Let's Rule",
         "background": "#5e6959",
         "color": "#b0976b",
-        "borderColor": "#183824",
-        "texture": "assets/ui/components/progressBar/progressBar.png"
+        "borderColor": "#E5E5E5"
       },
       "progressMini": {
-        "opaque": false,
-        "name": "Let's get some files",
+        "name": "Black Betty",
         "background": "#ff6188",
         "color": "#ffee61",
         "borderColor": "#183824",
-        "texture": "assets/ui/components/progressBar/progressBarMini.png"
+        "texture": "assets/ui/progress/progressBarMini.png"
       }
     }
   }

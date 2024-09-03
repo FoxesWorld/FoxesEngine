@@ -1,29 +1,24 @@
 {
   "styles": {
     "label": {
-      "promptLabel": {
-        "opaque": false,
-        "float": "right",
+      "updateStatus": {
         "name": "Pumpkin Power",
-        "font": "FSElliotPro-Heavy",
-        "color": "#ffffff"
+        "font": "FSElliotPro",
+        "color": "#f3d88a"
       },
-      "heading": {
-        "opaque": false,
-        "name": "Naming the space",
-        "font": "Primary",
-        "color": "#e3e0c585"
+      "updateTitle": {
+        "name": "Bald Power",
+        "font": "FSElliotPro-Bold",
+        "color": "#E5E5E5"
+      },
+      "updateVer": {
+        "name": "Version Power",
+        "font": "mcfont",
+        "color": "#E5E5E5"
       },
       "title": {
-        "opaque": false,
         "name": "Title",
-        "font": "mcfont",
-        "color": "#da3156"
-      },
-      "titleBold": {
-        "opaque": false,
-        "name": "Title",
-        "font": "mcfontBold",
+        "font": "FSElliotPro-Heavy",
         "color": "#da3156"
       }
     }
