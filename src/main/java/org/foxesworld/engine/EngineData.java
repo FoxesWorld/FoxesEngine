@@ -1,6 +1,5 @@
 package org.foxesworld.engine;
 
-@SuppressWarnings("unused")
 public class EngineData {
     
     private String bindUrl;

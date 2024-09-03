@@ -92,7 +92,7 @@ public class DownloadUtils {
                     outputStream.write(buffer, 0, read);
                     downloaded += read;
                     int progress = (int) ((downloaded * 100) / fileSize);
-                    String loadProgress = downloaded / (1024 * 1024) + "Mb /" + fileSize / (1024 * 1024) + "Mb";
+                    String loadProgress = formatFileSize(downloaded) + " / " + formatFileSize(fileSize);
                     SwingUtilities.invokeLater(() -> {
                         progressLabel.setText(loadProgress);
                         progressBar.setValue(progress);
@@ -107,13 +107,29 @@ public class DownloadUtils {
                 progressBar.setVisible(false);
                 progressLabel.setVisible(false);
                 progressBar.setValue(0);
-                //engine.getUpdater().setInfo("download.downloaded", fileName);
+                engine.getUpdater().setInfo("download.downloaded", fileName);
                 downloadListener.onFileDownloaded();
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private String formatFileSize(long sizeInBytes) {
+        if (sizeInBytes < 1024) {
+            return sizeInBytes + " bytes";
+        } else if (sizeInBytes < 1024 * 1024) {
+            double sizeInKb = sizeInBytes / 1024.0;
+            return String.format("%.2f KB", sizeInKb);
+        } else if (sizeInBytes < 1024 * 1024 * 1024) {
+            double sizeInMb = sizeInBytes / (1024.0 * 1024.0);
+            return String.format("%.2f MB", sizeInMb);
+        } else {
+            double sizeInGb = sizeInBytes / (1024.0 * 1024.0 * 1024.0);
+            return String.format("%.2f GB", sizeInGb);
+        }
+    }
+
 
 
     private String extractFileNameFromUrl(URL url) {
@@ -139,7 +155,7 @@ public class DownloadUtils {
             for (ZipEntry entry : zippedFiles) {
                 fileName = entry.getName();
                 File outFile = new File(destinationDir, fileName);
-                //engine.getUpdater().setInfo("download.unpacking", fileName);
+                engine.getUpdater().setInfo("download.unpacking", fileName);
                 try (InputStream inputStream = zipFile.getInputStream(entry);
                      OutputStream outputStream = Files.newOutputStream(outFile.toPath())) {
                     if (!outFile.getParentFile().exists()) {
@@ -157,14 +173,14 @@ public class DownloadUtils {
         }
 
         new File(zipFilePath).delete();
-        //engine.getUpdater().setInfo("download.unpacked", fileName);
+        engine.getUpdater().setInfo("download.unpacked", fileName);
         downloadListener.onFileUnpacked(fileName);
     }
 
     private void publish(int progress, String fileName) {
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue(progress);
-            //engine.getUpdater().setInfo("download.downloading", fileName);
+            engine.getUpdater().setInfo("download.downloading", fileName);
         });
     }
 

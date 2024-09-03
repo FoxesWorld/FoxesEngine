@@ -18,9 +18,10 @@ import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
 import org.foxesworld.engine.gui.components.scrollBox.ScrollBox;
 import org.foxesworld.engine.gui.components.scrollBox.ScrollBoxStyle;
 import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
-import org.foxesworld.engine.gui.components.textfield.TextField;
-import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
+import org.foxesworld.engine.gui.components.textfield.Textfield;
+import org.foxesworld.engine.gui.components.textfield.TextfieldStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
+import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.ImageUtils;
 
@@ -33,13 +34,14 @@ public class ComponentFactory {
     public Engine engine;
     private LanguageProvider LANG;
     private Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
-    private TextFieldStyle textfieldStyle;
+    private TextfieldStyle textfieldStyle;
     private PassFieldStyle passfieldStyle;
     private ProgressBarStyle progressBarStyle;
     private LabelStyle labelStyle;
     private ButtonStyle buttonStyle;
     private CheckboxStyle checkboxStyle;
     private MultiButtonStyle multiButtonStyle;
+    private ComponentAttributes componentAttributes;
     private ScrollBoxStyle scrollBoxStyle;
     public StyleAttributes style = null;
 
@@ -55,6 +57,7 @@ public class ComponentFactory {
             }
             style = componentStyles.get(componentAttributes.componentType).get(componentAttributes.componentStyle);
         }
+        this.componentAttributes = componentAttributes;
         String[] bounds = componentAttributes.bounds.split(",");
         int xPos = Integer.parseInt(bounds[0]);
         int yPos = Integer.parseInt(bounds[1]);
@@ -99,8 +102,8 @@ public class ComponentFactory {
                 return checkbox;
 
             case "textField":
-                textfieldStyle = new TextFieldStyle(this);
-                TextField textfield = new TextField(LANG.getString(componentAttributes.localeKey));
+                textfieldStyle = new TextfieldStyle(this);
+                Textfield textfield = new Textfield(LANG.getString(componentAttributes.localeKey));
                 textfieldStyle.apply(textfield);
                 textfield.setName(componentAttributes.componentId);
                 textfield.setBounds(xPos, yPos, textfieldStyle.width, textfieldStyle.height);
@@ -119,8 +122,7 @@ public class ComponentFactory {
                 return passfield;
 
             case "spriteImage":
-                SpriteAnimation spriteAnimation = new SpriteAnimation(componentAttributes);
-                spriteAnimation.setOpaque(false);
+                SpriteAnimation spriteAnimation = new SpriteAnimation(this);
                 spriteAnimation.setBounds(xPos,yPos,width,height);
                 spriteAnimation.setName(componentAttributes.componentId);
                 return  spriteAnimation;
@@ -159,5 +161,9 @@ public class ComponentFactory {
 
             default: throw new IllegalArgumentException("Unsupported component type: " + componentAttributes.componentType);
         }
+    }
+
+    public ComponentAttributes getComponentAttributes() {
+        return componentAttributes;
     }
 }
