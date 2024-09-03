@@ -5,8 +5,6 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.foxesworld.APP;
-import org.foxesworld.cfgProvider.CfgProvider;
 import org.foxesworld.engine.action.ActionHandler;
 import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.gui.GuiBuilder;
@@ -16,7 +14,6 @@ import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.FontUtils;
-import org.foxesworld.updater.Updater;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +44,7 @@ public class Engine extends JFrame implements ActionListener {
     private Map<String, Map<String, StyleAttributes>> elementStyles = new HashMap<>();
     private final Frame frame;
     //private DownloadUtils download;
-    private Updater updater;
+    //private Updater updater;
     private final String[] configFiles = new String[]{ "internal/config"};
     private boolean init = false;
 
@@ -55,7 +52,7 @@ public class Engine extends JFrame implements ActionListener {
         this.app = app;
         this.engineData = new EngineData();
         initEngineValues("engine.json");
-        LOGGER = LogManager.getLogger(APP.class);
+        LOGGER = LogManager.getLogger(Engine.class);
         LOGGER.info("Started "+engineData.getUpdaterBrand()+'-'+engineData.getUpdaterVersion());
         Configurator.setLevel(LOGGER.getName(), Level.valueOf("DEBUG"));
         System.setProperty("log.dir",  System.getProperty("user.dir"));//CfgProvider.getGameFullPath());
@@ -78,7 +75,7 @@ public class Engine extends JFrame implements ActionListener {
         this.loadMainPanel(this.app);
         this.actionHandler = new ActionHandler(this);
         //this.download = new DownloadUtils(this);
-        this.updater = new Updater(this);
+        //this.updater = new Updater(this);
         init = true;
     }
 
@@ -162,7 +159,6 @@ public class Engine extends JFrame implements ActionListener {
     public GuiBuilder getGuiBuilder() {
         return guiBuilder;
     }
-
     public EngineData getEngineData() {
         return engineData;
     }
@@ -187,13 +183,8 @@ public class Engine extends JFrame implements ActionListener {
     public Config getConfig() {
         return config;
     }
-
     public void setEngineData(EngineData engineData) {
         this.engineData = engineData;
-    }
-
-    public Updater getUpdater() {
-        return updater;
     }
     public StyleProvider getStyleProvider() {
         return styleProvider;

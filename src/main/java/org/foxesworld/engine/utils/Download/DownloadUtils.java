@@ -107,7 +107,7 @@ public class DownloadUtils {
                 progressBar.setVisible(false);
                 progressLabel.setVisible(false);
                 progressBar.setValue(0);
-                engine.getUpdater().setInfo("download.downloaded", fileName);
+                //engine.getUpdater().setInfo("download.downloaded", fileName);
                 downloadListener.onFileDownloaded();
             });
         } catch (IOException e) {
@@ -139,7 +139,7 @@ public class DownloadUtils {
             for (ZipEntry entry : zippedFiles) {
                 fileName = entry.getName();
                 File outFile = new File(destinationDir, fileName);
-                engine.getUpdater().setInfo("download.unpacking", fileName);
+                //engine.getUpdater().setInfo("download.unpacking", fileName);
                 try (InputStream inputStream = zipFile.getInputStream(entry);
                      OutputStream outputStream = Files.newOutputStream(outFile.toPath())) {
                     if (!outFile.getParentFile().exists()) {
@@ -157,14 +157,14 @@ public class DownloadUtils {
         }
 
         new File(zipFilePath).delete();
-        engine.getUpdater().setInfo("download.unpacked", fileName);
+        //engine.getUpdater().setInfo("download.unpacked", fileName);
         downloadListener.onFileUnpacked(fileName);
     }
 
     private void publish(int progress, String fileName) {
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue(progress);
-            engine.getUpdater().setInfo("download.downloading", fileName);
+            //engine.getUpdater().setInfo("download.downloading", fileName);
         });
     }
 

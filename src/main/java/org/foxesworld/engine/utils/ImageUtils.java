@@ -19,7 +19,7 @@ public class ImageUtils {
                 return imgs.get(name);
             }
 
-            BufferedImage img = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream(name));
+            BufferedImage img = ImageIO.read(ImageUtils.class.getClassLoader().getResourceAsStream(name));
             imgs.put(name, img);
             return img;
         } catch (Exception e) {
