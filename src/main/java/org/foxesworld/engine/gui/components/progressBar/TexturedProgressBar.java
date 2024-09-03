@@ -1,6 +1,5 @@
 package org.foxesworld.engine.gui.components.progressBar;
 
-import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
@@ -10,10 +9,8 @@ import java.awt.image.BufferedImage;
 
 class TexturedProgressBar extends BasicProgressBarUI {
     private final String textureImagePath;
-    private final  ComponentFactory componentFactory;
 
-    public TexturedProgressBar(ComponentFactory componentFactory, String textureImagePath) {
-        this.componentFactory = componentFactory;
+    public TexturedProgressBar(String textureImagePath) {
         this.textureImagePath = textureImagePath;
     }
 
@@ -27,7 +24,7 @@ class TexturedProgressBar extends BasicProgressBarUI {
         int barWidth = progressBar.getWidth();
         int barHeight = progressBar.getHeight();
 
-        BufferedImage texture = this.componentFactory.engine.getImageUtils().genButton(barWidth, barHeight, this.componentFactory.engine.getImageUtils().getLocalImage(textureImagePath));
+        BufferedImage texture = ImageUtils.genButton(barWidth, barHeight, ImageUtils.getLocalImage(textureImagePath));
 
         int progressWidth = (int) (barWidth * progressBar.getPercentComplete());
 

@@ -2,7 +2,7 @@ package org.foxesworld.engine.gui.components.label;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
@@ -14,10 +14,10 @@ public class LabelStyle {
 	public Color activeColor;
 
 	public LabelStyle(ComponentFactory componentFactory) {
-		this.fontName = componentFactory.style.getFont();
-		this.fontSize = componentFactory.style.getFontSize();
-		this.idleColor = hexToColor(componentFactory.style.getColor());
-		this.activeColor = hexToColor(componentFactory.style.getColor());
+		this.fontName = componentFactory.style.font;
+		this.fontSize = componentFactory.style.fontSize;
+		this.idleColor = hexToColor(componentFactory.style.color);
+		this.activeColor = hexToColor(componentFactory.style.color);
 	}
 
 	public void apply(Label label) {

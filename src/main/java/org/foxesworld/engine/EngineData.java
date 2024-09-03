@@ -1,103 +1,41 @@
 package org.foxesworld.engine;
 
-import com.google.gson.Gson;
-import org.foxesworld.engine.utils.HTTP.RequestProperty;
-import org.foxesworld.engine.utils.loadManager.LoadManagerAttributes;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
+@SuppressWarnings("unused")
 public class EngineData {
-    private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
-    private String[] styles;
+    
+    private String bindUrl;
+    private  String updaterBrand;
+    private  String updaterVersion;
+    private String launcherWebPath;
+    private  String updaterWebPath;
+    private String launcherRuntime;
+    private  String runtimeWebPath;
 
-    private DownloadManager downloadManager;
-    private LoadManagerAttributes loadManager[];
-    private List<RequestProperty> requestProperties;
-    private String[] tweakClasses;
-    private Map<String, Object> files;
     public String getBindUrl() {
         return bindUrl;
     }
-    public String getLauncherBrand() {
-        return launcherBrand;
-    }
-    public String getLauncherVersion() {
-        return launcherVersion;
-    }
-    public String getAppId() {
-        return appId;
-    }
-    public String getAccessToken() {
-        return accessToken;
-    }
-    public String getGroupDomain() {
-        return groupDomain;
-    }
-    public String getVkAPIversion() {
-        return vkAPIversion;
+
+    public String getUpdaterBrand() {
+        return updaterBrand;
     }
 
-    public DownloadManager getDownloadManager() {
-        return downloadManager;
-    }
-    public LoadManagerAttributes[] getLoadManager() { return  loadManager;};
-    public List<RequestProperty> getRequestProperties() {
-        return requestProperties;
-    }
-    public String[] getTweakClasses() {
-        return tweakClasses;
-    }
-    public String getLogLevel() {
-        return logLevel;
-    }
-    public String getProgramRuntime() {
-        return programRuntime;
-    }
-    public Map<String, Object> getFiles() {
-        return files;
+    public String getUpdaterVersion() {
+        return updaterVersion;
     }
 
-    public String[] getStyles() {
-        return styles;
+    public String getLauncherWebPath() {
+        return launcherWebPath;
+    }
+    
+    public String getUpdaterWebPath() {
+        return updaterWebPath;
+    }
+    
+    public String getLauncherRuntime() {
+        return launcherRuntime;
     }
 
-
-    public static class DownloadManager {
-        private int downloadThreads;
-        private List<ReplaceMask> replaceMasks;
-
-        public int getDownloadThreads() {
-            return downloadThreads;
-        }
-
-        public List<ReplaceMask> getReplaceMasks() {
-            return replaceMasks;
-        }
-    }
-
-    public static class ReplaceMask {
-        private String mask;
-        private String replace;
-
-        public String getMask() {
-            return mask;
-        }
-
-        public String getReplace() {
-            return replace;
-        }
-    }
-
-    public EngineData initEngineValues(String propertyPath) {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(propertyPath);
-        if (inputStream != null) {
-            InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            return new Gson().fromJson(reader, EngineData.class);
-        }
-        return null;
+    public String getRuntimeWebPath() {
+        return runtimeWebPath;
     }
 }

@@ -10,24 +10,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-@SuppressWarnings("unused")
 public class LanguageProvider {
+    private final Engine app;
+    private final String currentLang;
     private final Map<String, Map<String, String>> localizationData = new HashMap<>();
-    private final Set<String> sectionsSet = new HashSet<>();
-    private final Set<String> localesSet = new HashSet<>();
-    private int localeIndex = 0;
-    private String currentLang;
 
-    public LanguageProvider(Engine engine, String langFilePath, String locale) {
-        this.currentLang = locale;
-
+    public LanguageProvider(Engine app, String langFilePath) {
+        this.app = app;
+        this.currentLang = app.getLOCALE();
+        app.getLOGGER().info("Loading locale from " + langFilePath);
         try {
             Gson gson = new Gson();
-            InputStreamReader reader = new InputStreamReader(engine.getClass().getClassLoader().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
+            InputStreamReader reader = new InputStreamReader(app.getClass().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(reader);
             StringBuilder jsonStringBuilder = new StringBuilder();
             String line;
@@ -40,38 +36,25 @@ public class LanguageProvider {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
 
             for (Map.Entry<String, JsonElement> categoryEntry : jsonObject.entrySet()) {
-                String langKey = categoryEntry.getKey();
-                sectionsSet.add(langKey);
-
                 JsonObject categoryData = categoryEntry.getValue().getAsJsonObject();
                 Map<String, String> categoryMap = new HashMap<>();
 
                 for (Map.Entry<String, JsonElement> localizedData : categoryData.entrySet()) {
                     String localizedKey = localizedData.getKey();
                     JsonObject localizedValues = localizedData.getValue().getAsJsonObject();
-                    this.analyzeSection(localizedData.getValue());
+
                     if (localizedValues.has(currentLang)) {
                         String localizedValue = localizedValues.get(currentLang).getAsString();
                         categoryMap.put(localizedKey, localizedValue);
                     }
                 }
 
-                localizationData.put(langKey, categoryMap);
+                localizationData.put(categoryEntry.getKey(), categoryMap);
             }
             bufferedReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void analyzeSection(JsonElement jsonElement){
-        for (Map.Entry<String, JsonElement> langSet: jsonElement.getAsJsonObject().entrySet()){
-            this.localesSet.add(langSet.getKey());
-        }
-    }
-
-    public void setCurrentLang(String lang) {
-        this.currentLang = lang;
     }
 
     public String getString(String key) {
@@ -91,23 +74,5 @@ public class LanguageProvider {
             }
         }
         return key;
-    }
-    public String[] getSectionsSet() {
-        return sectionsSet.toArray(new String[0]);
-    }
-
-    public void setLocaleIndex(String locale) {
-        for(int k = 0; this.localesSet.size() > k; k++){
-            if(this.localesSet.toArray()[k].equals(locale)){
-                this.localeIndex =  k;
-            }
-        }
-    }
-    public String[] getLocalesSet() {
-        return localesSet.toArray(new String[0]);
-    }
-
-    public int getLocaleIndex() {
-        return localeIndex;
     }
 }

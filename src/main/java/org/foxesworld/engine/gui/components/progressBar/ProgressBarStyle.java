@@ -1,30 +1,33 @@
 package org.foxesworld.engine.gui.components.progressBar;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.gui.styles.StyleAttributes;
 
 import javax.swing.*;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class ProgressBarStyle {
-    private final String background, foreground,border;
-    private final ComponentFactory componentFactory;
+    private String background;
+    private  String forgeground;
+    private  String border;
+    private StyleAttributes styleAttributes;
 
-    public ProgressBarStyle(ComponentFactory componentFactory) {
-        this.componentFactory = componentFactory;
-        this.background = componentFactory.style.getBackground();
-        this.foreground = componentFactory.style.getColor();
-        this.border = componentFactory.style.getBorderColor();
+    public ProgressBarStyle(StyleAttributes styleAttributes) {
+        this.styleAttributes = styleAttributes;
+        this.background = styleAttributes.backgroundImage;
+        this.forgeground = styleAttributes.background;
+        this.border = styleAttributes.borderColor;
     }
 
     public void apply(JProgressBar progressBar) {
+        progressBar.setBackground(hexToColor(background));
+        progressBar.setForeground(hexToColor(forgeground));
         progressBar.setBorder(BorderFactory.createLineBorder(hexToColor(border)));
-        progressBar.setBackground(hexToColor(this.background));
-        progressBar.setForeground(hexToColor(this.foreground));
-        this.setTexture(progressBar, componentFactory.style.getTexture());
+        setTexture(progressBar, styleAttributes.texture);
     }
 
     private void setTexture(JProgressBar progressBar, String imagePath) {
-        progressBar.setUI(new TexturedProgressBar(componentFactory, imagePath));
+        progressBar.setUI(new TexturedProgressBar(imagePath));
     }
 }

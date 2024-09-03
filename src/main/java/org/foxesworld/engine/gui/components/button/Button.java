@@ -1,173 +1,112 @@
 package org.foxesworld.engine.gui.components.button;
 
-import org.foxesworld.engine.gui.components.ComponentAttributes;
-import org.foxesworld.engine.gui.components.ComponentFactory;
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 public class Button extends JButton implements MouseListener, MouseMotionListener {
-    private Color hoverColor;
-    private Timer disableTimer;
-    private boolean entered = false, pressed = false;
-    public BufferedImage defaultTX,rolloverTX,pressedTX,lockedTX;
-    private final ComponentFactory componentFactory;
-    private final ComponentAttributes buttonAttributes;
+	private static final long serialVersionUID = 1L;
+	private boolean entered = false;
+	private boolean pressed = false;
+	public BufferedImage defaultTX;
+	public BufferedImage rolloverTX;
+	public BufferedImage pressedTX;
+	public BufferedImage lockedTX;
 
-    public Button(ComponentFactory componentFactory, String text) {
-        this.componentFactory = componentFactory;
-        this.buttonAttributes = componentFactory.getComponentAttribute();
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        setText(text);
-        setBorderPainted(false);
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setOpaque(componentFactory.style.isOpaque());
-        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        //this.initCoolDown(this.componentFactory.getComponentAttribute().getCoolDown());
-    }
+	public Button(String text) {
+		addMouseListener(this);
+		addMouseMotionListener(this);
+		setText(text);
+		setBorderPainted(false);
+		setContentAreaFilled(false);
+		setFocusPainted(false);
+		setOpaque(false);
+		setFocusable(false);
+		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	}
 
-    public Button(ComponentFactory componentFactory, ImageIcon icon) {
-        super();
-        this.componentFactory = componentFactory;
-        this.buttonAttributes = componentFactory.getComponentAttribute();
-        addMouseListener(this);
-        addMouseMotionListener(this);
+	public Button(ImageIcon icon) {
+		super(icon);
+		addMouseListener(this);
+		addMouseMotionListener(this);
+		setText("");
+		setBorderPainted(false);
+		setContentAreaFilled(false);
+		setFocusPainted(false);
+		setOpaque(false);
+		setFocusable(false);
+		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	}
 
-        setBorderPainted(false);
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setOpaque(componentFactory.style.isOpaque());
-        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
 
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setHorizontalAlignment(JLabel.CENTER);
-        iconLabel.setVerticalAlignment(JLabel.CENTER);
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        setLayout(gridBagLayout);
+		Graphics2D g2d = (Graphics2D) g.create();
+		//g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.KEY_ANTIALIASING);
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.fill = GridBagConstraints.BOTH;
+		int w = getWidth();
+		int h = getHeight();
 
-        gridBagLayout.setConstraints(iconLabel, constraints);
-        add(iconLabel);
+		BufferedImage imageToDraw = defaultTX;
 
-        setPreferredSize(new Dimension(
-                componentFactory.getComponentAttribute().getIconWidth(),
-                componentFactory.getComponentAttribute().getIconHeight()));
-    }
-    private void initCoolDown(int mSec){
-        if(mSec > 0) {
-            disableTimer = new Timer(mSec, e -> {
-                setEnabled(true);
-                disableTimer.stop();
-            });
-        }
-    }
+		if (!isEnabled()) {
+			imageToDraw = lockedTX;
+		} else if (pressed) {
+			imageToDraw = pressedTX;
+		} else if (entered) {
+			imageToDraw = rolloverTX;
+		}
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+		super.paintComponent(g);
+		g2d.drawImage(imageToDraw, 0, 0, w, h, null);
 
-        int w = getWidth();
-        int h = getHeight();
+		// DrawText
+		if (getText() != null && !getText().isEmpty()) {
+			FontMetrics fm = g.getFontMetrics();
+			int textX = (w - fm.stringWidth(getText())) / 2;
+			int textY = (h + fm.getAscent()) / 2;
+			g.setColor(getForeground());
+			g.drawString(getText(), textX, textY);
+		}
 
-        BufferedImage imageToDraw = defaultTX;
+		g2d.dispose();
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		entered = true;
+		repaint();
+	}
 
-        if (!isEnabled()) {
-            imageToDraw = lockedTX;
-        } else if (pressed) {
-            imageToDraw = pressedTX;
-        } else if (entered) {
-            g.setColor(this.hoverColor);
-            imageToDraw = rolloverTX;
-        }
+	@Override
+	public void mouseExited(MouseEvent e) {
+		entered = false;
+		repaint();
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (isEnabled() && e.getButton() == MouseEvent.BUTTON1) {
+			pressed = true;
+			repaint();
+		}
+	}
 
-        g.drawImage(imageToDraw, 0, 0, w, h, null);
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if (pressed && e.getButton() == MouseEvent.BUTTON1) {
+			pressed = false;
+			repaint();
+		}
+	}
+	@Override
+	public void mouseClicked(MouseEvent e) {}
 
-        if (getText() != null && !getText().isEmpty()) {
-            FontMetrics fm = g.getFontMetrics();
-            int textX = (w - fm.stringWidth(getText())) / 2;
-            int textY = (h + fm.getAscent()) / 2;
-            if (isEnabled()) {
-                g.setColor(entered ? this.hoverColor : getForeground());
-            }
-            g.drawString(getText(), textX, textY);
-        }
-    }
+	@Override
+	public void mouseDragged(MouseEvent e) {}
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        entered = true;
-        if (isEnabled()) {
-            componentFactory.engine.getSOUND().playSound("button", "hover");
-        }
-        repaint();
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        entered = false;
-        repaint();
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        if (isEnabled() && e.getButton() == MouseEvent.BUTTON1) {
-            ButtonClick();
-            /* if(this.componentFactory.getComponentAttribute().getCoolDown() > 0) {
-                setEnabled(false);
-                disableTimer.start();
-            } */
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        if (pressed && e.getButton() == MouseEvent.BUTTON1) {
-            pressed = false;
-            repaint();
-        }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-    }
-
-    public void ButtonClick() {
-        String sound;
-        if (this.buttonAttributes.getComponentId().contains("back")) {
-            sound = "back";
-        } else if (this.buttonAttributes.getComponentId().contains("small")) {
-            sound = "clickSmall";
-        } else {
-            sound = "click";
-        }
-
-        componentFactory.engine.getSOUND().playSound("button", sound);
-        pressed = true;
-    }
-
-    public void setPressed(boolean pressed) {
-        this.pressed = pressed;
-    }
-
-    public void setHoverColor(Color hoverColor) {
-        this.hoverColor = hoverColor;
-    }
+	@Override
+	public void mouseMoved(MouseEvent e) {}
 }

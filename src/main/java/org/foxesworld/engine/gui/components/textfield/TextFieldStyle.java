@@ -1,61 +1,44 @@
 package org.foxesworld.engine.gui.components.textfield;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.gui.styles.StyleAttributes;
+import org.foxesworld.engine.utils.ImageUtils;
 
-import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-public class TextFieldStyle {
-	public Color foregroundColor, backgroundColor, caretColor;
-	private final List<Color> borderColor = new ArrayList();
-	public int width,height, bevel;
+public class TextfieldStyle {
+	public Color foregroundColor;
+	public Color backgroundColor;
+	public Color border;
+	public int width;
+	public int height;
 	public String font;
 	public float fontSize;
+	public Color caretColor;
 	public BufferedImage texture;
-	private final ComponentFactory componentFactory;
+	private ComponentFactory componentFactory;
 
-	public TextFieldStyle(ComponentFactory componentFactory) {
+	public TextfieldStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;
-		this.foregroundColor = hexToColor(componentFactory.style.getColor());
-		this.backgroundColor = hexToColor(componentFactory.style.getBackground());
-		this.setBorder(componentFactory.style);
-		this.caretColor = hexToColor(componentFactory.style.getCaretColor());
-		this.width = componentFactory.style.getWidth();
-		this.height = componentFactory.style.getHeight();
-		this.font = componentFactory.style.getFont();
-		this.fontSize = componentFactory.style.getFontSize();
-		this.texture = this.componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
-		if(componentFactory.style.getBorderRadius() != 0) {
-			this.texture = this.componentFactory.engine.getImageUtils().getRoundedImage(this.texture, componentFactory.style.getBorderRadius());
-		}
+		this.foregroundColor = hexToColor(componentFactory.style.color);
+		this.backgroundColor = hexToColor(componentFactory.style.background);
+		this.border = hexToColor(componentFactory.style.borderColor);
+		this.caretColor = hexToColor(componentFactory.style.caretColor);
+		this.width = componentFactory.style.width;
+		this.height = componentFactory.style.height;
+		this.font = componentFactory.style.font;
+		this.fontSize = componentFactory.style.fontSize;
+		this.texture = ImageUtils.getLocalImage(componentFactory.style.texture);
 	}
 
-	private void setBorder(StyleAttributes styleAttributes){
-		if(styleAttributes.getBorderColor() != null) {
-			this.borderColor.add(hexToColor(styleAttributes.getBorderColor().split(",")[1]));
-			this.borderColor.add(hexToColor(styleAttributes.getBorderColor().split(",")[2]));
-			this.bevel = Integer.parseInt(styleAttributes.getBorderColor().split(",")[0]);
-		}
-	}
-
-	public void apply(TextField text) {
+	public void apply(Textfield text) {
 		text.texture = texture;
-		text.setPaddingX(componentFactory.style.getPaddingX());
-		text.setPaddingY(componentFactory.style.getPaddingY());
 		text.setCaretColor(caretColor);
 		text.setBackground(backgroundColor);
 		text.setForeground(foregroundColor);
-		if(this.componentFactory.style.getBorderColor() != null) {
-			text.setBorder(new BevelBorder(this.bevel, borderColor.get(0), borderColor.get(1)));
-		} else {
-			text.setBorder(null);
-		}
-		text.setFont(componentFactory.engine.getFONTUTILS().getFont(font, fontSize));
+		text.setBorder(null);
+		text.setFont(componentFactory.engine.getFontUtils().getFont(font, fontSize));
 	}
 }

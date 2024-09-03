@@ -1,9 +1,7 @@
 package org.foxesworld.engine.gui.styles;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
+import com.google.gson.annotations.SerializedName;
 import org.foxesworld.engine.Engine;
 
 import java.io.InputStreamReader;
@@ -13,10 +11,15 @@ import java.util.Map;
 import java.util.Objects;
 
 public class StyleProvider {
+
     private final Map<String, Map<String, StyleAttributes>> elementStyles = new HashMap<>();
-    public StyleProvider(String[] styles) {
-        Engine.LOGGER.info("Loading styles...");
-        for(String style: styles){
+    private final String[] styles = {"button", "label", "multiButton", "progressBar"};
+    private final Engine engine;
+
+    public StyleProvider(Engine engine) {
+        engine.getLOGGER().info("Loading styles...");
+        this.engine = engine;
+        for(String style: this.styles){
             loadStyle(style);
         }
     }
@@ -29,10 +32,10 @@ public class StyleProvider {
         try {
             Gson gson = new Gson();
             InputStreamReader reader = new InputStreamReader(
-                    this.getClass().getClassLoader().getResourceAsStream(stylePath),
+                    Objects.requireNonNull(StyleProvider.class.getClassLoader().getResourceAsStream(stylePath)),
                     StandardCharsets.UTF_8
             );
-            Engine.getLOGGER().debug("Loading " + component + " style from " + stylePath);
+            engine.getLOGGER().debug("Loading " + component + " style from " + stylePath);
 
             JsonObject jsonRoot = gson.fromJson(reader, JsonObject.class);
             JsonObject stylesObject = jsonRoot.getAsJsonObject("styles");
@@ -53,7 +56,10 @@ public class StyleProvider {
             e.printStackTrace();
         }
     }
+
+
     public Map<String, Map<String, StyleAttributes>> getElementStyles() {
         return elementStyles;
     }
+
 }

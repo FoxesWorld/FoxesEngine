@@ -1,186 +1,99 @@
 package org.foxesworld.engine.gui.components.panel;
 
-import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.gui.components.Bounds;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
-import org.foxesworld.engine.gui.components.frame.FrameConstructor;
+import org.foxesworld.engine.gui.attributes.PanelOptions;
+import org.foxesworld.engine.gui.components.frame.Frame;
+import org.foxesworld.engine.utils.ActionListener;
 import org.foxesworld.engine.utils.CurrentMonth;
-import org.foxesworld.engine.utils.DragListener;
+import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-public class Panel extends JPanel {
-    private FrameAttributes frameAttributes;
-    private JPanel groupPanel;
-    private final FrameConstructor frameConstructor;
+public class Panel {
 
-    public Panel(FrameConstructor frameConstructor) {
-        this.frameConstructor = frameConstructor;
+    private final Frame frame;
+    public Panel(Frame frame) {
+        this.frame = frame;
     }
 
     public JPanel setRootPanel(FrameAttributes frameAttributes) {
-        this.frameAttributes = frameAttributes;
-        JPanel rootPanel = new JPanel(null, true) {
+        JPanel rootPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                drawDarkenedBackground(g);
+                drawDarkenedBackground(g, frameAttributes);
             }
         };
         rootPanel.setOpaque(false);
+        rootPanel.setLayout(null);
         rootPanel.setName("rootPanel");
 
         return rootPanel;
     }
 
-    private void drawDarkenedBackground(Graphics g) {
-        g.drawImage(applyDarkening(
-                this.frameConstructor.getAppFrame().getImageUtils().getLocalImage(getSeasonalBackground()),
-                hexToColor(frameAttributes.getBackgroundBlur())), 0, 0, null);
+    private void drawDarkenedBackground(Graphics g, FrameAttributes frameAttributes) {
+        BufferedImage background = ImageUtils.getLocalImage(this.getSeasonalBackground(frameAttributes));
+        g.drawImage(background, 0, 0, null);
+
+        g.setColor(hexToColor(frameAttributes.getBackgroundBlur()));
+        g.fillRect(0, 0, this.frame.getScreenSize().width, this.frame.getScreenSize().height);
     }
 
-    private String getSeasonalBackground(){
-        return switch (CurrentMonth.getCurrentMonth()) {
-            case DECEMBER, JANUARY, FEBRUARY -> frameAttributes.getWinterImage();
-            case MARCH, APRIL, MAY -> frameAttributes.getSpringImage();
-            case JUNE, JULY, AUGUST -> frameAttributes.getSummerImage();
-            case SEPTEMBER, OCTOBER, NOVEMBER -> frameAttributes.getAutumnImage();
-        };
+    private String getSeasonalBackground(FrameAttributes frameAttributes){
+        switch (CurrentMonth.getCurrentMonth()) {
+            case DECEMBER:
+            case JANUARY:
+            case FEBRUARY:
+                return frameAttributes.getWinterImage();
+            case MARCH:
+            case APRIL:
+            case MAY:
+                return frameAttributes.getSpringImage();
+            case JUNE:
+            case JULY:
+            case AUGUST:
+                return frameAttributes.getSummerImage();
+            case SEPTEMBER:
+            case OCTOBER:
+            case NOVEMBER:
+                return frameAttributes.getAutumnImage();
+            default:
+                return "";
+        }
     }
 
-    private BufferedImage applyDarkening(BufferedImage image, Color darkeningColor) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        BufferedImage darkenedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = darkenedImage.createGraphics();
-
-        // Накладываем изображение
-        g2d.drawImage(image, 0, 0, null);
-
-        // Создаем новый BufferedImage с прозрачностью
-        BufferedImage alphaImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gAlpha = alphaImage.createGraphics();
-
-        // Заполняем изображение прозрачным цветом
-        gAlpha.setColor(new Color(0, 0, 0, 0));
-        gAlpha.fillRect(0, 0, width, height);
-
-        // Наносим затемнение с учетом альфа-канала
-        gAlpha.setColor(darkeningColor);
-        gAlpha.setComposite(AlphaComposite.SrcOver.derive(0.5f)); // Пример установки прозрачности в 50%
-        gAlpha.fillRect(0, 0, width, height);
-
-        // Накладываем изображение с примененным альфа-каналом на изначальное изображение
-        g2d.drawImage(alphaImage, 0, 0, null);
-
-        g2d.dispose();
-        gAlpha.dispose();
-
-        return darkenedImage;
-    }
-
-
-    public JPanel createGroupPanel(PanelAttributes panelOptions, String groupName, FrameConstructor frameConstructor) {
-        LayoutManager layoutManager = null;
-
-        groupPanel = new JPanel(null, panelOptions.isDoubleBuffered()) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g.create();
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                if (panelOptions.getBackgroundImage() != null) {
-                    BufferedImage backgroundImage = frameConstructor.getAppFrame().getImageUtils().getLocalImage(panelOptions.getBackgroundImage());
-                    g.drawImage(applyDarkening(backgroundImage, hexToColor(panelOptions.getBackground())), 0, 0, null);
-                }
-
-                if(panelOptions.getCornerRadius() != 0){
-                    int cornerRadius = panelOptions.getCornerRadius();
-                    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
-                    g2d.setColor(getBackground());
-                    g2d.fill(roundedRectangle);
-                    g2d.setColor(getForeground());
-                    g2d.draw(roundedRectangle);
-                    g2d.dispose();
-                }
-            }
-
-            @Override
-            protected void paintBorder(Graphics g) {
-                if (panelOptions.getCornerRadius() != 0) {
-                    Graphics2D g2d = (Graphics2D) g.create();
-                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                    int cornerRadius = panelOptions.getCornerRadius();
-
-                    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(
-                            0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
-
-                    g2d.setColor(getForeground());
-                    g2d.draw(roundedRectangle);
-
-                    g2d.dispose();
-                }
-            }
-        };
-
+    public JPanel createGroupPanel(PanelOptions panelOptions, String groupName) {
+        JPanel groupPanel = new JPanel();
         groupPanel.setName(groupName);
-        groupPanel.setOpaque(panelOptions.getCornerRadius() == 0 && panelOptions.isOpaque());
-        groupPanel.setBackground(hexToColor(panelOptions.getBackground()));
-        if (panelOptions.getBorder() != null && !panelOptions.getBorder().equals("")) {
-            this.createBorder(groupPanel, panelOptions.getBorder());
+        groupPanel.setOpaque(panelOptions.opaque);
+        groupPanel.setLayout(null);
+        groupPanel.setBackground(hexToColor(panelOptions.background));
+        if(panelOptions.border != null && !panelOptions.border.equals("")) {
+            this.createBorder(groupPanel, panelOptions.border);
         }
 
-        if (panelOptions.getListener() != null) {
-            DragListener dragListener = new DragListener();
-            switch (panelOptions.getListener()) {
-                case "dragger" -> dragListener.addDragListener(groupPanel, frameConstructor);
+        if(panelOptions.listener != null) {
+            ActionListener actionListener = new ActionListener();
+            switch (panelOptions.listener){
+                case "dragger": actionListener.addDragListener(groupPanel, frame.getFrame());
             }
         }
+        //frame.getAppFrame().displayPanel(groupName, panelOptions.display);
 
-
-        if(panelOptions.isFocusable()) {
-            groupPanel.setFocusable(true);
-            groupPanel.requestFocus();
-        }
-
-        Bounds bounds = panelOptions.getBounds();
-        groupPanel.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
-        if(panelOptions.getLayout() != null) {
-            layoutManager = this.getLayout(panelOptions.getLayout(), groupPanel);
-            groupPanel.setLayout(layoutManager);
-        }
-
+        String[] bounds = panelOptions.bounds.split(",");
+        int posX = Integer.parseInt(bounds[0]);
+        int posY = Integer.parseInt(bounds[1]);
+        int width = Integer.parseInt(bounds[2]);
+        int height = Integer.parseInt(bounds[3]);
+        groupPanel.setBounds(posX, posY, width, height);
         return groupPanel;
     }
-
-    private LayoutManager getLayout(String layout, JPanel panel){
-        switch (layout.toLowerCase()) {
-            case "flow":
-                return new FlowLayout();
-            case "border":
-                return new BorderLayout();
-            case "grid":
-                return new GridLayout();
-            case "gridbag":
-                return new GridBagLayout();
-            case "box":
-                return new BoxLayout(panel, BoxLayout.X_AXIS);
-            default:
-                Engine.LOGGER.error("Invalid layout type: " + layout);
-                return null;
-        }
-    }
-
-    private void createBorder(JPanel groupPanel, String border) {
+    private JPanel createBorder(JPanel groupPanel, String border){
         String[] borderData = border.split(",");
         int top = Integer.parseInt(borderData[0]);
         int left = Integer.parseInt(borderData[1]);
@@ -188,6 +101,6 @@ public class Panel extends JPanel {
         int right = Integer.parseInt(borderData[3]);
         Color borderColor = hexToColor(borderData[4]);
         groupPanel.setBorder(new MatteBorder(top, left, bottom, right, borderColor));
+        return groupPanel;
     }
-
 }

@@ -1,219 +1,201 @@
 package org.foxesworld.engine;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.google.gson.Gson;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.foxesworld.APP;
+import org.foxesworld.cfgProvider.CfgProvider;
+import org.foxesworld.engine.action.ActionHandler;
 import org.foxesworld.engine.config.Config;
-import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
-import org.foxesworld.engine.gui.GuiBuilderListener;
-import org.foxesworld.engine.gui.FileProperties;
-import org.foxesworld.engine.gui.components.frame.FrameConstructor;
-import org.foxesworld.engine.gui.components.frame.OptionGroups;
-import org.foxesworld.engine.gui.components.panel.PanelVisibility;
+import org.foxesworld.engine.gui.components.SystemComponents;
+import org.foxesworld.engine.gui.components.frame.Frame;
+import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
-import org.foxesworld.engine.news.News;
-import org.foxesworld.engine.sound.Sound;
-import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.FontUtils;
-import org.foxesworld.engine.utils.HTTP.HTTPrequest;
-import org.foxesworld.engine.utils.ImageUtils;
-import org.foxesworld.engine.utils.loadManager.LoadingManager;
-import org.foxesworld.engine.utils.OS;
-import org.foxesworld.engine.utils.ServerInfo;
-import org.foxesworld.engine.gui.ActionHandler;
+import org.foxesworld.updater.Updater;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
-    private final FileProperties fileProperties;
-    public static String currentOS = "";
-    protected LoadingManager loadingManager;
-    private final List<String> configFiles;
-    private final String appTitle;
-    protected Sound SOUND;
-    protected Config config;
-    protected LanguageProvider LANG;
-    protected ServerInfo serverInfo;
-    protected ImageUtils imageUtils;
-    private News news;
-    public static Logger LOGGER;
-    protected Discord discord;
-    private final FontUtils FONTUTILS;
-    protected CryptUtils CRYPTO;
-    protected FrameConstructor frameConstructor;
-    private final PanelVisibility panelVisibility;
+public class Engine extends JFrame implements ActionListener {
+
+    protected final String app;
+    private final Logger LOGGER;
+    private EngineData engineData;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
-    private EngineData engineData;
-    private final HTTPrequest GETrequest, POSTrequest;
-    public ActionHandler actionHandler;
+    private final String LOCALE;
+    private final LanguageProvider LANG;
+    private final Config config;
+    private final Map<String, Object> CONFIG;
+    private final FontUtils fontUtils;
+    private SystemComponents systemComponents;
+    private ActionHandler actionHandler;
+    private Map<String, Map<String, StyleAttributes>> elementStyles = new HashMap<>();
+    private final Frame frame;
+    //private DownloadUtils download;
+    private Updater updater;
+    private final String[] configFiles = new String[]{ "internal/config"};
     private boolean init = false;
 
-    public Engine(List<String> configFiles) {
-        currentOS = OS.determineCurrentOS();
+    public Engine(String app) {
+        this.app = app;
         this.engineData = new EngineData();
-        this.configFiles = configFiles;
-        setEngineData(engineData.initEngineValues("engine.json"));
-        fileProperties = new FileProperties(this);
-        System.setProperty("log.dir", System.getProperty("user.dir"));
-        LOGGER = LogManager.getLogger(this.getClass());
-        appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
-        this.panelVisibility = new PanelVisibility(this);
-        LOGGER.info(appTitle + " started...");
+        initEngineValues("engine.json");
+        LOGGER = LogManager.getLogger(APP.class);
+        LOGGER.info("Started "+engineData.getUpdaterBrand()+'-'+engineData.getUpdaterVersion());
+        Configurator.setLevel(LOGGER.getName(), Level.valueOf("DEBUG"));
+        System.setProperty("log.dir",  System.getProperty("user.dir"));//CfgProvider.getGameFullPath());
+        this.config = new Config(this);
 
-        this.FONTUTILS = new FontUtils(this);
-        Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
+        CONFIG = config.getCONFIG();
+        LOCALE = String.valueOf(CONFIG.get("lang"));
+        this.LANG = new LanguageProvider(this, "/assets/lang/locale.json");
+        this.fontUtils = new FontUtils(this);
 
-        this.GETrequest = new HTTPrequest(this, "GET");
-        this.POSTrequest = new HTTPrequest(this, "POST");
-        this.imageUtils = new ImageUtils(this);
-        FlatIntelliJLaf.setup();
+        this.frame = new Frame(this);
+        initialize();
     }
 
-    public abstract void init();
-    protected abstract void preInit();
-    @Override
-    public abstract void onPanelsBuilt();
-    @Override
-    public abstract void onPanelBuild(Map<String, OptionGroups> panels, String componentGroup, JPanel parentPanel);
-    @Override
-    public abstract void actionPerformed(ActionEvent e);
-    protected void loadMainPanel(String path) {
-        this.guiBuilder.buildGui(path, this.getFrame().getRootPanel());
+    private void initialize() {
+        styleProvider = new StyleProvider(this);
+        this.elementStyles = styleProvider.getElementStyles();
+        this.guiBuilder = new GuiBuilder(this);
+        getGuiBuilder().buildGui("assets/frames/frame.json", true, this.getFrame().getRootPanel());
+        this.loadMainPanel(this.app);
+        this.actionHandler = new ActionHandler(this);
+        //this.download = new DownloadUtils(this);
+        this.updater = new Updater(this);
+        init = true;
     }
-    public String appPath() {
-        try {
-            return URLDecoder.decode(this.POSTrequest.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
-        } catch (java.net.URISyntaxException e) {
-            return null;
+
+    void initEngineValues(String propertyPath){
+        InputStream inputStream = Engine.class.getClassLoader().getResourceAsStream(propertyPath);
+        if (inputStream != null) {
+            InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            setEngineData(new Gson().fromJson(reader, EngineData.class));
         }
     }
 
-    public void restartApplication(int xmx, String jvmDir) {
-        String path = Config.getFullPath();
-        List<String> params = new LinkedList<>();
-        params.add(path + "/runtime/"+ jvmDir + "/bin/java");
-        params.add("-Xmx"+xmx+"M");
-        params.add("-jar");
-        params.add(appPath().substring(1));
-
-        ProcessBuilder builder = new ProcessBuilder(params);
-        builder.redirectErrorStream(true);
-        builder.directory(new File(path + File.separator));
-        try {
-            builder.start();
-            System.exit(-1);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Restart Error occurred \n PLease try again" + e, "Restart Error", JOptionPane.ERROR_MESSAGE);
+    public void displayPanel(String displayString) {
+        String[] panelElements = displayString.split("\\|");
+        if (panelElements.length <= 1) {
+            this.processSinglePanelDisplay(displayString);
+        } else {
+            for (String panelElement : panelElements) {
+                this.processSinglePanelDisplay(panelElement);
+            }
         }
     }
 
-    public void showDialog(String messageKey, String errorTitle, int warningMessage, boolean terminate) {
-        String errorMessage = this.getLANG().getString(messageKey);
-        this.getSOUND().playSound("other", messageKey);
-        UIManager.put("OptionPane.messageFont", this.getFONTUTILS().getFont("mcfont", 12));
-        JOptionPane.showMessageDialog(this.getFrame(), errorMessage, errorTitle, warningMessage);
-        if(terminate) {
-            System.exit(0);
+    private void processSinglePanelDisplay(String panelElement){
+        String[] parts = panelElement.split("->");
+        if (parts.length == 2) {
+            String panelName = parts[0];
+            boolean displayValue = Boolean.parseBoolean(parts[1]);
+
+            JPanel groupPanel = guiBuilder.getPanelsMap().get(panelName);
+            groupPanel.setVisible(displayValue);
+            getLOGGER().debug("Setting " + panelName + " visible to " + displayValue);
         }
     }
 
-    public List<String> getConfigFiles() {
-        return configFiles;
+    private void loadMainPanel(String path) {
+        this.guiBuilder.buildGui(path, true, this.getFrame().getRootPanel());
+        this.processComponents();
     }
-    protected boolean isInit() {
-        return init;
+
+    private void processComponents(){
+        List<String> systemIds = Arrays.asList("PBar", "progressLabel"); //ComponentFactory we define as system
+        this.systemComponents = new SystemComponents();
+        for(Map.Entry<String, List<Component>> panels: guiBuilder.getComponentsMap().entrySet()){
+            String panelName = panels.getKey();
+            for(Component component: panels.getValue()){
+                if(systemIds.contains(component.getName())){
+                    this.systemComponents.addComponent(component.getName(), component);
+                    getLOGGER().debug("Adding system component '" + component.getName()+"'");
+                }
+                this.setComponentValues(component);
+            }
+        }
     }
-    public FrameConstructor getFrame() {
-        return this.frameConstructor;
+
+    private void setComponentValues(Component component){
+        if(component instanceof  JLabel){
+            String text = ((JLabel) component).getText();
+        } else {
+            if(component instanceof  JCheckBox) {
+                if(component.isEnabled()){
+                    ((JCheckBox) component).setSelected((Boolean) CONFIG.get(component.getName()));
+                }
+            }
+        }
+    }
+
+    public Map<String, Map<String, StyleAttributes>> getElementStyles() {
+        return elementStyles;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        this.actionHandler.handleAction(e);
+    }
+    public Frame getFrame() {
+        return this.frame;
+    }
+    public SystemComponents getSystemComponents() {
+        return systemComponents;
     }
     public GuiBuilder getGuiBuilder() {
         return guiBuilder;
     }
-    public HTTPrequest getGETrequest() {
-        return GETrequest;
+
+    public EngineData getEngineData() {
+        return engineData;
     }
-    public HTTPrequest getPOSTrequest() {
-        return POSTrequest;
-    }
-    public static Logger getLOGGER() {
+    public Logger getLOGGER() {
         return LOGGER;
     }
     public LanguageProvider getLANG() {
         return LANG;
     }
-    public FontUtils getFONTUTILS() {
-        return FONTUTILS;
+    public Map<String, Object> getCONFIG() {
+        return CONFIG;
     }
-    public StyleProvider getStyleProvider() {
-        return styleProvider;
+    public String getLOCALE() {
+        return LOCALE;
     }
-    public Sound getSOUND() {
-        return SOUND;
+    public FontUtils getFontUtils() {
+        return fontUtils;
     }
-    public EngineData getEngineData() {
-        return engineData;
-    }
-    public void setStyleProvider(StyleProvider styleProvider) {
-        this.styleProvider = styleProvider;
-    }
-    public void setEngineData(EngineData engineData) {
-        this.engineData = engineData;
-    }
-    public ServerInfo getServerInfo() {
-        return serverInfo;
-    }
-    public Discord getDiscord() {
-        return discord;
-    }
-    public String getAppTitle() {
-        return appTitle;
-    }
-    public PanelVisibility getPanelVisibility() {
-        return panelVisibility;
-    }
-    public void setActionHandler(ActionHandler actionHandler) {
-        this.actionHandler = actionHandler;
-    }
-    public void setGuiBuilder(GuiBuilder guiBuilder) {
-        this.guiBuilder = guiBuilder;
-    }
-    public void setInit(boolean init) {
-        this.init = init;
-    }
-    public FileProperties getFileProperties() {
-        return fileProperties;
-    }
-    public LoadingManager getLoadingManager() {
-        return loadingManager;
-    }
-    public void setNews(News news) {
-        this.news = news;
-    }
-    public News getNews() {
-        return news;
-    }
-    public ImageUtils getImageUtils() {
-        return imageUtils;
-    }
-    public CryptUtils getCRYPTO() {
-        return CRYPTO;
+    public String[] getConfigFiles() {
+        return configFiles;
     }
     public Config getConfig() {
         return config;
+    }
+
+    public void setEngineData(EngineData engineData) {
+        this.engineData = engineData;
+    }
+
+    public Updater getUpdater() {
+        return updater;
+    }
+    public StyleProvider getStyleProvider() {
+        return styleProvider;
     }
 }
