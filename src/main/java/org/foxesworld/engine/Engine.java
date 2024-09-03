@@ -9,6 +9,7 @@ import org.foxesworld.cfgProvider.CfgProvider;
 import org.foxesworld.engine.action.ActionHandler;
 import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.gui.GuiBuilder;
+import org.foxesworld.engine.gui.SetInfo;
 import org.foxesworld.engine.gui.components.SystemComponents;
 import org.foxesworld.engine.gui.components.frame.Frame;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
@@ -42,6 +43,7 @@ public class Engine extends JFrame implements ActionListener {
     private final FontUtils fontUtils;
     private SystemComponents systemComponents;
     private ActionHandler actionHandler;
+    private SetInfo setInfo;
     private Map<String, Map<String, StyleAttributes>> elementStyles = new HashMap<>();
     private final Frame frame;
     //private DownloadUtils download;
@@ -189,5 +191,11 @@ public class Engine extends JFrame implements ActionListener {
     }
     public StyleProvider getStyleProvider() {
         return styleProvider;
+    }
+    public void setSetInfo(SetInfo setInfo) {
+        this.setInfo = setInfo;
+    }
+    public SetInfo getSetInfo() {
+        return setInfo;
     }
 }
