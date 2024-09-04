@@ -80,7 +80,7 @@ public class DownloadUtils {
             HttpURLConnection connection = (HttpURLConnection) downloadUrl.openConnection();
             long fileSize = connection.getContentLength();
             String fileName = extractFileNameFromUrl(downloadUrl);
-
+            downloadListener.downloading(fileName);
             try (InputStream inputStream = new BufferedInputStream(connection.getInputStream())) {
                 File destinationFile = new File(destinationPath);
                 FileOutputStream outputStream = new FileOutputStream(destinationFile);
@@ -107,8 +107,8 @@ public class DownloadUtils {
                 progressBar.setVisible(false);
                 progressLabel.setVisible(false);
                 progressBar.setValue(0);
-                engine.getSetInfo().setInfo("download.downloaded", fileName, false);
-                downloadListener.onFileDownloaded();
+                //engine.getSetInfo().setInfo("download.downloaded", fileName, false);
+                downloadListener.onFileDownloaded(fileName);
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -155,7 +155,8 @@ public class DownloadUtils {
             for (ZipEntry entry : zippedFiles) {
                 fileName = entry.getName();
                 File outFile = new File(destinationDir, fileName);
-                engine.getSetInfo().setInfo("download.unpacking", fileName, false);
+                //engine.getSetInfo().setInfo("download.unpacking", fileName, false);
+                downloadListener.unpacking(fileName);
                 try (InputStream inputStream = zipFile.getInputStream(entry);
                      OutputStream outputStream = Files.newOutputStream(outFile.toPath())) {
                     if (!outFile.getParentFile().exists()) {
@@ -173,14 +174,15 @@ public class DownloadUtils {
         }
 
         new File(zipFilePath).delete();
-        engine.getSetInfo().setInfo("download.unpacked", fileName, false);
+        //engine.getSetInfo().setInfo("download.unpacked", fileName, false);
         downloadListener.onFileUnpacked(fileName);
     }
 
     private void publish(int progress, String fileName) {
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue(progress);
-            engine.getSetInfo().setInfo("download.downloading", fileName, false);
+            //engine.getSetInfo().setInfo("download.downloading", fileName, false);
+            //downloadListener.downloading(progress, fileName);
         });
     }
 
