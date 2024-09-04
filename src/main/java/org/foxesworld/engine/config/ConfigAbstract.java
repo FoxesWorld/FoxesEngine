@@ -2,13 +2,14 @@ package org.foxesworld.engine.config;
 
 import org.foxesworld.cfgProvider.CfgProvider;
 
+import java.util.List;
 import java.util.Map;
 
 public abstract class ConfigAbstract {
 
     private String cfgFileExtension = "";
 
-    protected void addCfgFiles(String[] configFiles){
+    protected void addCfgFiles(List<String> configFiles){
         for(String cfgUnit: configFiles){
             String cfgFileName = cfgUnit + cfgFileExtension;
             new CfgProvider(cfgFileName);

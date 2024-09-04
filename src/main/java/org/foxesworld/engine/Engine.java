@@ -15,6 +15,7 @@ import org.foxesworld.engine.gui.components.frame.Frame;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
+import org.foxesworld.engine.sound.Sound;
 import org.foxesworld.engine.utils.FontUtils;
 
 import javax.swing.*;
@@ -24,35 +25,31 @@ import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class Engine extends JFrame implements ActionListener {
 
-    protected final String app;
     private final Logger LOGGER;
+    protected Sound SOUND;
     private EngineData engineData;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
     private final String LOCALE;
     private final LanguageProvider LANG;
     private final Config config;
-    private final Map<String, Object> CONFIG;
+    private Map<String, Object> CONFIG;
     private final FontUtils fontUtils;
     private SystemComponents systemComponents;
     private ActionHandler actionHandler;
     private InfoDisplay infoDisplay;
     private Map<String, Map<String, StyleAttributes>> elementStyles = new HashMap<>();
     private final Frame frame;
-    //private DownloadUtils download;
-    //private Updater updater;
-    private final String[] configFiles = new String[]{ "internal/config"};
+    private List<String> configFiles;
     private boolean init = false;
 
-    public Engine(String app) {
-        this.app = app;
+    public Engine(List<String> configFiles) {
+        this.configFiles = configFiles;
         this.engineData = new EngineData();
         initEngineValues("engine.json");
         System.setProperty("log.dir", CfgProvider.getGameFullPath());
@@ -70,14 +67,13 @@ public class Engine extends JFrame implements ActionListener {
     }
 
     private void initialize() {
+        String mainFrame = "assets/frames/mainFrame.json";
         styleProvider = new StyleProvider(this);
         this.elementStyles = styleProvider.getElementStyles();
         this.guiBuilder = new GuiBuilder(this);
         getGuiBuilder().buildGui("assets/frames/frame.json", true, this.getFrame().getRootPanel());
-        this.loadMainPanel(this.app);
+        this.loadMainPanel(mainFrame);
         this.actionHandler = new ActionHandler(this);
-        //this.download = new DownloadUtils(this);
-        //this.updater = new Updater(this);
         init = true;
     }
 
@@ -161,7 +157,6 @@ public class Engine extends JFrame implements ActionListener {
     public GuiBuilder getGuiBuilder() {
         return guiBuilder;
     }
-
     public EngineData getEngineData() {
         return engineData;
     }
@@ -174,13 +169,16 @@ public class Engine extends JFrame implements ActionListener {
     public Map<String, Object> getCONFIG() {
         return CONFIG;
     }
+    public void setCONFIG(Map<String, Object> CONFIG) {
+        this.CONFIG = CONFIG;
+    }
     public String getLOCALE() {
         return LOCALE;
     }
     public FontUtils getFontUtils() {
         return fontUtils;
     }
-    public String[] getConfigFiles() {
+    public List<String> getConfigFiles() {
         return configFiles;
     }
     public Config getConfig() {
@@ -197,5 +195,8 @@ public class Engine extends JFrame implements ActionListener {
     }
     public InfoDisplay getSetInfo() {
         return infoDisplay;
+    }
+    public Sound getSOUND() {
+        return SOUND;
     }
 }

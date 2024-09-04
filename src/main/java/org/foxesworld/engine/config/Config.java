@@ -71,6 +71,10 @@ public class Config extends ConfigAbstract {
         return CONFIG;
     }
 
+    public void setCONFIG(Map<String, Object> CONFIG) {
+        this.CONFIG = CONFIG;
+    }
+
     public Engine getAppFrame() {
         return engine;
     }
