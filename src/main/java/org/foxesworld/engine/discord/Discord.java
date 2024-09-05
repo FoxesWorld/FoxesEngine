@@ -38,6 +38,7 @@ public class Discord implements DiscordListener {
         presence.state = state;
         presence.largeImageKey = iconKey;
         presence.smallImageKey = detailsIcon;
+        presence.smallImageText = detailsIcon;
         lib.Discord_UpdatePresence(presence);
 
         rpcExecutorService.submit(() -> {
