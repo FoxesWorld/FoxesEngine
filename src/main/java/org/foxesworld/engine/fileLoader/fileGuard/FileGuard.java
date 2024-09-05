@@ -7,6 +7,7 @@ import org.foxesworld.engine.game.GameLauncher;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -14,7 +15,7 @@ public class FileGuard {
     private FileGuardListener fileGuardListener;
     private final List<String> checkList;
     private final Set<String> ignoreList;
-    private final String[] basicIgnoreDirs = {"saves", "resourcepacks", "shaderpacks", "logs", "config"};
+    private final String[] basicIgnoreDirs = {"saves", "resourcepacks", "shaderpacks", "screenshots", "logs", "config"};
     private final GameLauncher gameLauncher;
     private final Logger logger;
     private int totalFiles = 0;
@@ -81,6 +82,7 @@ public class FileGuard {
 
         boolean dir_contains_files = false, dir_contains_folders = false;
 
+        assert content != null;
         for (String object : content) {
             File obj = new File(dir + File.separator + object);
             if (obj.isFile()) dir_contains_files = true;
@@ -182,7 +184,7 @@ public class FileGuard {
             if (!file.exists())
                 return;
             if (file.isDirectory()) {
-                for (File f : file.listFiles())
+                for (File f : Objects.requireNonNull(file.listFiles()))
                     recursiveDelete(f);
                 file.delete();
             } else {

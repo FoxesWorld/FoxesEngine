@@ -11,14 +11,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Discord implements DiscordListener {
 
-    private Engine engine;
+    private final String iconKey;
     private final DiscordRPC lib;
     private final DiscordRichPresence presence;
     private final ExecutorService rpcExecutorService = Executors.newSingleThreadExecutor();
     private final AtomicBoolean shutdownRequested = new AtomicBoolean(false);
 
-    public Discord(Engine engine) {
-        this.engine = engine;
+    public Discord(Engine engine, String iconKey) {
+        this.iconKey = iconKey;
         String applicationId = engine.getEngineData().getAppId();
         lib = DiscordRPC.INSTANCE;
         String steamId = "";
@@ -32,17 +32,18 @@ public class Discord implements DiscordListener {
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
     @Override
-    public void discordRpcStart(String state, String details, String icon) {
+    public void discordRpcStart(String state, String details, String detailsIcon) {
         presence.startTimestamp = System.currentTimeMillis() / 1000;
         presence.details = details;
         presence.state = state;
-        presence.largeImageKey = icon;
+        presence.largeImageKey = iconKey;
+        presence.smallImageKey = detailsIcon;
         lib.Discord_UpdatePresence(presence);
 
         rpcExecutorService.submit(() -> {
             while (!shutdownRequested.get() && !Thread.currentThread().isInterrupted()) {
                 lib.Discord_RunCallbacks();
-                try {Thread.sleep(500); } catch (InterruptedException e) {}
+                //try {Thread.sleep(500); } catch (InterruptedException e) {}
             }
         });
     }
