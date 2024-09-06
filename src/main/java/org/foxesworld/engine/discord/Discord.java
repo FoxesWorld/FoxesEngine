@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Discord implements DiscordListener {
 
     private final String iconKey;
+    private  String smallImageText, largeImageText;
     private final DiscordRPC lib;
     private final DiscordRichPresence presence;
     private final ExecutorService rpcExecutorService = Executors.newSingleThreadExecutor();
@@ -37,8 +38,9 @@ public class Discord implements DiscordListener {
         presence.details = details;
         presence.state = state;
         presence.largeImageKey = iconKey;
+        presence.largeImageText = largeImageText;
         presence.smallImageKey = detailsIcon;
-        presence.smallImageText = detailsIcon;
+        presence.smallImageText = this.smallImageText;
         lib.Discord_UpdatePresence(presence);
 
         rpcExecutorService.submit(() -> {
@@ -58,5 +60,13 @@ public class Discord implements DiscordListener {
     @Override
     public DiscordRPC getDiscordLib() {
         return lib;
+    }
+
+    public void setSmallImageText(String smallImageText) {
+        this.smallImageText = smallImageText;
+    }
+
+    public void setLargeImageText(String largeImageText) {
+        this.largeImageText = largeImageText;
     }
 }
