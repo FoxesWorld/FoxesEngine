@@ -92,6 +92,33 @@ public class LanguageProvider {
         }
         return key;
     }
+
+    public String getStringWithKey(String langKey, String replaceKey, String replaceValue) {
+        if (langKey != null) {
+            if (langKey.contains(".")) {
+                String[] parts = langKey.split("\\.");
+                if (parts.length == 2) {
+                    String category = parts[0];
+                    String localizedKey = parts[1];
+                    if (localizationData.containsKey(category)) {
+                        Map<String, String> categoryMap = localizationData.get(category);
+                        if (categoryMap.containsKey(localizedKey)) {
+                            String langLine = categoryMap.get(localizedKey);
+                            String key = "{" + replaceKey + "}";
+                            if(langLine.contains(key)){
+                                return langLine.replace(key, replaceValue);
+                            }
+                            return langLine;
+                        }
+                    }
+                }
+            }
+        }
+        return langKey;
+    }
+
+
+
     public String[] getSectionsSet() {
         return sectionsSet.toArray(new String[0]);
     }
