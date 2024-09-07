@@ -93,7 +93,7 @@ public class LanguageProvider {
         return key;
     }
 
-    public String getStringWithKey(String langKey, String replaceKey, String replaceValue) {
+    public String getStringWithKey(String langKey, String[] replaceKeys, String[] replaceValues) {
         if (langKey != null) {
             if (langKey.contains(".")) {
                 String[] parts = langKey.split("\\.");
@@ -104,9 +104,13 @@ public class LanguageProvider {
                         Map<String, String> categoryMap = localizationData.get(category);
                         if (categoryMap.containsKey(localizedKey)) {
                             String langLine = categoryMap.get(localizedKey);
-                            String key = "{" + replaceKey + "}";
-                            if(langLine.contains(key)){
-                                return langLine.replace(key, replaceValue);
+                            if (replaceKeys != null && replaceValues != null && replaceKeys.length == replaceValues.length) {
+                                for (int i = 0; i < replaceKeys.length; i++) {
+                                    String key = "{" + replaceKeys[i] + "}";
+                                    if (langLine.contains(key)) {
+                                        langLine = langLine.replace(key, replaceValues[i]);
+                                    }
+                                }
                             }
                             return langLine;
                         }
@@ -116,8 +120,6 @@ public class LanguageProvider {
         }
         return langKey;
     }
-
-
 
     public String[] getSectionsSet() {
         return sectionsSet.toArray(new String[0]);
