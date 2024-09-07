@@ -49,12 +49,12 @@ public class FileLoader {
     public void getFilesToDownload() {
         loadingManager.toggleLoader();
         FileAttributes[] fileAttributes = this.getDownloadList(client, version, getPlatformNumber());
-        loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title", 800);
+        loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
         for (FileAttributes file : fileAttributes) {
             this.fileLoaderListener.onFileAdd(file);
         }
         Engine.getLOGGER().info("Keeping " + filesToKeep.size() + " files");
-        loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title", 800);
+        loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
         this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
         fileLoaderListener.onFilesRead();
     }

@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyframeAnimation {
+class KeyframeAnimation {
     private final List<Keyframe> keyframes = new ArrayList<>();
     private Timer animationTimer;
     private final int interval;

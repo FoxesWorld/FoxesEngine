@@ -1,14 +1,10 @@
 package org.foxesworld.engine.utils.loadManager;
 
 import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.utils.BezierCurve;
 import org.foxesworld.engine.utils.SpriteAnimation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.List;
 
@@ -17,19 +13,17 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 public class LoadingManager extends JWindow {
     private final List<LoadManagerAttributes> attributesList;
     private final Engine engine;
-    private String loadingText;
-    private String loadingTitle;
+    private String loadingText, loadingTitle, labelFont;
     private final Timer loadingTimer;
     private final int dotLimit = 4;
     private JLabel loaderText, titleLabel;
+    private boolean animating;
 
     private static final int FRAME_WIDTH = 500;
     private static final int FRAME_HEIGHT = 150;
     private final int ANIMATION_DURATION = 300;
     private final int ANIMATION_SPEED;
-    private BezierCurve curve;
-
-    private boolean animating = false;
+    private final AnimationManager animationManager;
 
     public LoadingManager(Engine engine, int index) {
         this.engine = engine;
@@ -39,6 +33,8 @@ public class LoadingManager extends JWindow {
 
         this.loadingTimer = new Timer(500, e -> loaderText.setText(loadingText));
         this.ANIMATION_SPEED = attributesList.get(index).getAnimSpeed();
+
+        this.animationManager = new AnimationManager(this, ANIMATION_DURATION, ANIMATION_SPEED);
 
         initializeLoadingFrame(index);
     }
@@ -56,7 +52,7 @@ public class LoadingManager extends JWindow {
         setContentPane(backgroundPanel);
         currentLoader.setBounds(currentLoader.getSpriteRect());
         backgroundPanel.add(currentLoader);
-
+        this.labelFont = attributes.getFont();
         titleLabel = createLabel(loadingTitle, 23, new Rectangle(120, 50, 300, 35), backgroundPanel);
         loaderText = createLabel(loadingText, 11, new Rectangle(120, 75, 400, 20), backgroundPanel);
         loaderText.setForeground(hexToColor(attributes.getDescColor()));
@@ -86,7 +82,8 @@ public class LoadingManager extends JWindow {
 
     private JLabel createLabel(String text, int fontSize, Rectangle bounds, JPanel panel) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", Font.BOLD, fontSize));
+        Font font = this.engine.getFONTUTILS().getFont(labelFont, fontSize);
+        label.setFont(font);
         label.setBounds(bounds);
         panel.add(label);
         return label;
@@ -108,63 +105,17 @@ public class LoadingManager extends JWindow {
         });
     }
 
-    private Point getCenterPoint(JFrame frame) {
+    public Point getCenterPoint(JFrame frame) {
         int centerX = frame.getX() + frame.getWidth() / 2;
         int centerY = frame.getY() + frame.getHeight() / 2;
         return new Point(centerX, centerY);
     }
 
-    private void animateLoadingWindow(boolean isEntry) {
-        if (!animating) {
-            animating = true;
-            setVisible(true);
-
-            Point mainFrameCenter = getCenterPoint(engine.getFrame());
-            int startX = mainFrameCenter.x - this.getWidth() / 2;
-            int startY = isEntry ? engine.getFrame().getY() - this.getHeight() : getY();
-            int targetY = mainFrameCenter.y - this.getHeight() / 2;
-            int endX = isEntry ? startX : engine.getFrame().getWidth();
-            float startOpacity = isEntry ? 0.0f : 1.0f;
-            float targetOpacity = isEntry ? 1.0f : 0.0f;
-
-            KeyframeAnimation animation = new KeyframeAnimation(this, ANIMATION_DURATION / ANIMATION_SPEED, () -> {
-                animating = false;
-                if (!isEntry) {
-                    setVisible(false);
-                }
-            });
-
-            addAnimationFrames(animation, startX, endX, startY, targetY, startOpacity, targetOpacity, isEntry);
-            animation.start();
-        }
+    public void animateLoadingWindow(boolean isEntry) {
+        animationManager.animate(isEntry);
     }
 
-    private void addAnimationFrames(KeyframeAnimation animation, int startX, int endX, int startY, int targetY, float startOpacity, float targetOpacity, boolean isEntry) {
-        for (int i = 0; i < ANIMATION_SPEED; i++) {
-            float t = (float) i / (ANIMATION_SPEED - 1);
-
-            // Using easing
-            float easedT = easeInOut(t);
-
-            // Get current pos
-            int x = isEntry ? startX : (int) (startX + (endX - startX) * easedT);
-            int y = isEntry ? (int) (startY + (targetY - startY) * easedT) : targetY;
-
-            // Get current opasity
-            float opacity = startOpacity + (targetOpacity - startOpacity) * easedT;
-
-            // Adding keyframe
-            animation.addKeyframe(opacity, new Point(x, y), ANIMATION_DURATION / ANIMATION_SPEED);
-        }
-    }
-
-    // Non-linear method for (ease-in-out)
-    private float easeInOut(float t) {
-        return (float) (-0.5 * (Math.cos(Math.PI * t) - 1));
-    }
-
-
-    public void setLoadingText(String loadingText, String loadingTitle, int sleep) {
+    public void setLoadingText(String loadingText, String loadingTitle) {
         this.loadingText = engine.getLANG().getString(loadingText);
         this.loadingTitle = engine.getLANG().getString(loadingTitle);
         SwingUtilities.invokeLater(() -> {
@@ -182,8 +133,24 @@ public class LoadingManager extends JWindow {
         }
     }
 
+    public void setLabelFont(String labelFont) {
+        this.labelFont = labelFont;
+    }
+
     @SuppressWarnings("unused")
     public Timer getLoadingTimer() {
         return loadingTimer;
+    }
+
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public boolean isAnimating() {
+        return animating;
+    }
+
+    public void setAnimating(boolean animating) {
+        this.animating = animating;
     }
 }

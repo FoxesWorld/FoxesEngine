@@ -4,7 +4,7 @@ import org.foxesworld.engine.gui.components.Bounds;
 
 @SuppressWarnings("unused")
 public class LoadManagerAttributes {
-    private String spritePath, bgPath, blurColor, titleColor, descColor;
+    private String spritePath, bgPath, blurColor, titleColor, descColor, font;
     private int rows, cols,delay,animSpeed;
     private Bounds bounds;
     public String getSpritePath() {
@@ -36,5 +36,8 @@ public class LoadManagerAttributes {
     }
     public String getDescColor() {
         return descColor;
+    }
+    public String getFont() {
+        return font;
     }
 }
