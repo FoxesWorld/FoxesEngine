@@ -25,6 +25,7 @@ import org.foxesworld.engine.utils.loadManager.LoadingManager;
 import org.foxesworld.engine.utils.OS;
 import org.foxesworld.engine.utils.ServerInfo;
 import org.foxesworld.engine.gui.ActionHandler;
+import org.graalvm.polyglot.Context;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -42,6 +43,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final FileProperties fileProperties;
     public static String currentOS = "";
     protected LoadingManager loadingManager;
+    private final Context jsContext;
     private final List<String> configFiles;
     private final String appTitle;
     protected Sound SOUND;
@@ -71,6 +73,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         fileProperties = new FileProperties(this);
         System.setProperty("log.dir", System.getProperty("user.dir"));
         LOGGER = LogManager.getLogger(this.getClass());
+        jsContext = Context.newBuilder("js").option("engine.WarnInterpreterOnly", "false").allowNativeAccess(true).allowAllAccess(true).build();
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
         LOGGER.info(appTitle + " started...");
@@ -215,5 +218,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
     public Config getConfig() {
         return config;
+    }
+
+    public Context getJsContext() {
+        return jsContext;
     }
 }
