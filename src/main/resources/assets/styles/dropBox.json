@@ -2,7 +2,7 @@
   "styles": {
     "dropBox": {
       "selectable": {
-        "name": "A selectable dude!",
+        "name": "A selectable one!",
         "font": "mcfont",
         "fontSize": 12,
         "borderRadius": 5,
