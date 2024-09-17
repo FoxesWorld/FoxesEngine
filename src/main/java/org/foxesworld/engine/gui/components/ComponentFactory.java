@@ -18,6 +18,7 @@ import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
+import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
 import org.foxesworld.engine.gui.components.textArea.AreaStyle;
 import org.foxesworld.engine.gui.components.textArea.TextArea;
 import org.foxesworld.engine.gui.components.textfield.TextField;
@@ -142,19 +143,7 @@ public class ComponentFactory {
                 if(componentAttributes.getInitialValue() != null) ((TextField)component).setText(componentAttributes.getInitialValue());
             }
 
-            /*
-            case "textArea" -> {
-                TextAreaStyle textAreaStyle = new TextAreaStyle(this);
-                TextArea textArea = new TextArea(this);
-                textAreaStyle.apply(textArea);
-                textArea.setName(componentAttributes.getComponentId());
-                textArea.setBounds(xPos, yPos, textAreaStyle.width, textAreaStyle.height);
-                //textArea.setActionCommand(componentAttributes.getComponentId());
-                //textArea.addActionListener(engine);
-                if(componentAttributes.getInitialValue() != null) textArea.setText(componentAttributes.getInitialValue());
-                return textArea;
-            }
-            */
+            case "spriteImage" -> component = new SpriteAnimation(this);
 
             case "passField" -> {
                 PassFieldStyle passfieldStyle = new PassFieldStyle(this);
@@ -163,21 +152,6 @@ public class ComponentFactory {
                 component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), style.getFontSize()));
                 ((PassField)component).setActionCommand(componentAttributes.getComponentId());
             }
-
-            /*
-            case "spriteImage" -> {
-                SpriteAnimation spriteAnimation = new SpriteAnimation(
-                        componentAttributes.getImageIcon(),
-                        componentAttributes.getRowNum(),
-                        componentAttributes.getColNum(),
-                        componentAttributes.getDelay(),
-                        new Rectangle(xPos,yPos, width, height));
-                spriteAnimation.setOpaque(style.isOpaque());
-                spriteAnimation.setVisible(componentAttributes.isEnabled());
-                spriteAnimation.setName(componentAttributes.getComponentId());
-                return  spriteAnimation;
-            }
-            */
 
             case "button" -> {
                 ButtonStyle buttonStyle = new ButtonStyle(this);
@@ -233,10 +207,6 @@ public class ComponentFactory {
                 component.setBackground(hexToColor(componentAttributes.getColor()));
                 component.setForeground(hexToColor(componentAttributes.getColor()));
             }
-
-            //case "scrollBar" -> {
-                //component = new CustomScrollBar(0, 100, 10);
-            //}
 
             case "slider" -> {
                 component = new Slider(this);

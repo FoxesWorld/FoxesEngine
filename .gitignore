@@ -35,13 +35,8 @@ bin/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
-
 ### Mac OS ###
 .DS_Store
-/src/main/resources/
-/src/main/resources/assets/
 /src/main/resources/config/
 /src/main/resources/engine.json
 /src/main/resources/log4j2.xml
