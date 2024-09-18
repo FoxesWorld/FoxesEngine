@@ -83,23 +83,25 @@ public class SpriteAnimation extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        int scaledWidth = 128;
-        int scaledHeight = 128;
+        if(this.isVisible()) {
+            int scaledWidth = 64;
+            int scaledHeight = 64;
 
-        int frameWidth = spriteSheet.getWidth() / columns;
-        int frameHeight = spriteSheet.getHeight() / rows;
+            int frameWidth = spriteSheet.getWidth() / columns;
+            int frameHeight = spriteSheet.getHeight() / rows;
 
-        int row = currentFrame / columns;
-        int column = currentFrame % columns;
+            int row = currentFrame / columns;
+            int column = currentFrame % columns;
 
-        g.drawImage(
-                spriteSheet.getSubimage(column * frameWidth, row * frameHeight, frameWidth, frameHeight),
-                0,
-                0,
-                scaledWidth,
-                scaledHeight,
-                this
-        );
+            g.drawImage(
+                    spriteSheet.getSubimage(column * frameWidth, row * frameHeight, frameWidth, frameHeight),
+                    0,
+                    0,
+                    scaledWidth,
+                    scaledHeight,
+                    this
+            );
+        }
     }
 
     public void updateImage(BufferedImage newSpriteSheet, int cols, int rows, int delay, boolean repeat) {

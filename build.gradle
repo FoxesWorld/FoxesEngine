@@ -71,6 +71,7 @@ dependencies {
     implementation files('lib/flatLaf/flatlaf-3.4.1.jar')
     implementation files('lib/flatLaf/flatlaf-extras-3.4.1.jar')
     implementation files('lib/jsvg-1.4.0.jar')
+    implementation files('lib/emoji-java-6.0i.jar')
 
     implementation 'com.github.stephengold:j-ogg-vorbis:1.0.4'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'

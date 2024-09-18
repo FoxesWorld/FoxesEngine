@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 
 class AnimationManager {
     private final LoadingManager loadingManager;
+    private AnimationStats animationStats;
     private final int animationDuration;
     private final int animationSpeed;
 
@@ -19,7 +20,7 @@ class AnimationManager {
     public void animate(boolean isEntry) {
         if (!loadingManager.isAnimating()) {
             loadingManager.setAnimating(true);
-            loadingManager.setVisible(true);
+            animationStats.animationStarted();
 
             Point mainFrameCenter = loadingManager.getCenterPoint(loadingManager.getEngine().getFrame());
             int startX = mainFrameCenter.x - loadingManager.getWidth() / 2;
@@ -41,7 +42,7 @@ class AnimationManager {
             KeyframeAnimation animation = new KeyframeAnimation(loadingManager, animationDuration / animationSpeed, () -> {
                 loadingManager.setAnimating(false);
                 if (!isEntry) {
-                    loadingManager.setVisible(false);
+                    animationStats.animationFinished();
                 }
             });
 
@@ -73,5 +74,9 @@ class AnimationManager {
     // Non-linear method for (ease-in-out)
     private float easeInOut(float t) {
         return (float) (-0.5 * (Math.cos(Math.PI * t) - 1));
+    }
+
+    public void setAnimationStats(AnimationStats animationStats) {
+        this.animationStats = animationStats;
     }
 }

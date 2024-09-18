@@ -1,5 +1,7 @@
 package org.foxesworld.engine.utils;
 
+import org.foxesworld.engine.Engine;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,22 +83,31 @@ public final class HashUtils {
 
     public static String calculateSHA1(String filePath) {
         Path path = Paths.get(filePath);
-        MessageDigest md = null;
-        byte[] fileBytes;
+        MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-1");
-            fileBytes = Files.readAllBytes(path);
-        } catch (NoSuchAlgorithmException | IOException e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-1 algorithm not found", e);
         }
-
-        md.update(fileBytes);
+        try (FileInputStream fis = new FileInputStream(path.toFile())) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            Engine.LOGGER.error("Error reading file: " + e.getMessage());
+            new File(filePath).delete();
+            return "";
+        }
         byte[] digest = md.digest();
         StringBuilder sb = new StringBuilder();
         for (byte b : digest) {
             sb.append(String.format("%02x", b));
         }
+
         return sb.toString();
     }
+
 }
 

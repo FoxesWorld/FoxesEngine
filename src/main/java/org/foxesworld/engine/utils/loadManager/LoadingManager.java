@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-public class LoadingManager extends JWindow {
+public class LoadingManager extends JWindow implements AnimationStats {
     private final List<LoadManagerAttributes> attributesList;
     private final Engine engine;
     private String loadingText, loadingTitle, labelFont;
@@ -35,7 +35,7 @@ public class LoadingManager extends JWindow {
         this.ANIMATION_SPEED = attributesList.get(index).getAnimSpeed();
 
         this.animationManager = new AnimationManager(this, ANIMATION_DURATION, ANIMATION_SPEED);
-
+        this.animationManager.setAnimationStats(this);
         initializeLoadingFrame(index);
     }
 
@@ -152,5 +152,15 @@ public class LoadingManager extends JWindow {
 
     public void setAnimating(boolean animating) {
         this.animating = animating;
+    }
+
+    @Override
+    public void animationStarted() {
+        this.setVisible(true);
+    }
+
+    @Override
+    public void animationFinished() {
+        this.setVisible(false);
     }
 }
