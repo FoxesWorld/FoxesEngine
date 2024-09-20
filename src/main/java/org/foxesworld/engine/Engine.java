@@ -21,7 +21,7 @@ import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.FontUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 import org.foxesworld.engine.utils.ImageUtils;
-import org.foxesworld.engine.utils.loadManager.LoadingManager;
+import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.utils.OS;
 import org.foxesworld.engine.utils.ServerInfo;
 import org.foxesworld.engine.gui.ActionHandler;

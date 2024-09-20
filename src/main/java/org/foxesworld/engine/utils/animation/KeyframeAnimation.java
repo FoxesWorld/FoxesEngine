@@ -1,4 +1,4 @@
-package org.foxesworld.engine.utils.loadManager;
+package org.foxesworld.engine.utils.animation;
 
 import javax.swing.*;
 import java.awt.*;

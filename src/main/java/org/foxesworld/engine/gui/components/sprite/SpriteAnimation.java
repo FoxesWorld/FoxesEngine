@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.sprite;
 
+import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 
@@ -9,7 +10,7 @@ import java.awt.image.BufferedImage;
 
 @SuppressWarnings("unused")
 public class SpriteAnimation extends JComponent {
-    private final ComponentFactory componentFactory;
+    private ComponentFactory componentFactory;
     private BufferedImage spriteSheet;
     private int rows, columns, delay;
     private int currentFrame = 0;
@@ -19,6 +20,7 @@ public class SpriteAnimation extends JComponent {
     private boolean animationStopped = false;
     private float alpha = 1.0f;
     private Dimension frameSize;
+    private Rectangle spriteRect;
 
     public SpriteAnimation(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
@@ -36,6 +38,19 @@ public class SpriteAnimation extends JComponent {
         this.frameSize = new Dimension(spriteSheet.getWidth() / columns, spriteSheet.getHeight() / rows);
 
         setPreferredSize(frameSize);
+    }
+
+    public SpriteAnimation(Engine engine, String path, int rows, int columns, int delay, Rectangle spriteRect) {
+        this.spriteSheet = engine.getImageUtils().getLocalImage(path);
+        this.rows = rows;
+        this.columns = columns;
+        this.spriteRect = spriteRect;
+
+        Timer timer = new Timer(delay, e -> {
+            currentFrame = (currentFrame + 1) % (rows * columns);
+            repaint();
+        });
+        timer.start();
     }
 
     private void startAnimation(boolean repeat) {
@@ -154,11 +169,39 @@ public class SpriteAnimation extends JComponent {
         return animationStopped;
     }
 
+    public void setSpriteSheet(BufferedImage spriteSheet) {
+        this.spriteSheet = spriteSheet;
+    }
+
+    public void setRows(int rows) {
+        this.rows = rows;
+    }
+
+    public void setFrameSize(Dimension frameSize) {
+        this.frameSize = frameSize;
+    }
+
+    public void setColumns(int columns) {
+        this.columns = columns;
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+    }
+
+    public void setPlayOnce(boolean playOnce) {
+        this.playOnce = playOnce;
+    }
+
     public void setAnimationStopped(boolean animationStopped) {
         this.animationStopped = animationStopped;
     }
 
     public int getCurrentFrame() {
         return currentFrame;
+    }
+
+    public Rectangle getSpriteRect() {
+        return spriteRect;
     }
 }

@@ -1,11 +1,12 @@
-package org.foxesworld.engine.utils.loadManager;
+package org.foxesworld.engine.utils.animation;
 
-import org.foxesworld.engine.utils.BezierCurve;
+
+import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 
-class AnimationManager {
+public class AnimationManager {
     private final LoadingManager loadingManager;
     private AnimationStats animationStats;
     private final int animationDuration;

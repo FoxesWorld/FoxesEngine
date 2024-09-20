@@ -1,4 +1,4 @@
-package org.foxesworld.engine.utils;
+package org.foxesworld.engine.utils.animation;
 
 import java.awt.geom.Point2D;
 

@@ -2,7 +2,7 @@ package org.foxesworld.engine;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.utils.HTTP.RequestProperty;
-import org.foxesworld.engine.utils.loadManager.LoadManagerAttributes;
+import org.foxesworld.engine.gui.loadingManager.LoadManagerAttributes;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
