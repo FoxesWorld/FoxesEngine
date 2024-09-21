@@ -9,7 +9,7 @@ import java.util.Map;
 public class PanelVisibility {
     private final Map<String, Boolean> activePanels = new HashMap<>();
 
-    private  Engine engine;
+    private final Engine engine;
 
     public PanelVisibility(Engine engine){
         this.engine = engine;

@@ -82,12 +82,12 @@ public class HTTPrequest {
 
     public void setRequestProperties(HttpURLConnection httpURLConnection, List<RequestProperty> properties) {
         for(RequestProperty requestProperty: properties){
-            String value = requestProperty.propertyValue;
+            String value = requestProperty.getPropertyValue();
             if (value.contains("{$boundary}")) {
                 value = value.replace("{$boundary}", this.getBoundary(3, 3));
             }
-            if(!httpURLConnection.getRequestProperties().containsKey(requestProperty.propertyKey)) {
-                httpURLConnection.setRequestProperty(requestProperty.propertyKey, value);
+            if(!httpURLConnection.getRequestProperties().containsKey(requestProperty.getPropertyKey())) {
+                httpURLConnection.setRequestProperty(requestProperty.getPropertyKey(), value);
                 //engine.getLOGGER().debug("Adding request header " + requestProperty.propertyKey);
             }
 

@@ -13,7 +13,7 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class TextFieldStyle {
 	public Color foregroundColor, backgroundColor, caretColor;
-	private final List<Color> borderColor = new ArrayList();
+	private final List<Color> borderColor = new ArrayList<>();
 	public int width,height, bevel;
 	public String font;
 	public float fontSize;

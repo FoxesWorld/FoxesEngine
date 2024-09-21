@@ -97,6 +97,7 @@ public class ComponentFactory {
             case "textArea" -> {
                 AreaStyle areaStyle = new AreaStyle(this);
                 component = new TextArea(this);
+                ((TextArea)component).setLineWrap(componentAttributes.isLineWrap());
                 areaStyle.apply((TextArea) component);
                 component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
 

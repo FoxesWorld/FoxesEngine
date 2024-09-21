@@ -40,12 +40,13 @@ public class Panel extends JPanel {
     }
 
     private void drawDarkenedBackground(Graphics g) {
-        g.drawImage(applyDarkening(
-                this.frameConstructor.getAppFrame().getImageUtils().getLocalImage(getSeasonalBackground()),
-                hexToColor(frameAttributes.getBackgroundBlur())), 0, 0, null);
+        BufferedImage backgroundImage = frameConstructor.getAppFrame()
+                .getImageUtils()
+                .getLocalImage(getSeasonalBackground());
+        g.drawImage(applyDarkening(backgroundImage, hexToColor(frameAttributes.getBackgroundBlur())), 0, 0, null);
     }
 
-    private String getSeasonalBackground(){
+    private String getSeasonalBackground() {
         return switch (CurrentMonth.getCurrentMonth()) {
             case DECEMBER, JANUARY, FEBRUARY -> frameAttributes.getWinterImage();
             case MARCH, APRIL, MAY -> frameAttributes.getSpringImage();
@@ -57,27 +58,21 @@ public class Panel extends JPanel {
     private BufferedImage applyDarkening(BufferedImage image, Color darkeningColor) {
         int width = image.getWidth();
         int height = image.getHeight();
-
         BufferedImage darkenedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = darkenedImage.createGraphics();
 
-        // Накладываем изображение
         g2d.drawImage(image, 0, 0, null);
 
-        // Создаем новый BufferedImage с прозрачностью
         BufferedImage alphaImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D gAlpha = alphaImage.createGraphics();
 
-        // Заполняем изображение прозрачным цветом
         gAlpha.setColor(new Color(0, 0, 0, 0));
         gAlpha.fillRect(0, 0, width, height);
 
-        // Наносим затемнение с учетом альфа-канала
         gAlpha.setColor(darkeningColor);
-        gAlpha.setComposite(AlphaComposite.SrcOver.derive(0.5f)); // Пример установки прозрачности в 50%
+        gAlpha.setComposite(AlphaComposite.SrcOver.derive(0.5f));
         gAlpha.fillRect(0, 0, width, height);
 
-        // Накладываем изображение с примененным альфа-каналом на изначальное изображение
         g2d.drawImage(alphaImage, 0, 0, null);
 
         g2d.dispose();
@@ -86,10 +81,7 @@ public class Panel extends JPanel {
         return darkenedImage;
     }
 
-
     public JPanel createGroupPanel(PanelAttributes panelOptions, String groupName, FrameConstructor frameConstructor) {
-        LayoutManager layoutManager = null;
-
         groupPanel = new JPanel(null, panelOptions.isDoubleBuffered()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -98,11 +90,13 @@ public class Panel extends JPanel {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 if (panelOptions.getBackgroundImage() != null) {
-                    BufferedImage backgroundImage = frameConstructor.getAppFrame().getImageUtils().getLocalImage(panelOptions.getBackgroundImage());
+                    BufferedImage backgroundImage = frameConstructor.getAppFrame()
+                            .getImageUtils()
+                            .getLocalImage(panelOptions.getBackgroundImage());
                     g.drawImage(applyDarkening(backgroundImage, hexToColor(panelOptions.getBackground())), 0, 0, null);
                 }
 
-                if(panelOptions.getCornerRadius() != 0){
+                if (panelOptions.getCornerRadius() != 0) {
                     int cornerRadius = panelOptions.getCornerRadius();
                     RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
                     g2d.setColor(getBackground());
@@ -118,15 +112,10 @@ public class Panel extends JPanel {
                 if (panelOptions.getCornerRadius() != 0) {
                     Graphics2D g2d = (Graphics2D) g.create();
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
                     int cornerRadius = panelOptions.getCornerRadius();
-
-                    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(
-                            0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
-
+                    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
                     g2d.setColor(getForeground());
                     g2d.draw(roundedRectangle);
-
                     g2d.dispose();
                 }
             }
@@ -135,49 +124,43 @@ public class Panel extends JPanel {
         groupPanel.setName(groupName);
         groupPanel.setOpaque(panelOptions.getCornerRadius() == 0 && panelOptions.isOpaque());
         groupPanel.setBackground(hexToColor(panelOptions.getBackground()));
-        if (panelOptions.getBorder() != null && !panelOptions.getBorder().equals("")) {
-            this.createBorder(groupPanel, panelOptions.getBorder());
+        if (panelOptions.getBorder() != null && !panelOptions.getBorder().isEmpty()) {
+            createBorder(groupPanel, panelOptions.getBorder());
         }
 
         if (panelOptions.getListener() != null) {
             DragListener dragListener = new DragListener();
-            switch (panelOptions.getListener()) {
-                case "dragger" -> dragListener.addDragListener(groupPanel, frameConstructor);
+            if ("dragger".equals(panelOptions.getListener())) {
+                dragListener.addDragListener(groupPanel, frameConstructor);
             }
         }
 
-
-        if(panelOptions.isFocusable()) {
+        if (panelOptions.isFocusable()) {
             groupPanel.setFocusable(true);
             groupPanel.requestFocus();
         }
 
         Bounds bounds = panelOptions.getBounds();
         groupPanel.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
-        if(panelOptions.getLayout() != null) {
-            layoutManager = this.getLayout(panelOptions.getLayout(), groupPanel);
-            groupPanel.setLayout(layoutManager);
+        if (panelOptions.getLayout() != null) {
+            groupPanel.setLayout(getLayout(panelOptions.getLayout(), groupPanel));
         }
 
         return groupPanel;
     }
 
-    private LayoutManager getLayout(String layout, JPanel panel){
-        switch (layout.toLowerCase()) {
-            case "flow":
-                return new FlowLayout();
-            case "border":
-                return new BorderLayout();
-            case "grid":
-                return new GridLayout();
-            case "gridbag":
-                return new GridBagLayout();
-            case "box":
-                return new BoxLayout(panel, BoxLayout.X_AXIS);
-            default:
+    private LayoutManager getLayout(String layout, JPanel panel) {
+        return switch (layout.toLowerCase()) {
+            case "flow" -> new FlowLayout();
+            case "border" -> new BorderLayout();
+            case "grid" -> new GridLayout();
+            case "gridbag" -> new GridBagLayout();
+            case "box" -> new BoxLayout(panel, BoxLayout.X_AXIS);
+            default -> {
                 Engine.LOGGER.error("Invalid layout type: " + layout);
-                return null;
-        }
+                yield null;
+            }
+        };
     }
 
     private void createBorder(JPanel groupPanel, String border) {
@@ -189,5 +172,4 @@ public class Panel extends JPanel {
         Color borderColor = hexToColor(borderData[4]);
         groupPanel.setBorder(new MatteBorder(top, left, bottom, right, borderColor));
     }
-
 }
