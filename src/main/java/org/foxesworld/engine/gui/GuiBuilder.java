@@ -60,22 +60,7 @@ public class GuiBuilder {
         return components;
     }
 
-    @Deprecated
-    public JComponent getComponentById(String id) {
-        return componentsMap.values().stream()
-                .flatMap(List::stream)
-                .filter(component -> id.equals(component.getName()))
-                .findFirst()
-                .orElse(null);
-    }
 
-    @Deprecated
-    public Map<String, JComponent> getPanelsComponents(String panelName) {
-        Map<String, JComponent> panelComponents = new HashMap<>();
-        componentsMap.getOrDefault(panelName, Collections.emptyList())
-                .forEach(component -> panelComponents.put(component.getName(), component));
-        return panelComponents;
-    }
 
     private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
         if (panels != null) {
@@ -143,7 +128,6 @@ public class GuiBuilder {
     private void updateChildParentMap(JPanel parentPanel, JPanel childPanel) {
         childParentMap.computeIfAbsent(parentPanel.getName(), k -> new ArrayList<>()).add(childPanel.getName());
     }
-
     public void buildAdditionalPanels() {
         if (!additionalPanelsBuilt) {
             if (guiBuilderListener != null) {
@@ -169,35 +153,47 @@ public class GuiBuilder {
         panelsMap.put(child.getName(), child);
         updateChildParentMap(parent, child);
     }
+    @Deprecated
+    public JComponent getComponentById(String id) {
+        return componentsMap.values().stream()
+                .flatMap(List::stream)
+                .filter(component -> id.equals(component.getName()))
+                .findFirst()
+                .orElse(null);
+    }
 
+    @Deprecated
+    public Map<String, JComponent> getPanelsComponents(String panelName) {
+        Map<String, JComponent> panelComponents = new HashMap<>();
+        componentsMap.getOrDefault(panelName, Collections.emptyList())
+                .forEach(component -> panelComponents.put(component.getName(), component));
+        return panelComponents;
+    }
+
+    @Deprecated
     public Map<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }
-
+    @Deprecated
     public void addPanelToMap(JPanel panel) {
         this.panelsMap.put(panel.getName(), panel);
     }
-
+    @Deprecated
     public Map<String, JPanel> getPanelsMap() {
         return panelsMap;
     }
-
     public Map<String, List<String>> getChildParentMap() {
         return childParentMap;
     }
-
     public void setGuiBuilderListener(GuiBuilderListener guiBuilderListener) {
         this.guiBuilderListener = guiBuilderListener;
     }
-
     public Engine getEngine() {
         return engine;
     }
-
     public Notification getNotification() {
         return notification;
     }
-
     public ComponentFactory getComponentFactory() {
         return componentFactory;
     }

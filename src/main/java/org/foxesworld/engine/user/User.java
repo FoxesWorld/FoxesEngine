@@ -1,15 +1,14 @@
 package org.foxesworld.engine.user;
 
 import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.gui.ComponentsAccessor;
+import org.foxesworld.engine.gui.componentAccessor.ComponentsAccessor;
 import org.foxesworld.engine.gui.GuiBuilder;
-import org.foxesworld.engine.utils.ImageUtils;
 
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public abstract class User extends ComponentsAccessor {
 
     protected Engine engine;
