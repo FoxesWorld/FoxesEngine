@@ -17,14 +17,20 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class LanguageProvider {
     private final Map<String, Map<String, String>> localizationData = new HashMap<>();
+    private final Engine engine;
+    private String langFilePath;
     private final Set<String> sectionsSet = new HashSet<>();
     private final Set<String> localesSet = new HashSet<>();
     private int localeIndex = 0;
-    private String currentLang;
 
-    public LanguageProvider(Engine engine, String langFilePath, String locale) {
-        this.currentLang = locale;
+    public LanguageProvider(Engine engine, String langFilePath, int localeIndex) {
+        this.localeIndex = localeIndex;
+        this.engine = engine;
+        this.langFilePath = langFilePath;
+        loadLocalizationData(engine, langFilePath);
+    }
 
+    private void loadLocalizationData(Engine engine, String langFilePath) {
         try {
             Gson gson = new Gson();
             InputStreamReader reader = new InputStreamReader(engine.getClass().getClassLoader().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
@@ -49,9 +55,10 @@ public class LanguageProvider {
                 for (Map.Entry<String, JsonElement> localizedData : categoryData.entrySet()) {
                     String localizedKey = localizedData.getKey();
                     JsonObject localizedValues = localizedData.getValue().getAsJsonObject();
-                    this.analyzeSection(localizedData.getValue());
-                    if (localizedValues.has(currentLang)) {
-                        String localizedValue = localizedValues.get(currentLang).getAsString();
+                    analyzeSection(localizedValues);
+                    String localeKey = getLocaleKeyByIndex(localeIndex);
+                    if (localizedValues.has(localeKey)) {
+                        String localizedValue = localizedValues.get(localeKey).getAsString();
                         categoryMap.put(localizedKey, localizedValue);
                     }
                 }
@@ -64,29 +71,39 @@ public class LanguageProvider {
         }
     }
 
-    private void analyzeSection(JsonElement jsonElement){
-        for (Map.Entry<String, JsonElement> langSet: jsonElement.getAsJsonObject().entrySet()){
-            this.localesSet.add(langSet.getKey());
+    private void analyzeSection(JsonObject localizedValues) {
+        for (Map.Entry<String, JsonElement> langSet : localizedValues.entrySet()) {
+            localesSet.add(langSet.getKey());
         }
     }
 
-    public void setCurrentLang(String lang) {
-        this.currentLang = lang;
+    private String getLocaleKeyByIndex(int index) {
+        return localesSet.toArray(new String[0])[index];
+    }
+
+    public void setLocaleIndex(int index) {
+        if (index >= 0 && index < localesSet.size()) {
+            this.localeIndex = index;
+            reloadLocalizationData();
+        } else {
+            throw new IndexOutOfBoundsException("Invalid locale index: " + index);
+        }
+    }
+
+    private void reloadLocalizationData() {
+        localizationData.clear();
+        loadLocalizationData(this.engine, this.langFilePath);
     }
 
     public String getString(String key) {
-        if (key != null) {
-            if (key.contains(".")) {
-                String[] parts = key.split("\\.");
-                if (parts.length == 2) {
-                    String category = parts[0];
-                    String localizedKey = parts[1];
-                    if (localizationData.containsKey(category)) {
-                        Map<String, String> categoryMap = localizationData.get(category);
-                        if (categoryMap.containsKey(localizedKey)) {
-                            return categoryMap.get(localizedKey);
-                        }
-                    }
+        if (key != null && key.contains(".")) {
+            String[] parts = key.split("\\.");
+            if (parts.length == 2) {
+                String category = parts[0];
+                String localizedKey = parts[1];
+                Map<String, String> categoryMap = localizationData.get(category);
+                if (categoryMap != null) {
+                    return categoryMap.getOrDefault(localizedKey, key);
                 }
             }
         }
@@ -94,44 +111,19 @@ public class LanguageProvider {
     }
 
     public String getStringWithKey(String langKey, String[] replaceKeys, String[] replaceValues) {
-        if (langKey != null) {
-            if (langKey.contains(".")) {
-                String[] parts = langKey.split("\\.");
-                if (parts.length == 2) {
-                    String category = parts[0];
-                    String localizedKey = parts[1];
-                    if (localizationData.containsKey(category)) {
-                        Map<String, String> categoryMap = localizationData.get(category);
-                        if (categoryMap.containsKey(localizedKey)) {
-                            String langLine = categoryMap.get(localizedKey);
-                            if (replaceKeys != null && replaceValues != null && replaceKeys.length == replaceValues.length) {
-                                for (int i = 0; i < replaceKeys.length; i++) {
-                                    String key = "{" + replaceKeys[i] + "}";
-                                    if (langLine.contains(key)) {
-                                        langLine = langLine.replace(key, replaceValues[i]);
-                                    }
-                                }
-                            }
-                            return langLine;
-                        }
-                    }
-                }
+        String langLine = getString(langKey);
+        if (replaceKeys != null && replaceValues != null && replaceKeys.length == replaceValues.length) {
+            for (int i = 0; i < replaceKeys.length; i++) {
+                langLine = langLine.replace("{" + replaceKeys[i] + "}", replaceValues[i]);
             }
         }
-        return langKey;
+        return langLine;
     }
 
     public String[] getSectionsSet() {
         return sectionsSet.toArray(new String[0]);
     }
 
-    public void setLocaleIndex(String locale) {
-        for(int k = 0; this.localesSet.size() > k; k++){
-            if(this.localesSet.toArray()[k].equals(locale)){
-                this.localeIndex =  k;
-            }
-        }
-    }
     public String[] getLocalesSet() {
         return localesSet.toArray(new String[0]);
     }

@@ -26,7 +26,7 @@ public class TextField extends JTextField {
 	private Color selectionColor;
 	private Color selectedTextColor = Color.white;
 	private Timer caretTimer;
-	private String placeholder;
+	private final String placeholder;
 
 	public TextField(ComponentFactory componentFactory) {
 		this.placeholder = componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey());
@@ -107,17 +107,13 @@ public class TextField extends JTextField {
 	protected void paintComponent(Graphics maing) {
 		Graphics2D g = (Graphics2D) maing.create();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-		// Draw the texture
 		g.drawImage(texture, 0, 0, getWidth(), getHeight(), null);
-
-		// Draw the text with padding
 		g.setColor(getForeground());
 		int x = paddingX;
 		int y = paddingY + g.getFontMetrics().getAscent();
 
 		String text = getText();
-		if (text != null) { // Добавленная проверка на null
+		if (text != null) {
 			g.drawString(text, x, y);
 		}
 
@@ -149,7 +145,6 @@ public class TextField extends JTextField {
 
 		g.dispose();
 	}
-
 
 	public void setTextFieldListener(TextFieldListener textFieldListener) {
 		this.textFieldListener = textFieldListener;
@@ -185,27 +180,28 @@ public class TextField extends JTextField {
 		this.paddingY = paddingY;
 	}
 
-	// Метод для установки цвета выделения
 	public void setSelectionColor(Color selectionColor) {
 		this.selectionColor = selectionColor;
 	}
 
-	// Метод для установки цвета текста при выделении
 	public void setSelectedTextColor(Color selectedTextColor) {
 		this.selectedTextColor = selectedTextColor;
 	}
 
-	// Метод для получения цвета выделения
 	public Color getSelectionColor() {
 		return selectionColor;
 	}
 
-	public String getValue(){
-		return  this.getText();
+	public String getValue() {
+		return this.getText();
 	}
 
-	// Метод для получения цвета текста при выделении
 	public Color getSelectedTextColor() {
 		return selectedTextColor;
+	}
+	public void resetText() {
+		setText(placeholder);
+		repaint();
+		revalidate();
 	}
 }

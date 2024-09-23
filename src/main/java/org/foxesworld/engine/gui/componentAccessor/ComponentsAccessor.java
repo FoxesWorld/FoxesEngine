@@ -82,7 +82,7 @@ public class ComponentsAccessor {
         } else if (component instanceof Slider) {
             return String.valueOf(((Slider) component).getValue());
         } else if(component instanceof DropBox) {
-            return String.valueOf(((DropBox) component).getValue());
+            return String.valueOf(((DropBox) component).getSelectedIndex());
         }
         return "";
     }
@@ -96,7 +96,7 @@ public class ComponentsAccessor {
     }
 
     public Map<String, String> getFormCredentials() {
-        return Collections.unmodifiableMap(formCredentials);
+        return formCredentials;
     }
 
     public JComponent getComponent(String id) {
@@ -110,7 +110,7 @@ public class ComponentsAccessor {
     public Map<String, String> collectFormCredentialsForPanel(String panelId) {
         Map<String, String> credentials = new HashMap<>();
         collectFormCredentials(panelId, credentials);
-        return Collections.unmodifiableMap(credentials);
+        return credentials;
     }
 
     private void collectFormCredentials(String panelId, Map<String, String> credentials) {

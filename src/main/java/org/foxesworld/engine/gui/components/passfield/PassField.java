@@ -28,7 +28,7 @@ public class PassField extends JPasswordField {
 
         this.setOpaque(false);
 
-        if(componentFactory.getComponentAttribute().isrevealButton()) {
+        if (componentFactory.getComponentAttribute().isrevealButton()) {
             this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
             this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
             // Initialize the icon label
@@ -127,5 +127,11 @@ public class PassField extends JPasswordField {
 
     public void setPaddingY(int paddingY) {
         this.paddingY = paddingY;
+    }
+
+    public void resetText() {
+        setText("");
+        repaint();
+        revalidate();
     }
 }

@@ -8,6 +8,12 @@
         "font": "FSElliotPro-Heavy",
         "color": "#ffffff"
       },
+	  "arcJet": {
+		"opaque": false,
+        "name": "Naming the Company",
+        "font": "arcjet",
+        "color": "#e66b24bd"
+	  },
       "heading": {
         "opaque": false,
         "name": "Naming the space",

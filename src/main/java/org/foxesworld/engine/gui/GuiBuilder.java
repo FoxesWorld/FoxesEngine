@@ -153,22 +153,15 @@ public class GuiBuilder {
         panelsMap.put(child.getName(), child);
         updateChildParentMap(parent, child);
     }
-    @Deprecated
-    public JComponent getComponentById(String id) {
-        return componentsMap.values().stream()
-                .flatMap(List::stream)
-                .filter(component -> id.equals(component.getName()))
-                .findFirst()
-                .orElse(null);
-    }
 
+    /*
     @Deprecated
     public Map<String, JComponent> getPanelsComponents(String panelName) {
         Map<String, JComponent> panelComponents = new HashMap<>();
         componentsMap.getOrDefault(panelName, Collections.emptyList())
                 .forEach(component -> panelComponents.put(component.getName(), component));
         return panelComponents;
-    }
+    } */
 
     @Deprecated
     public Map<String, List<JComponent>> getComponentsMap() {
