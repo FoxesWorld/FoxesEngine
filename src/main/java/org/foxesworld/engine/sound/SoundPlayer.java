@@ -7,45 +7,61 @@ import javax.sound.sampled.*;
 import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.Timer;
 
-public class SoundPlayer {
+public class SoundPlayer implements LineListener {
 
     private final Engine engine;
     private final VorbisAudioFileReader vorbisAudioFileReader;
-    private final List<Clip> activeClips = new ArrayList<>();
+    private final Map<Clip, PlaybackStatusListener> clipListeners = new HashMap<>();
+    private final Map<Clip, String> clipPaths = new HashMap<>();
+    private final Map<Clip, Timer> clipTimers = new HashMap<>();
 
     public SoundPlayer(Engine engine) {
         this.engine = engine;
         vorbisAudioFileReader = new VorbisAudioFileReader();
     }
 
-    public void playSound(String path, boolean loop) {
+    public void playSound(String path, boolean loop, PlaybackStatusListener listener) {
         if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getCONFIG().get("enableSound")))) {
             float volume;
             try {
                 InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
                 AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
-                    Clip clip = AudioSystem.getClip();
-                    clip.open(audioInputStream);
-                    if (path.contains("mus")) {
-                        volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.15f;
-                    } else {
-                        volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
-                    }
-                    setVolume(clip, volume);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioInputStream);
+                clip.addLineListener(this);
 
-                    if (loop) {
-                        clip.loop(Clip.LOOP_CONTINUOUSLY);
-                    }
+                clipPaths.put(clip, path);
+                clipListeners.put(clip, listener);
 
-                    clip.start();
-                    activeClips.add(clip);
+                if (path.contains("mus")) {
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.15f;
+                } else {
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
+                }
+                setVolume(clip, volume);
+
+                if (loop) {
+                    clip.loop(Clip.LOOP_CONTINUOUSLY);
+                }
+
+                clip.start();
+
+                if (listener != null) {
+                    listener.onPlaybackStarted(path);
+                }
+
+                startPlaybackTimer(clip, path, listener);
             } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
-                //e.printStackTrace();
+                // e.printStackTrace();
             }
         }
+    }
+
+    public void playSound(String path, boolean loop) {
+        playSound(path, loop, null);
     }
 
     private void setVolume(Clip clip, float volume) {
@@ -60,25 +76,40 @@ public class SoundPlayer {
         gainControl.setValue(gain);
     }
 
+    private void startPlaybackTimer(Clip clip, String path, PlaybackStatusListener listener) {
+        Timer timer = new Timer(true);
+        clipTimers.put(clip, timer);
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                long microsecondPosition = clip.getMicrosecondPosition();
+                long microsecondLength = clip.getMicrosecondLength();
+                if (listener != null) {
+                    listener.onPlaybackProgress(path, microsecondPosition, microsecondLength);
+                }
+            }
+        }, 0, 1000); // Update every second
+    }
+
     @SuppressWarnings("unused")
     public void changeActiveVolume(float volume) {
-        for (Clip clip : activeClips) {
+        for (Clip clip : clipListeners.keySet()) {
             setVolume(clip, volume);
         }
     }
-
 
     @SuppressWarnings("unused")
     public void stopAllSounds() {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                for (Clip clip : activeClips) {
+                for (Clip clip : clipListeners.keySet()) {
                     if (clip.isRunning()) {
                         fadeOut(clip);
                     }
                 }
-                activeClips.clear();
+                clipListeners.clear();
                 return null;
             }
         };
@@ -99,6 +130,30 @@ public class SoundPlayer {
         }
         clip.stop();
         gainControl.setValue(0.0f);
-        activeClips.remove(clip);
+        clipListeners.remove(clip);
+        clipPaths.remove(clip);
+        Timer timer = clipTimers.remove(clip);
+        if (timer != null) {
+            timer.cancel();
+        }
+    }
+
+    @Override
+    public void update(LineEvent event) {
+        Clip clip = (Clip) event.getLine();
+        if (event.getType() == LineEvent.Type.STOP) {
+            clip.close();
+
+            PlaybackStatusListener listener = clipListeners.remove(clip);
+            String path = clipPaths.remove(clip);
+            Timer timer = clipTimers.remove(clip);
+            if (timer != null) {
+                timer.cancel();
+            }
+
+            if (listener != null && path != null) {
+                listener.onPlaybackStopped(path);
+            }
+        }
     }
 }

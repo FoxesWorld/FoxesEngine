@@ -16,6 +16,7 @@ public class Sound {
     private final Map<String, Map<String, List<String>>> soundsMap = new HashMap<>();
     private final Random random = new Random();
 
+    @SuppressWarnings("unused")
     public Sound(Engine engine, InputStream inputStream) {
         Engine.getLOGGER().debug("FoxesSound init");
         this.soundPlayer = new SoundPlayer(engine);
@@ -67,6 +68,15 @@ public class Sound {
             int randomIndex = random.nextInt(subCategorySounds.size());
             String randomSound = subCategorySounds.get(randomIndex);
             this.soundPlayer.playSound(randomSound, false);
+        }
+    }
+
+    public void playSound(String category, String subCategory, PlaybackStatusListener playbackStatusListener) {
+        List<String> subCategorySounds = getSounds(category, subCategory);
+        if (subCategorySounds != null && !subCategorySounds.isEmpty()) {
+            int randomIndex = random.nextInt(subCategorySounds.size());
+            String randomSound = subCategorySounds.get(randomIndex);
+            this.soundPlayer.playSound(randomSound, false, playbackStatusListener);
         }
     }
 

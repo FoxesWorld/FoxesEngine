@@ -37,6 +37,7 @@ public class HTTPrequest {
             httpURLConnection.connect();
 
             try (OutputStream os = httpURLConnection.getOutputStream()) {
+                //parameters.put("programVersion", this.engine.getEngineData().getLauncherVersion());
                 byte[] postDataBytes = this.formParams(parameters).toString().getBytes(StandardCharsets.UTF_8);
                 os.write(postDataBytes);
             }
