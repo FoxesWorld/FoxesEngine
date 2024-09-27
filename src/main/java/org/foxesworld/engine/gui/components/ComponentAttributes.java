@@ -8,7 +8,7 @@ import java.util.Map;
 public class ComponentAttributes {
 
     private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
-    private boolean enabled, opaque, revealButton, repeat, lineWrap;
+    private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
     private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     private Map<String, OptionGroups> panels;
@@ -115,6 +115,10 @@ public class ComponentAttributes {
     }
     public int getSelectedIndex() {
         return selectedIndex;
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 
     public boolean isLineWrap() {

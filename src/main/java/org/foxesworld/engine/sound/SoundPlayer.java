@@ -89,7 +89,7 @@ public class SoundPlayer implements LineListener {
                     listener.onPlaybackProgress(path, microsecondPosition, microsecondLength);
                 }
             }
-        }, 0, 1000); // Update every second
+        }, 0, 100); // Update every second
     }
 
     @SuppressWarnings("unused")
@@ -99,61 +99,66 @@ public class SoundPlayer implements LineListener {
         }
     }
 
-    @SuppressWarnings("unused")
     public void stopAllSounds() {
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() {
-                for (Clip clip : clipListeners.keySet()) {
-                    if (clip.isRunning()) {
-                        fadeOut(clip);
-                    }
+        synchronized (clipListeners) {
+            for (Clip clip : new HashSet<>(clipListeners.keySet())) {
+                if (clip.isRunning()) {
+                    fadeOut(clip);
                 }
-                clipListeners.clear();
-                return null;
             }
-        };
-        worker.execute();
+        }
     }
 
     private void fadeOut(Clip clip) {
-        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-        float currentVolume = gainControl.getValue();
-        while (currentVolume > -80.0f) {
-            currentVolume -= 0.25f;
-            gainControl.setValue(currentVolume);
+        new Thread(() -> {
             try {
-                Thread.sleep(50);
+                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                float minVolume = gainControl.getMinimum();
+                float currentVolume = gainControl.getValue();
+                while (currentVolume > minVolume) {
+                    currentVolume -= 0.25f;
+                    if (currentVolume < minVolume) {
+                        currentVolume = minVolume;
+                    }
+                    gainControl.setValue(currentVolume);
+                    Thread.sleep(50);
+                }
+                clip.stop();
+                gainControl.setValue(minVolume);
+                clip.close();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } finally {
+                synchronized (clipListeners) {
+                    clipListeners.remove(clip);
+                    clipPaths.remove(clip);
+                    Timer timer = clipTimers.remove(clip);
+                    if (timer != null) {
+                        timer.cancel();
+                    }
+                }
             }
-        }
-        clip.stop();
-        gainControl.setValue(0.0f);
-        clipListeners.remove(clip);
-        clipPaths.remove(clip);
-        Timer timer = clipTimers.remove(clip);
-        if (timer != null) {
-            timer.cancel();
-        }
+        }).start();
     }
+
 
     @Override
     public void update(LineEvent event) {
         Clip clip = (Clip) event.getLine();
         if (event.getType() == LineEvent.Type.STOP) {
+            synchronized (clipListeners) {
+                PlaybackStatusListener listener = clipListeners.remove(clip);
+                String path = clipPaths.remove(clip);
+                Timer timer = clipTimers.remove(clip);
+                if (timer != null) {
+                    timer.cancel();
+                }
+
+                if (listener != null && path != null) {
+                    listener.onPlaybackStopped(path);
+                }
+            }
             clip.close();
-
-            PlaybackStatusListener listener = clipListeners.remove(clip);
-            String path = clipPaths.remove(clip);
-            Timer timer = clipTimers.remove(clip);
-            if (timer != null) {
-                timer.cancel();
-            }
-
-            if (listener != null && path != null) {
-                listener.onPlaybackStopped(path);
-            }
         }
     }
 }

@@ -236,6 +236,7 @@ public class ComponentFactory {
         }
 
         component.setName(componentAttributes.getComponentId());
+        component.setVisible(componentAttributes.isVisible());
         component.setOpaque(style.isOpaque());
         component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
 
