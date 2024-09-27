@@ -18,6 +18,7 @@ import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
+import org.foxesworld.engine.gui.components.spinner.Spinner;
 import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
 import org.foxesworld.engine.gui.components.textArea.AreaStyle;
 import org.foxesworld.engine.gui.components.textArea.TextArea;
@@ -152,6 +153,10 @@ public class ComponentFactory {
                 passfieldStyle.apply((PassField) component);
                 component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), style.getFontSize()));
                 ((PassField)component).setActionCommand(componentAttributes.getComponentId());
+            }
+
+            case "spinner" -> {
+                component = new Spinner(Integer.parseInt(componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
             }
 
             case "button" -> {
