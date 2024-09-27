@@ -9,7 +9,7 @@ public class ComponentAttributes {
 
     private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
     private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
-    private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment;
+    private String keyCode, border, initialValue, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment, toolTip;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     private Map<String, OptionGroups> panels;
     private Bounds bounds;
@@ -116,15 +116,15 @@ public class ComponentAttributes {
     public int getSelectedIndex() {
         return selectedIndex;
     }
-
+    public String getToolTip() {
+        return toolTip;
+    }
     public boolean isVisible() {
         return visible;
     }
-
     public boolean isLineWrap() {
         return lineWrap;
     }
-
     public boolean isRepeat() {
         return repeat;
     }

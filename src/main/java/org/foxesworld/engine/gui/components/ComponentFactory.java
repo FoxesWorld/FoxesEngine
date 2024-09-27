@@ -236,8 +236,10 @@ public class ComponentFactory {
         }
 
         component.setName(componentAttributes.getComponentId());
-        component.setVisible(componentAttributes.isVisible());
         component.setOpaque(style.isOpaque());
+        if(componentAttributes.getToolTip() != null) {
+            component.setToolTipText(this.engine.getLANG().getString(componentAttributes.getToolTip()));
+        }
         component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
 
         return  component;

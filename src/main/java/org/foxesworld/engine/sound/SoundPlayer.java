@@ -12,6 +12,7 @@ import java.util.Timer;
 
 public class SoundPlayer implements LineListener {
 
+    private static int UPDATE_RATE = 100;
     private final Engine engine;
     private final VorbisAudioFileReader vorbisAudioFileReader;
     private final Map<Clip, PlaybackStatusListener> clipListeners = new HashMap<>();
@@ -89,7 +90,7 @@ public class SoundPlayer implements LineListener {
                     listener.onPlaybackProgress(path, microsecondPosition, microsecondLength);
                 }
             }
-        }, 0, 100); // Update every second
+        }, 0, UPDATE_RATE); // Update every second
     }
 
     @SuppressWarnings("unused")
@@ -160,5 +161,9 @@ public class SoundPlayer implements LineListener {
             }
             clip.close();
         }
+    }
+
+    public static void setUPDATE_RATE(int rate) {
+        SoundPlayer.UPDATE_RATE = rate;
     }
 }

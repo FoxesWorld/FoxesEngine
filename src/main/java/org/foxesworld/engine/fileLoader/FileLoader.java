@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 @SuppressWarnings("unused")
 public class FileLoader {
     private final HTTPrequest POSTrequest;
@@ -56,6 +57,19 @@ public class FileLoader {
         Engine.getLOGGER().info("Keeping " + filesToKeep.size() + " files");
         loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
         this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
+        fileLoaderListener.onFilesRead();
+    }
+
+    public void forceUpdateFiles() {
+        loadingManager.toggleLoader();
+        FileAttributes[] fileAttributes = this.getDownloadList(client, version, getPlatformNumber());
+        loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
+        for (FileAttributes file : fileAttributes) {
+            this.fileLoaderListener.onFileAdd(file);
+        }
+        Engine.getLOGGER().info("Force updating " + fileAttributes.length + " files");
+        loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
+        this.fileAttributes = Arrays.asList(fileAttributes); //No check - just loading
         fileLoaderListener.onFilesRead();
     }
 
@@ -149,6 +163,7 @@ public class FileLoader {
             return fileName.substring(dotIndex + 1).toLowerCase();
         }
     }
+
     @SuppressWarnings("unused")
     public FileAttributes addJreToLoad(String jreVersion) {
         Map<String, String> request = new HashMap<>();
@@ -158,10 +173,12 @@ public class FileLoader {
         jreFile.setReplaceMask(this.replaceMask);
         return jreFile;
     }
+
     @SuppressWarnings("unused")
     public void setLoaderListener(FileLoaderListener fileLoaderListener) {
         this.fileLoaderListener = fileLoaderListener;
     }
+
     @SuppressWarnings("unused")
     public DownloadUtils getDownloadUtils() {
         return downloadUtils;
@@ -174,22 +191,27 @@ public class FileLoader {
     public void addFileToKeep(String fileToKeep) {
         this.filesToKeep.add(fileToKeep);
     }
+
     @SuppressWarnings("unused")
     public void addFileToDownload(FileAttributes fileAttributes) {
         this.fileAttributes.add(fileAttributes);
     }
+
     @SuppressWarnings("unused")
     public void setReplaceMask(String replaceMask) {
         this.replaceMask = replaceMask;
     }
+
     @SuppressWarnings("unused")
     public String getHomeDir() {
         return homeDir;
     }
+
     @SuppressWarnings("unused")
     public String getFileType() {
         return fileExtension;
     }
+
     public FileAttributes getCurrentFile() {
         return currentFile;
     }
