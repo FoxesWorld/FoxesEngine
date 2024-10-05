@@ -17,6 +17,7 @@ public class DownloadUtils {
     private JLabel progressLabel;
     private JProgressBar progressBar;
     private int percent;
+    public static int updateInterval = 100;
     private long downloaded = 0;
     public DownloadUtils(Engine engine) {
         this.engine = engine;
@@ -31,31 +32,37 @@ public class DownloadUtils {
             parentDir.mkdirs();
         }
 
+        Timer timer = new Timer(updateInterval, null);
+
         try {
-            //TODO use our HTTP class (Partly done)
             URL url = new URL(engine.getEngineData().getBindUrl() + downloadFile);
             HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             httpConnection.setDoOutput(false);
             httpConnection.setRequestMethod("GET");
             engine.getGETrequest().setRequestProperties(httpConnection, engine.getEngineData().getRequestProperties());
             long fileSize = httpConnection.getContentLength();
-            long chunkSize = fileSize / 100;
 
             FileOutputStream fileOutputStream = new FileOutputStream(savePath);
             byte[] buffer = new byte[65536];
+
+            long finalDownloaded = downloaded;
+            timer.addActionListener(e -> {
+                percent = (int) (finalDownloaded * 100 / totalSize);
+                progressBar.setValue(percent);
+                progressLabel.setText(formatFileSize((int) finalDownloaded) + " / " + formatFileSize(totalSize));
+            });
+
+            timer.start();
 
             try (InputStream in = new BufferedInputStream(httpConnection.getInputStream())) {
                 int read;
                 while ((read = in.read(buffer, 0, buffer.length)) != -1) {
                     fileOutputStream.write(buffer, 0, read);
                     downloaded += read;
-                    percent = (int) (downloaded * 100 / totalSize);
-                    SwingUtilities.invokeLater(() -> {
-                        progressBar.setValue(percent);
-                        progressLabel.setText(formatFileSize((int) downloaded) + " / " + formatFileSize(totalSize));
-                    });
                 }
             }
+
+            timer.stop();
             fileOutputStream.close();
             httpConnection.disconnect();
 
@@ -63,6 +70,7 @@ public class DownloadUtils {
             throw new RuntimeException(e);
         }
     }
+
     private String formatFileSize(long sizeInBytes) {
         if (sizeInBytes < 1024) {
             return sizeInBytes + " bytes";

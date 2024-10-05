@@ -1,0 +1,12 @@
+{
+    "Employes": {
+    "founder": "AidenFox",
+    "helper": "SwitchFox"
+    },
+    
+    "Array": {
+        "Enabled": true,
+        "Desc": "CoolDude",
+        "num": 10
+    }
+}
