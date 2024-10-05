@@ -47,17 +47,21 @@ public class FileLoader {
     }
 
     @SuppressWarnings("unused")
-    public void getFilesToDownload() {
-        loadingManager.toggleLoader();
-        FileAttributes[] fileAttributes = this.getDownloadList(client, version, getPlatformNumber());
-        loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
-        for (FileAttributes file : fileAttributes) {
+    public void getFilesToDownload(boolean forceUpdate) {
+        this.loadingManager.toggleLoader();
+        FileAttributes[] fileAttributes = getDownloadList(this.client, this.version, getPlatformNumber());
+        this.loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
+        for (FileAttributes file : fileAttributes)
             this.fileLoaderListener.onFileAdd(file);
+        Engine.getLOGGER().info("Keeping " + this.filesToKeep.size() + " files");
+        this.loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
+        if (forceUpdate) {
+            this.fileAttributes = Arrays.asList(fileAttributes);
+            Engine.getLOGGER().info("Force updating " + fileAttributes.length + " files");
+        } else {
+            this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
         }
-        Engine.getLOGGER().info("Keeping " + filesToKeep.size() + " files");
-        loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
-        this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
-        fileLoaderListener.onFilesRead();
+        this.fileLoaderListener.onFilesRead();
     }
 
     public void forceUpdateFiles() {
