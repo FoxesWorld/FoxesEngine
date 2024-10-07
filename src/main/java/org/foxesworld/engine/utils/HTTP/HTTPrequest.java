@@ -25,7 +25,7 @@ public class HTTPrequest {
         this.requestMethod = requestMethod;
     }
 
-    public String send(Map<String, String> parameters) {
+    public String send(Map<String, Object> parameters) {
         try {
             URL url = new URL(engine.getEngineData().getBindUrl());
             httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -68,9 +68,9 @@ public class HTTPrequest {
         return boundary;
     }
 
-    private StringBuilder formParams(Map<String, String> parameters) {
+    private StringBuilder formParams(Map<String, Object> parameters) {
         StringBuilder postData = new StringBuilder();
-        for (Map.Entry<String, String> param : parameters.entrySet()) {
+        for (Map.Entry<String, Object> param : parameters.entrySet()) {
             if (postData.length() != 0) {
                 postData.append('&');
             }

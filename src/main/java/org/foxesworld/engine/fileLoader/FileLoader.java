@@ -78,7 +78,7 @@ public class FileLoader {
     }
 
     private FileAttributes[] getDownloadList(String client, String version, int platfom) {
-        Map<String, String> request = new HashMap<>();
+        Map<String, Object> request = new HashMap<>();
         request.put("sysRequest", "loadFiles");
         request.put("version", version);
         request.put("client", client);
@@ -170,7 +170,7 @@ public class FileLoader {
 
     @SuppressWarnings("unused")
     public FileAttributes addJreToLoad(String jreVersion) {
-        Map<String, String> request = new HashMap<>();
+        Map<String, Object> request = new HashMap<>();
         request.put("sysRequest", "getJre");
         request.put("jreVersion", jreVersion);
         FileAttributes jreFile = new Gson().fromJson(POSTrequest.send(request), FileAttributes.class);

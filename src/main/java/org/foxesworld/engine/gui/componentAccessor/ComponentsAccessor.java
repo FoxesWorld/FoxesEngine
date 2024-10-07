@@ -17,7 +17,7 @@ public class ComponentsAccessor {
     private final List<Class<?>> componentTypes;
     private final Map<String, JComponent> componentMap = new HashMap<>();
     private final Map<String, List<JComponent>> panelComponentMap = new HashMap<>();
-    private final Map<String, String> formCredentials = new HashMap<>();
+    private final Map<String, Object> formCredentials = new HashMap<>();
 
     public ComponentsAccessor(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
         this.guiBuilder = Objects.requireNonNull(guiBuilder, "guiBuilder must not be null");
@@ -95,7 +95,7 @@ public class ComponentsAccessor {
         return Collections.unmodifiableMap(panelComponentMap);
     }
 
-    public Map<String, String> getFormCredentials() {
+    public Map<String, Object> getFormCredentials() {
         return formCredentials;
     }
 
@@ -107,13 +107,13 @@ public class ComponentsAccessor {
         return panelComponentMap.getOrDefault(panelId, Collections.emptyList());
     }
 
-    public Map<String, String> collectFormCredentialsForPanel(String panelId) {
-        Map<String, String> credentials = new HashMap<>();
+    public Map<String, Object> collectFormCredentialsForPanel(String panelId) {
+        Map<String, Object> credentials = new HashMap<>();
         collectFormCredentials(panelId, credentials);
         return credentials;
     }
 
-    private void collectFormCredentials(String panelId, Map<String, String> credentials) {
+    private void collectFormCredentials(String panelId, Map<String, Object> credentials) {
         List<JComponent> components = panelComponentMap.get(panelId);
         if (components != null) {
             for (JComponent component : components) {

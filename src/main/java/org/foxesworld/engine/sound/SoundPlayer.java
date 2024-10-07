@@ -25,7 +25,7 @@ public class SoundPlayer implements LineListener {
     }
 
     public void playSound(String path, boolean loop, PlaybackStatusListener listener) {
-        if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getCONFIG().get("enableSound")))) {
+        if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getConfig().get("enableSound")))) {
             float volume;
             try {
                 InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
@@ -38,9 +38,9 @@ public class SoundPlayer implements LineListener {
                 clipListeners.put(clip, listener);
 
                 if (path.contains("mus")) {
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f - 0.15f;
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getConfig().get("volume"))) / 100.0f - 0.15f;
                 } else {
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getCONFIG().get("volume"))) / 100.0f;
+                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getConfig().get("volume"))) / 100.0f;
                 }
                 setVolume(clip, volume);
 

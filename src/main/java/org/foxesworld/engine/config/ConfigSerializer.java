@@ -11,7 +11,7 @@ public class ConfigSerializer implements JsonSerializer<Config> {
     @Override
     public JsonElement serialize(Config src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject jsonObject = new JsonObject();
-        for (Map.Entry<String, Object> entry : src.getCONFIG().entrySet()) {
+        for (Map.Entry<String, Object> entry : src.getConfig().entrySet()) {
             jsonObject.add(entry.getKey(), context.serialize(entry.getValue()));
         }
         return jsonObject;

@@ -22,7 +22,7 @@ public abstract class User extends ComponentsAccessor {
 
     @SuppressWarnings("unused")
     protected String getUserHead(String login) {
-        Map<String, String> skinData = new HashMap<>();
+        Map<String, Object> skinData = new HashMap<>();
         skinData.put("sysRequest", "skin");
         skinData.put("show", "head");
         skinData.put("login", login);
