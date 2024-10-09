@@ -101,7 +101,7 @@ public class FileLoader {
             fileLoaderListener.onDownloadStart();
         }
 
-        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
+        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum() - this.getTotalSizeAlreadyDownloaded();
         fileAttributes.forEach(file -> executorService.execute(() -> {
             this.currentFile = file;
             fileExtension = getFileExtension(file.getFilename());
@@ -112,6 +112,17 @@ public class FileLoader {
                 fileLoaderListener.onFilesLoaded();
             }
         }));
+    }
+
+    public long getTotalSizeAlreadyDownloaded() {
+        long totalSize = 0;
+        for (String file : filesToKeep) {
+            File fileObj = new File(homeDir + file);
+            if (fileObj.exists()) {
+                totalSize += fileObj.length();
+            }
+        }
+        return totalSize;
     }
 
     public boolean isInvalidFile(File file, String expectedHash, long expectedSize) {
