@@ -1,10 +1,14 @@
 package org.foxesworld.engine.gui.componentAccessor;
 
 import org.foxesworld.engine.gui.GuiBuilder;
+import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
+import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.slider.Slider;
+import org.foxesworld.engine.gui.components.textfield.TextField;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -21,8 +25,9 @@ public class ComponentsAccessor {
     private final Map<String, Object> formCredentials = new HashMap<>();
 
     private final Map<Class<?>, Function<JComponent, String>> valueExtractors = Map.of(
-            JTextField.class, c -> ((JTextField) c).getText(),
-            JCheckBox.class, c -> String.valueOf(((JCheckBox) c).isSelected()),
+            TextField.class, c -> ((TextField) c).getText(),
+            PassField.class, c -> ((PassField) c).getText(),
+            Checkbox.class, c -> String.valueOf(((Checkbox) c).isSelected()),
             Slider.class, c -> String.valueOf(((Slider) c).getValue()),
             DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex())
     );
