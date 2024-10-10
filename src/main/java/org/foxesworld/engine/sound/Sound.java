@@ -62,22 +62,26 @@ public class Sound {
         return null;
     }
 
-    public void playSound(String category, String subCategory) {
+    public String playSound(String category, String subCategory) {
+        String randomSound = "";
         List<String> subCategorySounds = getSounds(category, subCategory);
         if (subCategorySounds != null && !subCategorySounds.isEmpty()) {
             int randomIndex = random.nextInt(subCategorySounds.size());
-            String randomSound = subCategorySounds.get(randomIndex);
+            randomSound = subCategorySounds.get(randomIndex);
             this.soundPlayer.playSound(randomSound, false);
         }
+        return randomSound;
     }
 
-    public void playSound(String category, String subCategory, PlaybackStatusListener playbackStatusListener) {
+    public String playSound(String category, String subCategory, PlaybackStatusListener playbackStatusListener) {
+        String randomSound = "";
         List<String> subCategorySounds = getSounds(category, subCategory);
         if (subCategorySounds != null && !subCategorySounds.isEmpty()) {
             int randomIndex = random.nextInt(subCategorySounds.size());
-            String randomSound = subCategorySounds.get(randomIndex);
+            randomSound = subCategorySounds.get(randomIndex);
             this.soundPlayer.playSound(randomSound, false, playbackStatusListener);
         }
+        return randomSound;
     }
 
     public void playSound(String category, String subCategory, boolean loop) {

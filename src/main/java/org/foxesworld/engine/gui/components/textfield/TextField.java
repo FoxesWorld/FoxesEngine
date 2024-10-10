@@ -6,6 +6,7 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicTextFieldUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -77,6 +78,7 @@ public class TextField extends JTextField {
 				selected = true;
 			}
 		});
+		this.setUI(new BasicTextFieldUI());
 	}
 
 	private void startCaretBlinking() {

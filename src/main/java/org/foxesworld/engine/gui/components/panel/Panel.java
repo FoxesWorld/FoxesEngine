@@ -1,5 +1,7 @@
 package org.foxesworld.engine.gui.components.panel;
 
+import com.formdev.flatlaf.ui.FlatDesktopPaneUI;
+import com.formdev.flatlaf.ui.FlatRootPaneUI;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.Bounds;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
@@ -35,7 +37,6 @@ public class Panel extends JPanel {
         };
         rootPanel.setOpaque(false);
         rootPanel.setName("rootPanel");
-
         return rootPanel;
     }
 
