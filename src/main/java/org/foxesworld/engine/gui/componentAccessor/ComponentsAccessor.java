@@ -5,9 +5,10 @@ import org.foxesworld.engine.gui.components.dropBox.DropBox;
 import org.foxesworld.engine.gui.components.slider.Slider;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class ComponentsAccessor {
@@ -19,6 +20,13 @@ public class ComponentsAccessor {
     private final Map<String, List<JComponent>> panelComponentMap = new HashMap<>();
     private final Map<String, Object> formCredentials = new HashMap<>();
 
+    private final Map<Class<?>, Function<JComponent, String>> valueExtractors = Map.of(
+            JTextField.class, c -> ((JTextField) c).getText(),
+            JCheckBox.class, c -> String.valueOf(((JCheckBox) c).isSelected()),
+            Slider.class, c -> String.valueOf(((Slider) c).getValue()),
+            DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex())
+    );
+
     public ComponentsAccessor(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
         this.guiBuilder = Objects.requireNonNull(guiBuilder, "guiBuilder must not be null");
         this.panelId = Objects.requireNonNull(panelId, "panelId must not be null");
@@ -27,64 +35,44 @@ public class ComponentsAccessor {
     }
 
     private void collectComponents(String panelId) {
-        List<JComponent> components = guiBuilder.getComponentsMap().get(panelId);
-        if (components != null) {
-            List<JComponent> panelComponents = new ArrayList<>();
-            for (JComponent component : components) {
-                processComponent(component, panelComponents);
-            }
-            panelComponentMap.put(panelId, panelComponents);
-        }
+        Optional.ofNullable(guiBuilder.getComponentsMap().get(panelId))
+                .ifPresent(components -> {
+                    List<JComponent> panelComponents = components.stream()
+                            .filter(this::isComponentType)
+                            .peek(this::processComponent)
+                            .collect(Collectors.toList());
+                    panelComponentMap.put(panelId, panelComponents);
+                });
 
-        List<String> childPanels = guiBuilder.getChildParentMap().get(panelId);
-        if (childPanels != null) {
-            for (String childPanelId : childPanels) {
-                collectComponents(childPanelId);
-            }
-        }
+        Optional.ofNullable(guiBuilder.getChildParentMap().get(panelId))
+                .ifPresent(childPanels -> childPanels.forEach(this::collectComponents));
     }
 
-    private void processComponent(JComponent component, List<JComponent> panelComponents) {
+    private void processComponent(JComponent component) {
         if (component == null) {
             return;
         }
 
         String name = component.getName();
-        if (name != null && !name.isEmpty() && isComponentType(component)) {
+        if (name != null && !name.isEmpty()) {
             componentMap.put(name, component);
-            panelComponents.add(component);
             formCredentials.put(name, getValue(component));
-        }
 
-        if (component instanceof org.foxesworld.engine.gui.components.panel.Panel panel) {
-            for (Component child : panel.getComponents()) {
-                if (child instanceof JComponent) {
-                    processComponent((JComponent) child, panelComponents);
-                }
+            if (component instanceof org.foxesworld.engine.gui.components.panel.Panel panel) {
+                Arrays.stream(panel.getComponents())
+                        .filter(JComponent.class::isInstance)
+                        .map(JComponent.class::cast)
+                        .forEach(this::processComponent);
             }
         }
     }
 
     private boolean isComponentType(JComponent component) {
-        for (Class<?> compType : this.componentTypes) {
-            if (compType.isInstance(component)) {
-                return true;
-            }
-        }
-        return false;
+        return componentTypes.stream().anyMatch(type -> type.isInstance(component));
     }
 
     private String getValue(JComponent component) {
-        if (component instanceof JTextField) {
-            return ((JTextField) component).getText();
-        } else if (component instanceof JCheckBox) {
-            return String.valueOf(((JCheckBox) component).isSelected());
-        } else if (component instanceof Slider) {
-            return String.valueOf(((Slider) component).getValue());
-        } else if(component instanceof DropBox) {
-            return String.valueOf(((DropBox) component).getSelectedIndex());
-        }
-        return "";
+        return valueExtractors.getOrDefault(component.getClass(), c -> "").apply(component);
     }
 
     public Map<String, JComponent> getComponentMap() {
@@ -114,21 +102,15 @@ public class ComponentsAccessor {
     }
 
     private void collectFormCredentials(String panelId, Map<String, Object> credentials) {
-        List<JComponent> components = panelComponentMap.get(panelId);
-        if (components != null) {
-            for (JComponent component : components) {
-                String name = component.getName();
-                if (name != null && !name.isEmpty()) {
-                    credentials.put(name, getValue(component));
-                }
-            }
-        }
+        Optional.ofNullable(panelComponentMap.get(panelId))
+                .ifPresent(components -> components.forEach(component -> {
+                    String name = component.getName();
+                    if (name != null && !name.isEmpty()) {
+                        credentials.put(name, getValue(component));
+                    }
+                }));
 
-        List<String> childPanels = guiBuilder.getChildParentMap().get(panelId);
-        if (childPanels != null) {
-            for (String childPanelId : childPanels) {
-                collectFormCredentials(childPanelId, credentials);
-            }
-        }
+        Optional.ofNullable(guiBuilder.getChildParentMap().get(panelId))
+                .ifPresent(childPanels -> childPanels.forEach(childPanelId -> collectFormCredentials(childPanelId, credentials)));
     }
 }

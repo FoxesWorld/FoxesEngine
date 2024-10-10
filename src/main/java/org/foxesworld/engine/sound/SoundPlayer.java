@@ -4,7 +4,6 @@ import de.jarnbjo.vorbis.VorbisAudioFileReader;
 import org.foxesworld.engine.Engine;
 
 import javax.sound.sampled.*;
-import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;

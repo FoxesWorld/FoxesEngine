@@ -43,7 +43,7 @@ public class GuiBuilder {
         buildPanels(frameAttributes.getGroups(), parent);
     }
 
-    private FrameAttributes loadFrameAttributes(String framePath) {
+    FrameAttributes loadFrameAttributes(String framePath) {
         Gson gson = new Gson();
         try (InputStreamReader reader = new InputStreamReader(
                 Objects.requireNonNull(GuiBuilder.class.getClassLoader().getResourceAsStream(framePath)))) {
@@ -82,7 +82,7 @@ public class GuiBuilder {
         return panel;
     }
 
-    private void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
+    void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
         for (ComponentAttributes componentAttributes : childComponents) {
             if (componentAttributes.getComponentType() != null) {
                 addComponentToParent(componentAttributes, parentPanel);
@@ -154,16 +154,6 @@ public class GuiBuilder {
         updateChildParentMap(parent, child);
     }
 
-    /*
-    @Deprecated
-    public Map<String, JComponent> getPanelsComponents(String panelName) {
-        Map<String, JComponent> panelComponents = new HashMap<>();
-        componentsMap.getOrDefault(panelName, Collections.emptyList())
-                .forEach(component -> panelComponents.put(component.getName(), component));
-        return panelComponents;
-    } */
-
-    @Deprecated
     public Map<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }

@@ -1,7 +1,6 @@
 package org.foxesworld.engine.gui.components.dropBox;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,8 +9,8 @@ import java.awt.image.BufferedImage;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
+@SuppressWarnings("unused")
 public class DropBox extends JComponent implements MouseListener, MouseMotionListener {
-    @SuppressWarnings("unused")
     private Color color, hoverColor;
     private boolean loaded = false;
     private final ComponentFactory componentFactory;
@@ -19,11 +18,8 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     private String[] values;
     private final int initialY;
     private State state = State.CLOSED;
-    private int x = 0, y = 0, previousHover = -1;
-    private int selected;
-    private int hover;
-    @SuppressWarnings("unused")
-    private boolean entered;
+    private int selected = 0;
+    private int hover = -1;
     private BufferedImage defaultTX;
     private BufferedImage openedTX;
     private BufferedImage rolloverTX;
@@ -31,25 +27,12 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     private BufferedImage panelTX;
     private BufferedImage point;
 
-    @Deprecated
     public DropBox(ComponentFactory componentFactory, String[] values, int initialY) {
         this.componentFactory = componentFactory;
         this.values = values;
         this.initialY = initialY;
 
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        setFocusable(true);
-
-        addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                state = State.CLOSED;
-                hover = selected;
-                componentFactory.engine.getFrame().repaint();
-                repaint();
-            }
-        });
+        setupListeners();
     }
 
     public DropBox(ComponentFactory componentFactory, int initialY) {
@@ -70,82 +53,93 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         });
     }
 
+    private void setupListeners() {
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        setFocusable(true);
+
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                closeDropBox();
+            }
+        });
+    }
+
     @Override
     protected void paintComponent(Graphics gmain) {
         Graphics2D g = (Graphics2D) gmain;
-        int w = getWidth();
+        int width = getWidth();
         g.setColor(hexToColor(componentFactory.style.getColor()));
 
+        // Optimize state handling by using a method to handle the drawing
         switch (state) {
-            case OPENED -> drawOpenedState(g, w);
-            case ROLLOVER -> drawRolloverState(g, w);
-            default -> drawDefaultState(g, w);
+            case OPENED -> drawOpenedState(g, width);
+            case ROLLOVER -> drawRolloverState(g, width);
+            default -> drawDefaultState(g, width);
         }
         g.dispose();
+
+        // Call listener once to notify about component creation
         if (!loaded) {
             dropBoxListener.onScrollBoxCreated(selected);
-            setLoaded(true);
+            loaded = true;
         }
     }
 
-    private void drawOpenedState(Graphics2D g, int w) {
-        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(w, openedTX.getHeight(), openedTX), 0, getHeight() - openedTX.getHeight(), w, openedTX.getHeight(), null);
+    private void drawOpenedState(Graphics2D g, int width) {
+        int height = openedTX.getHeight();
+        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(width, height, openedTX), 0, getHeight() - height, width, height, null);
+        int rightHeight = height * (values.length + 1);
+        int rightY = initialY + height - rightHeight;
 
-        int rightHeight = openedTX.getHeight() * (values.length + 1);
-        int rightY = initialY + openedTX.getHeight() - rightHeight;
+        // Move logic out of rendering methods to prevent repetitive checks
+        updateComponentSizeAndLocation(rightY, rightHeight);
 
-        if (getY() != rightY || getHeight() != rightHeight) {
-            setLocation(getX(), rightY);
-            setSize(getWidth(), rightHeight);
-            y = getHeight();
-            return;
-        }
-
-        for (int i = 0; i < values.length; ++i) {
+        for (int i = 0; i < values.length; i++) {
             drawPanel(g, i);
             if (i == selected) {
                 g.drawImage(point, 205, panelTX.getHeight() * i + 10, this);
             }
-            //System.out.println(values[i]);
         }
-        g.drawString(values[selected], 10, selectedTX.getHeight() * (values.length + 1) - g.getFontMetrics().getHeight() / 2 - 5);
+        g.drawString(values[selected], 10, height * (values.length + 1) - g.getFontMetrics().getHeight() / 2 - 5);
     }
 
-    private void drawRolloverState(Graphics2D g, int w) {
-        int rightHeight = rolloverTX.getHeight();
-        if (getY() != initialY || getHeight() != rightHeight) {
-            setLocation(getX(), initialY);
-            setSize(getWidth(), rightHeight);
-            return;
-        }
+    private void drawRolloverState(Graphics2D g, int width) {
+        int height = rolloverTX.getHeight();
+        updateComponentSizeAndLocation(initialY, height);
 
-        // Draw the button with rollover effect
-        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(w, rolloverTX.getHeight(), rolloverTX), 0, 0, w, rolloverTX.getHeight(), null);
-
-        // Draw the text
-        g.setColor(hoverColor); // Set the color for HOVER TEXT
-        g.drawString(values[selected], 10, rolloverTX.getHeight() - g.getFontMetrics().getHeight() / 2 - 5);
+        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(width, height, rolloverTX), 0, 0, width, height, null);
+        g.setColor(hoverColor);
+        g.drawString(values[selected], 10, height - g.getFontMetrics().getHeight() / 2 - 5);
     }
 
-    private void drawDefaultState(Graphics2D g, int w) {
-        int rightHeight = defaultTX.getHeight();
-        if (getY() != initialY || getHeight() != rightHeight) {
-            setLocation(getX(), initialY);
-            setSize(getWidth(), rightHeight);
-            return;
-        }
+    private void drawDefaultState(Graphics2D g, int width) {
+        int height = defaultTX.getHeight();
+        updateComponentSizeAndLocation(initialY, height);
 
-        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(w, defaultTX.getHeight(), defaultTX), 0, 0, w, defaultTX.getHeight(), null);
-        g.drawString(values[selected], 10, rolloverTX.getHeight() - g.getFontMetrics().getHeight() / 2 - 5);
+        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(width, height, defaultTX), 0, 0, width, height, null);
+        g.drawString(values[selected], 10, height - g.getFontMetrics().getHeight() / 2 - 5);
     }
 
-    private void drawPanel(Graphics2D g, int i) {
-        if (hover != i) {
-            g.drawImage(panelTX, 0, panelTX.getHeight() * i, this);
-        } else {
-            g.drawImage(selectedTX, 0, panelTX.getHeight() * i, this);
+    private void drawPanel(Graphics2D g, int index) {
+        BufferedImage currentPanel = (hover == index) ? selectedTX : panelTX;
+        g.drawImage(currentPanel, 0, panelTX.getHeight() * index, this);
+        g.drawString(values[index], 5, selectedTX.getHeight() * (index + 1) - g.getFontMetrics().getHeight() / 2 - 5);
+    }
+
+    private void updateComponentSizeAndLocation(int y, int height) {
+        if (getY() != y || getHeight() != height) {
+            setLocation(getX(), y);
+            setSize(getWidth(), height);
         }
-        g.drawString(values[i], 5, selectedTX.getHeight() * (i + 1) - g.getFontMetrics().getHeight() / 2 - 5);
+    }
+
+    private void closeDropBox() {
+        state = State.CLOSED;
+        hover = selected;
+        componentFactory.engine.getFrame().repaint();
+        repaint();
     }
 
     @Override
@@ -156,25 +150,21 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         bringToFront();
         grabFocus();
 
-        if (state == State.OPENED && y / openedTX.getHeight() < values.length) {
-            selected = y / openedTX.getHeight();
-            entered = this.componentFactory.engine.getImageUtils().contains(x, y, getX(), getY(), getWidth(), getHeight());
+        if (state == State.OPENED && (hover >= 0 && hover < values.length)) {
+            selected = hover;
         }
 
         if (state == State.OPENED) {
             dropBoxListener.onScrollBoxClose(selected);
             componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
-
         } else {
             dropBoxListener.onScrollBoxOpen(selected);
             componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxClose");
         }
 
         state = (state == State.OPENED) ? State.CLOSED : State.OPENED;
-        hover = selected;
         repaint();
     }
-
 
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -182,104 +172,79 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
             componentFactory.engine.getSOUND().playSound("button", "hover");
         }
         state = State.ROLLOVER;
-        entered = true;
         hover = -1;
         repaint();
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        entered = false;
-        if (state.equals(State.OPENED)) {
-            componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
-        }
-        state = State.CLOSED;
-        dropBoxListener.onScrollBoxClose(selected);
-        repaint();
+        closeDropBox();
     }
-
 
     @Override
     public void mousePressed(MouseEvent e) {
         grabFocus();
-        handleMouseClick(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        handleMouseClick(e);
-    }
-
-    private void handleMouseClick(MouseEvent e) {
-        if (e.getButton() != MouseEvent.BUTTON1) {
-            return;
-        }
+        // No action needed, handled in mouseClicked
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        // Currently unused, can be removed if unnecessary
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        y = e.getY();
-        x = e.getX();
-        int newHover = (state == State.OPENED) ? (y / openedTX.getHeight()) : (y / defaultTX.getHeight());
-        if (newHover >= 0 && newHover < values.length && newHover != previousHover) {
-            if(state.equals(State.OPENED)) {
+        int newY = e.getY();
+        int newHover = (state == State.OPENED) ? (newY / openedTX.getHeight()) : (newY / defaultTX.getHeight());
+
+        // Only update hover if it's changed and within bounds
+        if (newHover >= 0 && newHover < values.length && newHover != hover) {
+            hover = newHover;
+            if (state == State.OPENED) {
                 dropBoxListener.onServerHover(newHover);
-                previousHover = newHover;
-                repaint();
-                hover = y / openedTX.getHeight();
             }
+            repaint();
         }
     }
 
-    @SuppressWarnings("unused")
     public int getSelectedIndex() {
         return selected;
     }
-    @SuppressWarnings("unused")
+
     public int getHoverIndex() {
         return hover;
     }
-    @SuppressWarnings("unused")
+
     public String getValue() {
-        try {
-            return values[selected];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
-            return values[0];
-        }
+        return (values.length > selected) ? values[selected] : values[0];
     }
 
-    @SuppressWarnings("unused")
     public void setSelectedIndex(int i) {
-        if (values.length <= i) {
-            return;
+        if (i >= 0 && i < values.length) {
+            selected = i;
+            repaint();
         }
-        selected = i;
-        repaint();
     }
 
-    @SuppressWarnings("unused")
     public void setValues(String[] values) {
         this.values = values;
         repaint();
     }
+
     public void bringToFront() {
         if (getParent() != null) {
             getParent().setComponentZOrder(this, 0);
         }
     }
 
-
-    @SuppressWarnings("unused")
     public boolean isOpened() {
         return state == State.OPENED;
     }
 
-    @SuppressWarnings("unused")
     public void setScrollBoxListener(DropBoxListener dropBoxListener) {
         this.dropBoxListener = dropBoxListener;
     }
@@ -319,7 +284,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     public void setHoverColor(Color hoverColor) {
         this.hoverColor = hoverColor;
     }
-    @SuppressWarnings("unused")
+
     public String[] getValues() {
         return values;
     }
@@ -327,7 +292,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     public BufferedImage getOpenedTX() {
         return openedTX;
     }
-    @SuppressWarnings("unused")
+
     public State getState() {
         return state;
     }
