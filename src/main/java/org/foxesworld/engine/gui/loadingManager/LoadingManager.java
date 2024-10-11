@@ -7,7 +7,6 @@ import org.foxesworld.engine.utils.animation.AnimationStats;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
@@ -17,6 +16,8 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
     protected Engine engine;
     protected String loadingText, loadingTitle, labelFont;
     protected Timer loadingTimer;
+    @Deprecated
+    private final int dotLimit = 4;
     protected JLabel loaderText, titleLabel;
     protected boolean animating;
     protected int FRAME_WIDTH = 500;
@@ -41,7 +42,7 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
         backgroundPanel.setLayout(basePanel.getLayout());
         backgroundPanel.setBounds(basePanel.getX(), basePanel.getY(), basePanel.getWidth(), basePanel.getHeight());
         backgroundPanel.setName(basePanel.getName());
-        for (Component component : basePanel.getComponents()) {
+        for(Component component: basePanel.getComponents()){
             backgroundPanel.add(component);
         }
         return backgroundPanel;
@@ -70,44 +71,7 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
     }
 
     public void animateLoadingWindow(boolean isEntry) {
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() {
-                if (isEntry) {
-                    animationManager.animate(isEntry);
-                } else {
-                    performFlyOutAndFade();
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    get();
-                    if (!isEntry) {
-                        setVisible(false);
-                    }
-                } catch (InterruptedException | ExecutionException e) {}
-            }
-        };
-        worker.execute();
-    }
-
-    private void performFlyOutAndFade() {
-        int targetX = getLocation().x + 100;  // Fly out to the right
-        int targetY = getLocation().y;
-        float opacity = 1.0f;
-
-        while (getLocation().x < targetX && opacity > 0.0f) {
-            SwingUtilities.invokeLater(() -> setLocation(getLocation().x + 1, targetY));
-            opacity -= 0.01f;
-            float finalOpacity = opacity;
-            SwingUtilities.invokeLater(() -> setOpacity(finalOpacity));
-            try {
-                Thread.sleep(10);  // Adjust sleep for smoother animation
-            } catch (InterruptedException ignored) {}
-        }
+        animationManager.animate(isEntry);
     }
 
     public void setLoadingText(String loadingText, String loadingTitle) {
@@ -124,7 +88,6 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
             animateLoadingWindow(false);
         } else {
             setSize(FRAME_WIDTH, FRAME_HEIGHT);
-            setVisible(true);
             animateLoadingWindow(true);
         }
     }
@@ -148,7 +111,6 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
     public void setAnimating(boolean animating) {
         this.animating = animating;
     }
-
     protected int getANIMATION_DURATION() {
         return ANIMATION_DURATION;
     }
@@ -173,11 +135,11 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
         this.ANIMATION_SPEED = ANIMATION_SPEED;
     }
 
-    protected int getFrameWidth() {
+    protected int getFrameWidth(){
         return this.FRAME_WIDTH;
     }
 
-    protected int getFrameHeight() {
+    protected int getFrameHeight(){
         return this.FRAME_HEIGHT;
     }
 
