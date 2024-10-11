@@ -39,6 +39,10 @@ public class ComponentsAccessor {
         collectComponents(panelId);
     }
 
+    public JPanel getPanel(){
+        return this.guiBuilder.getPanelsMap().get(panelId);
+    }
+
     private void collectComponents(String panelId) {
         Optional.ofNullable(guiBuilder.getComponentsMap().get(panelId))
                 .ifPresent(components -> {

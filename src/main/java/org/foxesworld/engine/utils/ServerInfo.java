@@ -11,6 +11,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
+@SuppressWarnings("unused")
 public class ServerInfo {
     private final LanguageProvider lang;
 

@@ -3,8 +3,8 @@ package org.foxesworld.engine.fileLoader;
 import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.config.Config;
-import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.gui.ActionHandler;
+import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.utils.Download.DownloadUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 
@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 @SuppressWarnings("unused")
 public class FileLoader {
     private final HTTPrequest POSTrequest;
@@ -64,18 +63,6 @@ public class FileLoader {
         this.fileLoaderListener.onFilesRead();
     }
 
-    public void forceUpdateFiles() {
-        loadingManager.toggleLoader();
-        FileAttributes[] fileAttributes = this.getDownloadList(client, version, getPlatformNumber());
-        loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
-        for (FileAttributes file : fileAttributes) {
-            this.fileLoaderListener.onFileAdd(file);
-        }
-        Engine.getLOGGER().info("Force updating " + fileAttributes.length + " files");
-        loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
-        this.fileAttributes = Arrays.asList(fileAttributes); //No check - just loading
-        fileLoaderListener.onFilesRead();
-    }
 
     private FileAttributes[] getDownloadList(String client, String version, int platfom) {
         Map<String, Object> request = new HashMap<>();
@@ -101,7 +88,7 @@ public class FileLoader {
             fileLoaderListener.onDownloadStart();
         }
 
-        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum() - this.getTotalSizeAlreadyDownloaded();
+        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
         fileAttributes.forEach(file -> executorService.execute(() -> {
             this.currentFile = file;
             fileExtension = getFileExtension(file.getFilename());
@@ -112,17 +99,6 @@ public class FileLoader {
                 fileLoaderListener.onFilesLoaded();
             }
         }));
-    }
-
-    public long getTotalSizeAlreadyDownloaded() {
-        long totalSize = 0;
-        for (String file : filesToKeep) {
-            File fileObj = new File(homeDir + file);
-            if (fileObj.exists()) {
-                totalSize += fileObj.length();
-            }
-        }
-        return totalSize;
     }
 
     public boolean isInvalidFile(File file, String expectedHash, long expectedSize) {
@@ -178,7 +154,6 @@ public class FileLoader {
             return fileName.substring(dotIndex + 1).toLowerCase();
         }
     }
-
     @SuppressWarnings("unused")
     public FileAttributes addJreToLoad(String jreVersion) {
         Map<String, Object> request = new HashMap<>();
@@ -188,12 +163,10 @@ public class FileLoader {
         jreFile.setReplaceMask(this.replaceMask);
         return jreFile;
     }
-
     @SuppressWarnings("unused")
     public void setLoaderListener(FileLoaderListener fileLoaderListener) {
         this.fileLoaderListener = fileLoaderListener;
     }
-
     @SuppressWarnings("unused")
     public DownloadUtils getDownloadUtils() {
         return downloadUtils;
@@ -206,27 +179,22 @@ public class FileLoader {
     public void addFileToKeep(String fileToKeep) {
         this.filesToKeep.add(fileToKeep);
     }
-
     @SuppressWarnings("unused")
     public void addFileToDownload(FileAttributes fileAttributes) {
         this.fileAttributes.add(fileAttributes);
     }
-
     @SuppressWarnings("unused")
     public void setReplaceMask(String replaceMask) {
         this.replaceMask = replaceMask;
     }
-
     @SuppressWarnings("unused")
     public String getHomeDir() {
         return homeDir;
     }
-
     @SuppressWarnings("unused")
     public String getFileType() {
         return fileExtension;
     }
-
     public FileAttributes getCurrentFile() {
         return currentFile;
     }

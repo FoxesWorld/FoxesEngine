@@ -6,58 +6,46 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 @SuppressWarnings("unused")
 public class DropBox extends JComponent implements MouseListener, MouseMotionListener {
     private Color color, hoverColor;
-    private boolean loaded = false;
+    private volatile boolean loaded = false;
     private final ComponentFactory componentFactory;
     private DropBoxListener dropBoxListener;
     private String[] values;
     private final int initialY;
-    private State state = State.CLOSED;
-    private int selected = 0;
-    private int hover = -1;
+    private volatile State state = State.CLOSED;
+    private volatile int selected = 0;
+    private volatile int hover = -1;
     private BufferedImage defaultTX;
     private BufferedImage openedTX;
     private BufferedImage rolloverTX;
     private BufferedImage selectedTX;
     private BufferedImage panelTX;
     private BufferedImage point;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public DropBox(ComponentFactory componentFactory, String[] values, int initialY) {
         this.componentFactory = componentFactory;
         this.values = values;
         this.initialY = initialY;
-
         setupListeners();
     }
 
     public DropBox(ComponentFactory componentFactory, int initialY) {
         this.componentFactory = componentFactory;
         this.initialY = initialY;
-
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        setFocusable(true);
-        addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                state = State.CLOSED;
-                hover = selected;
-                componentFactory.engine.getFrame().repaint();
-                repaint();
-            }
-        });
+        setupListeners();
     }
 
     private void setupListeners() {
         addMouseListener(this);
         addMouseMotionListener(this);
         setFocusable(true);
-
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -82,7 +70,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
         // Call listener once to notify about component creation
         if (!loaded) {
-            dropBoxListener.onScrollBoxCreated(selected);
+            dropBoxListener.onScrollBoxCreated(this);
             loaded = true;
         }
     }
@@ -93,7 +81,6 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         int rightHeight = height * (values.length + 1);
         int rightY = initialY + height - rightHeight;
 
-        // Move logic out of rendering methods to prevent repetitive checks
         updateComponentSizeAndLocation(rightY, rightHeight);
 
         for (int i = 0; i < values.length; i++) {
@@ -136,11 +123,16 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     }
 
     private void closeDropBox() {
-        state = State.CLOSED;
-        hover = selected;
-        componentFactory.engine.getFrame().repaint();
-        dropBoxListener.onScrollBoxClose(selected);
-        repaint();
+        lock.lock();
+        try {
+            state = State.CLOSED;
+            hover = selected;
+            componentFactory.engine.getFrame().repaint();
+            dropBoxListener.onScrollBoxClose(this);
+            repaint();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -151,20 +143,25 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         bringToFront();
         grabFocus();
 
-        if (state == State.OPENED && (hover >= 0 && hover < values.length)) {
-            selected = hover;
-        }
+        lock.lock();
+        try {
+            if (state == State.OPENED && (hover >= 0 && hover < values.length)) {
+                selected = hover;
+            }
 
-        if (state == State.OPENED) {
-            dropBoxListener.onScrollBoxOpen(selected);
-            componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
-        } else {
-            dropBoxListener.onScrollBoxClose(selected);
-            componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxClose");
-        }
+            if (state == State.OPENED) {
+                dropBoxListener.onScrollBoxOpen(this);
+                componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
+            } else {
+                dropBoxListener.onScrollBoxClose(this);
+                componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxClose");
+            }
 
-        state = (state == State.OPENED) ? State.CLOSED : State.OPENED;
-        repaint();
+            state = (state == State.OPENED) ? State.CLOSED : State.OPENED;
+            repaint();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -206,7 +203,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         if (newHover >= 0 && newHover < values.length && newHover != hover) {
             hover = newHover;
             if (state == State.OPENED) {
-                dropBoxListener.onServerHover(newHover);
+                dropBoxListener.onServerHover(this, newHover);
             }
             repaint();
         }

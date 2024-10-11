@@ -2,8 +2,8 @@ package org.foxesworld.engine.gui.components.dropBox;
 
 public interface DropBoxListener {
 
-    void onScrollBoxCreated(int index);
-    void onScrollBoxOpen(int index);
-    void onScrollBoxClose(int index);
-    void onServerHover(int index);
+    void onScrollBoxCreated(DropBox dropBox);
+    void onScrollBoxOpen(DropBox dropBox);
+    void onScrollBoxClose(DropBox dropBox);
+    void onServerHover(DropBox dropBox, int hover);
 }

@@ -116,7 +116,7 @@ public class ComponentFactory {
                 component = new Checkbox(this, LANG.getString(componentAttributes.getLocaleKey()));
                 checkboxStyle.apply((Checkbox) component);
                 if(componentAttributes.getInitialValue() != null) {
-                    ((Checkbox)component).setSelected(Boolean.parseBoolean(componentAttributes.getInitialValue()));
+                    ((Checkbox)component).setSelected(Boolean.parseBoolean(String.valueOf(componentAttributes.getInitialValue())));
                 }
                 if (componentAttributes.getKeyCode() != null) {
                     component.setFocusable(true);
@@ -142,7 +142,7 @@ public class ComponentFactory {
                 textfieldStyle.apply((TextField) component);
                 ((TextField)component).setActionCommand(componentAttributes.getComponentId());
                 ((TextField)component).addActionListener(engine);
-                if(componentAttributes.getInitialValue() != null) ((TextField)component).setText(componentAttributes.getInitialValue());
+                if(componentAttributes.getInitialValue() != null) ((TextField)component).setText(String.valueOf(componentAttributes.getInitialValue()));
             }
 
             case "spriteImage" -> component = new SpriteAnimation(this);
@@ -156,7 +156,7 @@ public class ComponentFactory {
             }
 
             case "spinner" -> {
-                component = new Spinner(Integer.parseInt(componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
+                component = new Spinner(Integer.parseInt((String) componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
             }
 
             case "button" -> {
@@ -220,7 +220,7 @@ public class ComponentFactory {
                 ((Slider) component).setMinimum(componentAttributes.getMinValue());
                 ((Slider) component).setMaximum(componentAttributes.getMaxValue());
                 if(componentAttributes.getInitialValue() != null) {
-                    ((Slider) component).setValue(Integer.parseInt(componentAttributes.getInitialValue()));
+                    ((Slider) component).setValue(Integer.parseInt(String.valueOf(componentAttributes.getInitialValue())));
                 }
                 ((Slider) component).setMajorTickSpacing(componentAttributes.getMajorSpacing());
                 ((Slider) component).setMinorTickSpacing(componentAttributes.getMinorSpacing());
