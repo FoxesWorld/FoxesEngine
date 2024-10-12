@@ -2,6 +2,8 @@ package org.foxesworld.engine.gui.loadingManager;
 
 import org.foxesworld.engine.gui.components.Bounds;
 
+import java.awt.*;
+
 @SuppressWarnings("unused")
 public class LoadManagerAttributes {
     private String spritePath, bgPath, blurColor, titleColor, descColor;
@@ -28,8 +30,8 @@ public class LoadManagerAttributes {
     public int getAnimSpeed() {
         return animSpeed;
     }
-    public Bounds getBounds() {
-        return bounds;
+    public Rectangle getBounds() {
+        return new Rectangle(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
     }
     public String getTitleColor() {
         return titleColor;

@@ -79,6 +79,14 @@ public class FileLoader {
         return isInvalidFile(localFile, fileSection.getHash(), fileSection.getSize());
     }
 
+    private long countFoundFilesSize(){
+        long totalDonwloadSize = 0;
+        for(FileAttributes thisFile: this.fileAttributes){
+            totalDonwloadSize += thisFile.getSize();
+        }
+        return totalDonwloadSize;
+    }
+
     @SuppressWarnings("unused")
     public void downloadFiles() {
         int totalFiles = fileAttributes.size();

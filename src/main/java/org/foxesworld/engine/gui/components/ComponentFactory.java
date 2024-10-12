@@ -29,6 +29,7 @@ import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.IconUtils;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class ComponentFactory {
     private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
     public StyleAttributes style = null;
     private ComponentAttributes componentAttribute;
-    private  Bounds bounds;
+    private Rectangle bounds;
     private ComponentFactoryListener componentFactoryListener;
 
     public ComponentFactory(Engine engine){
@@ -72,7 +73,7 @@ public class ComponentFactory {
                 component = new JProgressBar();
                 progressBarStyle.apply((JProgressBar) component);
                 component.setName(componentAttributes.getComponentId());
-                component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
+                component.setBounds(bounds);
             }
 
             case "label" -> {
@@ -167,7 +168,7 @@ public class ComponentFactory {
                 } else {
                     component = new Button(this, LANG.getString(componentAttributes.getLocaleKey()));
                 }
-                component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
+                component.setBounds(bounds);
                 buttonStyle.apply((Button) component);
                 ((Button)component).setActionCommand(componentAttributes.getComponentId());
                 ((Button) component).addActionListener(engine);
@@ -200,7 +201,7 @@ public class ComponentFactory {
 
             case "dropBox" -> {
                 DropBoxStyle dropBoxStyle = new DropBoxStyle(this);
-                component = new DropBox(this,  bounds.getY());
+                component = new DropBox(this, (int) bounds.getY());
                 dropBoxStyle.apply((DropBox) component);
                 component.repaint();
             }
@@ -216,7 +217,7 @@ public class ComponentFactory {
 
             case "slider" -> {
                 component = new Slider(this);
-                component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
+                component.setBounds(bounds);
                 ((Slider) component).setMinimum(componentAttributes.getMinValue());
                 ((Slider) component).setMaximum(componentAttributes.getMaxValue());
                 if(componentAttributes.getInitialValue() != null) {
@@ -240,7 +241,7 @@ public class ComponentFactory {
         if(componentAttributes.getToolTip() != null) {
             component.setToolTipText(this.engine.getLANG().getString(componentAttributes.getToolTip()));
         }
-        component.setBounds(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
+        component.setBounds(bounds);
 
         return  component;
     }
@@ -258,7 +259,7 @@ public class ComponentFactory {
     public IconUtils getIconUtils() {
         return iconUtils;
     }
-    public Bounds getBounds() {
+    public Rectangle getBounds() {
         return bounds;
     }
     public ComponentAttributes getComponentAttribute() {

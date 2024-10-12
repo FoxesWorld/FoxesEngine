@@ -2,6 +2,7 @@ package org.foxesworld.engine.gui.components;
 
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 
+import java.awt.*;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -93,8 +94,8 @@ public class ComponentAttributes {
     public int getDelay() {
         return delay;
     }
-    public Bounds getBounds() {
-        return bounds;
+    public Rectangle getBounds() {
+        return new Rectangle(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
     }
     public String getLoadPanel() {
         return loadPanel;

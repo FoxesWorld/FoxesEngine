@@ -13,7 +13,7 @@ public class TextArea extends JTextArea {
             setText(componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
         }
         setOpaque(componentFactory.style.isOpaque());
-        setPreferredSize(new Dimension(componentFactory.getBounds().getSize().getWidth(), componentFactory.getBounds().getSize().getHeight()));
+        setPreferredSize(new Dimension((int) componentFactory.getBounds().getWidth(), (int) componentFactory.getBounds().getHeight()));
         if(componentFactory.getComponentAttribute().getBorder() != null) {
             List borders = new List();
             for (String val : componentFactory.getComponentAttribute().getBorder().split(",")) {
