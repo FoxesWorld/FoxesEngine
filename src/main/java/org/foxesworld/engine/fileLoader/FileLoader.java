@@ -31,9 +31,8 @@ public class FileLoader {
     private FileLoaderListener fileLoaderListener;
     private List<FileAttributes> fileAttributes;
     private FileAttributes currentFile;
-    private long totalSize;
+    private long totalSize = -1;
 
-    @SuppressWarnings("unused")
     public FileLoader(ActionHandler actionHandler) {
         Engine engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
@@ -45,23 +44,31 @@ public class FileLoader {
         this.loadingManager = engine.getLoadingManager();
     }
 
-    @SuppressWarnings("unused")
     public void getFilesToDownload(boolean forceUpdate) {
         this.loadingManager.toggleLoader();
         FileAttributes[] fileAttributes = getDownloadList(this.client, this.version, getPlatformNumber());
         this.loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
-        for (FileAttributes file : fileAttributes)
+
+        for (FileAttributes file : fileAttributes) {
             this.fileLoaderListener.onFileAdd(file);
+        }
+
         Engine.getLOGGER().info("Keeping " + this.filesToKeep.size() + " files");
         this.loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
+
         if (forceUpdate) {
             this.fileAttributes = Arrays.asList(fileAttributes);
             Engine.getLOGGER().info("Force updating " + fileAttributes.length + " files");
         } else {
-            this.fileAttributes = Stream.of(fileAttributes).filter(this::shouldDownloadFile).collect(Collectors.toList());
+            this.fileAttributes = Stream.of(fileAttributes)
+                    .filter(file -> !filesToKeep.contains(file.getFilename()))
+                    .filter(this::shouldDownloadFile)
+                    .collect(Collectors.toList());
         }
+
         this.fileLoaderListener.onFilesRead();
     }
+
 
 
     private FileAttributes[] getDownloadList(String client, String version, int platfom) {
@@ -79,15 +86,7 @@ public class FileLoader {
         return isInvalidFile(localFile, fileSection.getHash(), fileSection.getSize());
     }
 
-    private long countFoundFilesSize(){
-        long totalDonwloadSize = 0;
-        for(FileAttributes thisFile: this.fileAttributes){
-            totalDonwloadSize += thisFile.getSize();
-        }
-        return totalDonwloadSize;
-    }
 
-    @SuppressWarnings("unused")
     public void downloadFiles() {
         int totalFiles = fileAttributes.size();
         if (totalFiles == 0) {
@@ -96,7 +95,10 @@ public class FileLoader {
             fileLoaderListener.onDownloadStart();
         }
 
-        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
+        totalSize = fileAttributes.stream()
+                .mapToLong(FileAttributes::getSize)
+                .sum();
+
         fileAttributes.forEach(file -> executorService.execute(() -> {
             this.currentFile = file;
             fileExtension = getFileExtension(file.getFilename());
@@ -162,7 +164,7 @@ public class FileLoader {
             return fileName.substring(dotIndex + 1).toLowerCase();
         }
     }
-    @SuppressWarnings("unused")
+
     public FileAttributes addJreToLoad(String jreVersion) {
         Map<String, Object> request = new HashMap<>();
         request.put("sysRequest", "getJre");
@@ -171,11 +173,11 @@ public class FileLoader {
         jreFile.setReplaceMask(this.replaceMask);
         return jreFile;
     }
-    @SuppressWarnings("unused")
+
     public void setLoaderListener(FileLoaderListener fileLoaderListener) {
         this.fileLoaderListener = fileLoaderListener;
     }
-    @SuppressWarnings("unused")
+
     public DownloadUtils getDownloadUtils() {
         return downloadUtils;
     }
@@ -187,19 +189,18 @@ public class FileLoader {
     public void addFileToKeep(String fileToKeep) {
         this.filesToKeep.add(fileToKeep);
     }
-    @SuppressWarnings("unused")
+
     public void addFileToDownload(FileAttributes fileAttributes) {
         this.fileAttributes.add(fileAttributes);
     }
-    @SuppressWarnings("unused")
+
     public void setReplaceMask(String replaceMask) {
         this.replaceMask = replaceMask;
     }
-    @SuppressWarnings("unused")
+
     public String getHomeDir() {
         return homeDir;
     }
-    @SuppressWarnings("unused")
     public String getFileType() {
         return fileExtension;
     }
@@ -208,6 +209,18 @@ public class FileLoader {
     }
 
     public long getTotalSize() {
+        if (totalSize == -1) {
+            totalSize = fileAttributes.stream()
+                    .mapToLong(fileSection -> {
+                        String localPath = fileSection.getFilename().replace(fileSection.getReplaceMask(), "");
+                        File localFile = new File(homeDir, localPath);
+                        return (localFile.exists() && localFile.length() == fileSection.getSize())
+                                ? 0
+                                : fileSection.getSize();
+                    })
+                    .sum();
+        }
         return totalSize;
     }
+
 }
