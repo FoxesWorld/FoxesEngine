@@ -33,6 +33,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         this.componentFactory = componentFactory;
         this.values = values;
         this.initialY = initialY;
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setupListeners();
     }
 

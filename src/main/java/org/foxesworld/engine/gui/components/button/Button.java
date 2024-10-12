@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 
 public class Button extends JButton implements MouseListener, MouseMotionListener {
     private Color hoverColor;
-    private Timer disableTimer;
     private boolean entered = false, pressed = false;
     public BufferedImage defaultTX,rolloverTX,pressedTX,lockedTX;
     private final ComponentFactory componentFactory;
@@ -27,7 +26,6 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
         setFocusPainted(false);
         setOpaque(componentFactory.style.isOpaque());
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        //this.initCoolDown(this.componentFactory.getComponentAttribute().getCoolDown());
     }
 
     public Button(ComponentFactory componentFactory, ImageIcon icon) {
@@ -62,14 +60,7 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
         setPreferredSize(new Dimension(
                 componentFactory.getComponentAttribute().getIconWidth(),
                 componentFactory.getComponentAttribute().getIconHeight()));
-    }
-    private void initCoolDown(int mSec){
-        if(mSec > 0) {
-            disableTimer = new Timer(mSec, e -> {
-                setEnabled(true);
-                disableTimer.stop();
-            });
-        }
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     @Override
@@ -122,10 +113,6 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
     public void mousePressed(MouseEvent e) {
         if (isEnabled() && e.getButton() == MouseEvent.BUTTON1) {
             ButtonClick();
-            /* if(this.componentFactory.getComponentAttribute().getCoolDown() > 0) {
-                setEnabled(false);
-                disableTimer.start();
-            } */
         }
     }
 

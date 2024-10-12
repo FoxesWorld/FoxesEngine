@@ -3,12 +3,13 @@ package org.foxesworld.engine.gui.components.slider;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 
 import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("unused")
 public class Slider extends JSlider {
 
     private SliderListener sliderListener;
-    private ComponentFactory componentFactory;
+    private final ComponentFactory componentFactory;
 
     public Slider(ComponentFactory componentFactory){
         super(componentFactory.getComponentAttribute().getMinValue(), componentFactory.getComponentAttribute().getMaxValue());
@@ -18,5 +19,6 @@ public class Slider extends JSlider {
     public void setSliderListener(SliderListener sliderListener) {
         this.sliderListener = sliderListener;
         this.addChangeListener(e -> sliderListener.onSliderChange(this));
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 }

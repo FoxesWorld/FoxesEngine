@@ -25,8 +25,9 @@ public class MultiButton extends JButton implements MouseListener, MouseMotionLi
         this.setBorderPainted(false);
         this.setContentAreaFilled(false);
         this.setFocusPainted(false);
-        this.setOpaque(false);
+        //this.setOpaque(false);
         this.setFocusable(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     @Override

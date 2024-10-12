@@ -38,7 +38,7 @@ import java.util.Objects;
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 @SuppressWarnings("unused")
-public class ComponentFactory {
+public class ComponentFactory extends JComponent {
 
     public Engine engine;
     private final LanguageProvider LANG;
@@ -244,6 +244,22 @@ public class ComponentFactory {
         component.setBounds(bounds);
 
         return  component;
+    }
+
+    @Override
+    public void setToolTipText(String text) {
+        String oldText = getToolTipText();
+        putClientProperty(TOOL_TIP_TEXT_KEY, text);
+        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+        toolTipManager.setInitialDelay(1);
+
+        if (text != null) {
+            if (oldText == null) {
+                toolTipManager.registerComponent(this);
+            }
+        } else {
+            toolTipManager.unregisterComponent(this);
+        }
     }
 
 

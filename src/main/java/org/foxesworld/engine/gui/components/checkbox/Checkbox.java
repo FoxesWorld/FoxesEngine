@@ -65,6 +65,10 @@ public class Checkbox extends JCheckBox {
                 if(checkBoxListener != null) {
                     checkBoxListener.onHover(checkbox);
                 }
+
+                if(isEnabled()) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
             }
 
             @Override
