@@ -1,5 +1,8 @@
 package org.foxesworld.engine.gui.components;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.button.ButtonStyle;
@@ -24,6 +27,8 @@ import org.foxesworld.engine.gui.components.textArea.AreaStyle;
 import org.foxesworld.engine.gui.components.textArea.TextArea;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
+import org.foxesworld.engine.gui.components.utils.tooltip.CustomTooltip;
+import org.foxesworld.engine.gui.components.utils.tooltip.TooltipAttributes;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.IconUtils;
@@ -31,6 +36,8 @@ import org.foxesworld.engine.utils.IconUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +61,30 @@ public class ComponentFactory extends JComponent {
         this.iconUtils = new IconUtils(engine);
         this.LANG = engine.getLANG();
     }
+
+    public void createComponentAsync(ComponentAttributes componentAttributes, ComponentCreationCallback callback) {
+        new SwingWorker<JComponent, Void>() {
+            @Override
+            protected JComponent doInBackground() {
+                return createComponent(componentAttributes);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    JComponent component = get();
+                    SwingUtilities.invokeLater(() -> {
+                        callback.onComponentCreated(component);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
+    }
+
     public JComponent createComponent(ComponentAttributes componentAttributes) {
+        CustomTooltip customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
         componentFactoryListener.onComponentCreation(componentAttributes);
         if(componentAttributes.getComponentStyle() != null && componentAttributes.getComponentStyle() != null) {
             if(componentStyles.get(componentAttributes.getComponentStyle()) == null){
@@ -65,6 +95,20 @@ public class ComponentFactory extends JComponent {
         JComponent component;
         bounds = componentAttributes.getBounds();
         this.componentAttribute = componentAttributes;
+
+        if (this.componentAttribute.getToolTip() != null) {
+            String tooltipStyle = "default";
+            if (this.componentAttribute.getTooltipStyle() != null) {
+                tooltipStyle = this.componentAttribute.getTooltipStyle();
+            }
+                TooltipAttributes attributes = loadTooltipAttributes(tooltipStyle);
+                if (attributes != null) {
+                    Color bgColor = hexToColor(attributes.getBgColor());
+                    Color textColor = hexToColor(attributes.getTextColor());
+                    Font font = this.engine.getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize());
+                    customTooltip = new CustomTooltip(bgColor, textColor, attributes.getBorderRadius(), font);
+                }
+        }
 
         switch (componentAttributes.getComponentType()) {
 
@@ -239,7 +283,7 @@ public class ComponentFactory extends JComponent {
         component.setName(componentAttributes.getComponentId());
         component.setOpaque(style.isOpaque());
         if(componentAttributes.getToolTip() != null) {
-            component.setToolTipText(this.engine.getLANG().getString(componentAttributes.getToolTip()));
+            customTooltip.attachToComponent(component, this.engine.getLANG().getString(componentAttributes.getToolTip()));
         }
         component.setBounds(bounds);
 
@@ -280,5 +324,34 @@ public class ComponentFactory extends JComponent {
     }
     public ComponentAttributes getComponentAttribute() {
         return componentAttribute;
+    }
+
+    public interface ComponentCreationCallback {
+        void onComponentCreated(JComponent component);
+    }
+
+    private TooltipAttributes loadTooltipAttributes(String styleKey) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/styles/tooltip.json");
+             InputStreamReader reader = new InputStreamReader(inputStream)) {
+
+            if (inputStream == null) {
+                System.out.println("Could not find the JSON file.");
+                return null;
+            }
+
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject attributes = jsonObject.getAsJsonObject(styleKey);
+
+            if (attributes != null) {
+                Gson gson = new Gson();
+                return gson.fromJson(attributes, TooltipAttributes.class);
+            } else {
+                System.out.println("Style key not found: " + styleKey);
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

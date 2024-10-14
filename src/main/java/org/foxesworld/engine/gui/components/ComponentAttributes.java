@@ -7,11 +7,10 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class ComponentAttributes {
-
     private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
     private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
     private  Object initialValue;
-    private String keyCode, border, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment, toolTip;
+    private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment, toolTip;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     private Map<String, OptionGroups> panels;
     private Bounds bounds;
@@ -129,5 +128,9 @@ public class ComponentAttributes {
     }
     public boolean isRepeat() {
         return repeat;
+    }
+
+    public String getTooltipStyle() {
+        return tooltipStyle;
     }
 }
