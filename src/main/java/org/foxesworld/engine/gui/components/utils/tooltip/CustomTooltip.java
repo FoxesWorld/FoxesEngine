@@ -38,26 +38,28 @@ public class CustomTooltip extends JWindow {
     }
 
     public void attachToComponent(JComponent component, String tooltipText) {
-        label.setText(tooltipText);
-        setSize(tooltipText.length() * 10, 50);
-        activeTooltips.add(this);
+        if(component.isEnabled()) {
+            label.setText(tooltipText);
+            setSize(tooltipText.length() * 10, 50);
+            activeTooltips.add(this);
 
-        component.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y + 20);
-                setVisible(true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setVisible(false);
-                dispose();
-                if(!isVisible()) {
-                    activeTooltips.remove(CustomTooltip.this);
+            component.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y + 20);
+                    setVisible(true);
                 }
-            }
-        });
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setVisible(false);
+                    dispose();
+                    if (!isVisible()) {
+                        activeTooltips.remove(CustomTooltip.this);
+                    }
+                }
+            });
+        }
     }
     public void clearAllTooltips() {
         for (CustomTooltip tooltip : new ArrayList<>(activeTooltips)) {
