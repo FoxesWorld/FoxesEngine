@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CustomTooltip extends JWindow {
-    private static final List<CustomTooltip> activeTooltips = new ArrayList<>();
+    private final List<CustomTooltip> activeTooltips = new ArrayList<>();
     private final JLabel label;
 
     public CustomTooltip(Color backgroundColor, Color textColor, int borderRadius, Font font) {
@@ -57,7 +57,7 @@ public class CustomTooltip extends JWindow {
             }
         });
     }
-    public static void clearAllTooltips() {
+    public void clearAllTooltips() {
         for (CustomTooltip tooltip : new ArrayList<>(activeTooltips)) {
             tooltip.setVisible(false);
             tooltip.dispose();

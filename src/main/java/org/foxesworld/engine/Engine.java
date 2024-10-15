@@ -105,6 +105,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
 
     public void restartApplication(int xmx, String jvmDir) {
+        this.cleanUp();
         String path = Config.getFullPath();
         List<String> params = new LinkedList<>();
         params.add(path + "/runtime/"+ jvmDir + "/bin/java");
@@ -131,6 +132,10 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         if(terminate) {
             System.exit(0);
         }
+    }
+
+    private void cleanUp(){
+        this.getGuiBuilder().getComponentFactory().getCustomTooltip().clearAllTooltips();
     }
 
     public List<String> getConfigFiles() {
