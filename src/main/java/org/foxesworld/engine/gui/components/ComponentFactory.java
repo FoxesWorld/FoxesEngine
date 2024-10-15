@@ -55,6 +55,7 @@ public class ComponentFactory extends JComponent {
     private ComponentAttributes componentAttribute;
     private Rectangle bounds;
     private ComponentFactoryListener componentFactoryListener;
+    private CustomTooltip customTooltip;
 
     public ComponentFactory(Engine engine){
         this.engine = engine;
@@ -84,7 +85,7 @@ public class ComponentFactory extends JComponent {
     }
 
     public JComponent createComponent(ComponentAttributes componentAttributes) {
-        CustomTooltip customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
+        customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
         componentFactoryListener.onComponentCreation(componentAttributes);
         if(componentAttributes.getComponentStyle() != null && componentAttributes.getComponentStyle() != null) {
             if(componentStyles.get(componentAttributes.getComponentStyle()) == null){
@@ -324,6 +325,10 @@ public class ComponentFactory extends JComponent {
     }
     public ComponentAttributes getComponentAttribute() {
         return componentAttribute;
+    }
+
+    public CustomTooltip getCustomTooltip() {
+        return customTooltip;
     }
 
     public interface ComponentCreationCallback {

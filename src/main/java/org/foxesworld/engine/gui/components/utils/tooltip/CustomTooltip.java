@@ -3,44 +3,65 @@ package org.foxesworld.engine.gui.components.utils.tooltip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CustomTooltip {
-    private JWindow tooltip;
-    private JLabel label;
+public class CustomTooltip extends JWindow {
+    private static final List<CustomTooltip> activeTooltips = new ArrayList<>();
+    private final JLabel label;
 
     public CustomTooltip(Color backgroundColor, Color textColor, int borderRadius, Font font) {
-        tooltip = new JWindow();
-        tooltip.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
+        setBackground(new Color(0, 0, 0, 0));
 
         RoundedPanel panel = new RoundedPanel(borderRadius);
         panel.setBackground(backgroundColor);
         panel.setLayout(new BorderLayout());
-
-        label = new JLabel("", JLabel.CENTER);
+        panel.setOpaque(false);
+        label = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+                g2d.dispose();
+            }
+        };
         label.setForeground(textColor);
         label.setFont(font);
+        label.setHorizontalAlignment(JLabel.CENTER);
         panel.add(label, BorderLayout.CENTER);
 
-        tooltip.add(panel, BorderLayout.CENTER);
-        tooltip.setSize(150, 50);
-        tooltip.setFocusableWindowState(false);
+        add(panel, BorderLayout.CENTER);
+        setSize(150, 50);
+        setFocusableWindowState(false);
     }
 
     public void attachToComponent(JComponent component, String tooltipText) {
         label.setText(tooltipText);
-        tooltip.setSize(tooltipText.length() * 10, 50);
+        setSize(tooltipText.length() * 10, 50);
+        activeTooltips.add(this); // Добавляем тултип в список активных
 
         component.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                tooltip.setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y + 20);
-                tooltip.setVisible(true);
+                setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y + 20);
+                setVisible(true);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                tooltip.setVisible(false);
+                setVisible(false);
+                dispose();
+                activeTooltips.remove(CustomTooltip.this);
             }
         });
+    }
+    public static void clearAllTooltips() {
+        for (CustomTooltip tooltip : new ArrayList<>(activeTooltips)) {
+            tooltip.setVisible(false);
+            tooltip.dispose();
+        }
+        activeTooltips.clear();
     }
 }
