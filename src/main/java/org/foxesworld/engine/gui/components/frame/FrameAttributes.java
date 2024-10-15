@@ -8,7 +8,7 @@ import java.util.Map;
 public class FrameAttributes {
     private String appTitle;
     private String appIcon;
-    private int width, height;
+    private int width, height, borderRadius;
     private boolean resizable;
     private String backgroundImage;
     private String springImage;
@@ -74,5 +74,9 @@ public class FrameAttributes {
 
     public List<ComponentAttributes> getChildComponents() {
         return childComponents;
+    }
+
+    public int getBorderRadius() {
+        return borderRadius;
     }
 }

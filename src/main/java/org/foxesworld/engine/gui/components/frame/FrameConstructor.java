@@ -9,6 +9,7 @@ import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -47,6 +48,9 @@ public class FrameConstructor extends JFrame {
         setSize(frameAttributes.getWidth(), frameAttributes.getHeight());
         setResizable(frameAttributes.isResizable());
         setUndecorated(frameAttributes.isUndecorated());
+        if(frameAttributes.getBorderRadius() != 0) {
+            this.setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), frameAttributes.getBorderRadius(), frameAttributes.getBorderRadius()));
+        }
 
         screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - getWidth()) / 2;

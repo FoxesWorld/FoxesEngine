@@ -40,7 +40,7 @@ public class CustomTooltip extends JWindow {
     public void attachToComponent(JComponent component, String tooltipText) {
         label.setText(tooltipText);
         setSize(tooltipText.length() * 10, 50);
-        activeTooltips.add(this); // Добавляем тултип в список активных
+        activeTooltips.add(this);
 
         component.addMouseListener(new MouseAdapter() {
             @Override
@@ -53,7 +53,9 @@ public class CustomTooltip extends JWindow {
             public void mouseExited(MouseEvent e) {
                 setVisible(false);
                 dispose();
-                activeTooltips.remove(CustomTooltip.this);
+                if(!isVisible()) {
+                    activeTooltips.remove(CustomTooltip.this);
+                }
             }
         });
     }
