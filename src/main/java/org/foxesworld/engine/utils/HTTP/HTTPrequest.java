@@ -29,41 +29,6 @@ public class HTTPrequest {
         this.requestMethod = requestMethod;
     }
 
-    @Deprecated
-    public String send(Map<String, Object> parameters) {
-        try {
-            URL url = new URL(engine.getEngineData().getBindUrl());
-            httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod(this.requestMethod);
-            this.setRequestProperties(httpURLConnection, engine.getEngineData().getRequestProperties());
-            httpURLConnection.setUseCaches(false);
-            httpURLConnection.setDoInput(true);
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.connect();
-
-            try (OutputStream os = httpURLConnection.getOutputStream()) {
-                //parameters.put("programVersion", this.engine.getEngineData().getLauncherVersion());
-                byte[] postDataBytes = this.formParams(parameters).toString().getBytes(StandardCharsets.UTF_8);
-                os.write(postDataBytes);
-            }
-
-            InputStream is = httpURLConnection.getInputStream();
-            StringBuilder response;
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            response = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-            }
-            return response.toString();
-        } catch (Exception e) {
-            return null;
-        } finally {
-            if (httpURLConnection != null)
-                httpURLConnection.disconnect();
-        }
-    }
-
     public void sendAsync(Map<String, Object> parameters, OnSuccess onSuccess, OnFailure onFailure) {
         executorService.submit(() -> {
             try {

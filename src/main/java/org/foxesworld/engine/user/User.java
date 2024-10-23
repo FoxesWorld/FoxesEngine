@@ -22,31 +22,6 @@ public abstract class User extends ComponentsAccessor {
 
     protected abstract void setUserSpace();
 
-    @Deprecated
-    protected String getUserHead(String login) {
-        if (login == null || login.isEmpty()) {
-            Engine.getLOGGER().warn("Login is null or empty in getUserHead");
-            return null;
-        }
-
-        Map<String, Object> skinData = new HashMap<>();
-        skinData.put("sysRequest", "skin");
-        skinData.put("show", "head");
-        skinData.put("login", login);
-
-        String response = null;
-        try {
-            response = this.engine.getPOSTrequest().send(skinData);
-            if (response == null || response.isEmpty()) {
-                Engine.getLOGGER().warn("Received empty or null response for user head request for login: {}", login);
-            }
-        } catch (Exception e) {
-            Engine.getLOGGER().error("Error while sending user head request for login: {}", login, e);
-        }
-
-        return response;
-    }
-
     protected void getUserHeadAsync(String login, OnSuccess<String> onSuccess, OnFailure onFailure) {
         if (login == null || login.isEmpty()) {
             Engine.getLOGGER().warn("Login is null or empty in getUserHead");
