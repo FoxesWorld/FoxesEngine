@@ -95,6 +95,9 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public abstract void actionPerformed(ActionEvent e);
     protected void loadMainPanel(String path) {
         this.guiBuilder.buildGui(path, this.getFrame().getRootPanel());
+        if (!init) {
+            this.postInit();
+        }
     }
     public String appPath() {
         try {

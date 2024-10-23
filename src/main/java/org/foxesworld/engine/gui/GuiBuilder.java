@@ -146,6 +146,7 @@ public class GuiBuilder {
         } else {
             Engine.LOGGER.error("Additional panels are already built!");
         }
+
     }
 
     private void addPanelGroup(JPanel parent, JPanel child) {
