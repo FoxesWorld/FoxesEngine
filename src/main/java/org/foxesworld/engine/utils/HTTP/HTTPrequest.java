@@ -12,12 +12,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+@SuppressWarnings("unused")
 public class HTTPrequest {
 
     private final String requestMethod;
     private final Engine engine;
     private HttpURLConnection httpURLConnection = null;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public HTTPrequest(Engine engine, String requestMethod) {
         this.engine = engine;
@@ -25,6 +29,7 @@ public class HTTPrequest {
         this.requestMethod = requestMethod;
     }
 
+    @Deprecated
     public String send(Map<String, Object> parameters) {
         try {
             URL url = new URL(engine.getEngineData().getBindUrl());
@@ -57,6 +62,43 @@ public class HTTPrequest {
             if (httpURLConnection != null)
                 httpURLConnection.disconnect();
         }
+    }
+
+    public void sendAsync(Map<String, Object> parameters, OnSuccess onSuccess, OnFailure onFailure) {
+        executorService.submit(() -> {
+            try {
+                URL url = new URL(engine.getEngineData().getBindUrl());
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setRequestMethod(this.requestMethod);
+                this.setRequestProperties(httpURLConnection, engine.getEngineData().getRequestProperties());
+                httpURLConnection.setUseCaches(false);
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.connect();
+
+                try (OutputStream os = httpURLConnection.getOutputStream()) {
+                    byte[] postDataBytes = this.formParams(parameters).toString().getBytes(StandardCharsets.UTF_8);
+                    os.write(postDataBytes);
+                }
+
+                InputStream is = httpURLConnection.getInputStream();
+                StringBuilder response = new StringBuilder();
+                BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    response.append(line);
+                }
+                onSuccess.onSuccess(response.toString());
+            } catch (Exception e) {
+                if (onFailure != null) {
+                    onFailure.onFailure(e);
+                }
+            } finally {
+                if (httpURLConnection != null) {
+                    httpURLConnection.disconnect();
+                }
+            }
+        });
     }
 
 

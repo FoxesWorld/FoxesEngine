@@ -7,6 +7,8 @@ import org.foxesworld.engine.gui.ActionHandler;
 import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.utils.Download.DownloadUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
+import org.foxesworld.engine.utils.HTTP.OnFailure;
+import org.foxesworld.engine.utils.HTTP.OnSuccess;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +22,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public class FileLoader {
     private final HTTPrequest POSTrequest;
+    private final Engine engine;
     private final LoadingManager loadingManager;
     private final Set<String> filesToKeep = new HashSet<>();
     private final String homeDir, client, version;
@@ -34,6 +37,7 @@ public class FileLoader {
     private long totalSize = -1;
 
     public FileLoader(ActionHandler actionHandler) {
+        this.engine = actionHandler.getEngine();
         Engine engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
@@ -71,6 +75,7 @@ public class FileLoader {
 
 
 
+    @Deprecated
     private FileAttributes[] getDownloadList(String client, String version, int platfom) {
         Map<String, Object> request = new HashMap<>();
         request.put("sysRequest", "loadFiles");
@@ -78,6 +83,26 @@ public class FileLoader {
         request.put("client", client);
         request.put("platform", String.valueOf(platfom));
         return new Gson().fromJson(POSTrequest.send(request), FileAttributes[].class);
+    }
+
+    public void getDownloadListAsync(String client, String version, int platform, OnSuccess<FileAttributes[]> onSuccess, OnFailure onFailure) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("sysRequest", "loadFiles");
+        request.put("version", version);
+        request.put("client", client);
+        request.put("platform", String.valueOf(platform));
+
+        HTTPrequest httpRequest = new HTTPrequest(this.engine, "POST");
+        httpRequest.sendAsync(request, response -> {
+            try {
+                FileAttributes[] fileAttributes = new Gson().fromJson((String) response, FileAttributes[].class);
+                onSuccess.onSuccess(fileAttributes);
+            } catch (Exception e) {
+                if (onFailure != null) {
+                    onFailure.onFailure(e);
+                }
+            }
+        }, onFailure);
     }
 
     private boolean shouldDownloadFile(FileAttributes fileSection) {
@@ -165,6 +190,7 @@ public class FileLoader {
         }
     }
 
+    @Deprecated
     public FileAttributes addJreToLoad(String jreVersion) {
         Map<String, Object> request = new HashMap<>();
         request.put("sysRequest", "getJre");
@@ -172,6 +198,25 @@ public class FileLoader {
         FileAttributes jreFile = new Gson().fromJson(POSTrequest.send(request), FileAttributes.class);
         jreFile.setReplaceMask(this.replaceMask);
         return jreFile;
+    }
+
+    public void addJreToLoadAsync(String jreVersion, OnSuccess<FileAttributes> onSuccess, OnFailure onFailure) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("sysRequest", "getJre");
+        request.put("jreVersion", jreVersion);
+
+        HTTPrequest httpRequest = new HTTPrequest(engine, "POST");
+        httpRequest.sendAsync(request, response -> {
+            try {
+                FileAttributes jreFile = new Gson().fromJson((String) response, FileAttributes.class);
+                jreFile.setReplaceMask(this.replaceMask);
+                onSuccess.onSuccess(jreFile);
+            } catch (Exception e) {
+                if (onFailure != null) {
+                    onFailure.onFailure(e);
+                }
+            }
+        }, onFailure);
     }
 
     public void setLoaderListener(FileLoaderListener fileLoaderListener) {
