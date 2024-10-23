@@ -24,11 +24,11 @@
         "paddingX": 10,
         "paddingY": 15,
         "borderRadius": 5,
-        "color": "#e2e7ec",
+        "color": "#9f9a89",
         "caretColor": "#ff0000",
         "background": "#ffffff",
         "selectionColor": "#2dc5bb",
-        "texture": "assets/ui/input/textField2.png"
+        "texture": "assets/ui/components/input/textField2.png"
       }
     }
   }
