@@ -18,11 +18,14 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class FileLoader {
+
+    private final AtomicBoolean isCancelled = new AtomicBoolean(false);
     private final HTTPrequest postRequest;
     private final Engine engine;
     private final LoadingManager loadingManager;
@@ -112,12 +115,18 @@ public class FileLoader {
         CompletableFuture<FileAttributes[]> future = new CompletableFuture<>();
 
         postRequest.sendAsync(request, response -> {
+            if (isCancelled.get()) {
+                future.completeExceptionally(new InterruptedException("Загрузка отменена"));
+                return;
+            }
+
             FileAttributes[] fileAttributes = new Gson().fromJson(String.valueOf(response), FileAttributes[].class);
             future.complete(fileAttributes);
         }, future::completeExceptionally);
 
         return future;
     }
+
 
     private boolean shouldDownloadFile(FileAttributes fileSection) {
         String localPath = fileSection.getFilename().replace(fileSection.getReplaceMask(), "");
@@ -136,6 +145,10 @@ public class FileLoader {
         totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
 
         fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> {
+            if (isCancelled.get()) {
+                return; // Прекратить выполнение, если была вызвана отмена
+            }
+
             this.currentFile = file;
             fileExtension = getFileExtension(file.getFilename());
             fileLoaderListener.onNewFileFound(this);
@@ -149,6 +162,7 @@ public class FileLoader {
             }
         }, executorService));
     }
+
 
     private void downloadFile(FileAttributes file) {
         // Implementation of actual file download logic
@@ -276,5 +290,10 @@ public class FileLoader {
                     .sum();
         }
         return totalSize;
+    }
+    public void cancel() {
+        isCancelled.set(true);
+        executorService.shutdownNow();
+        fileLoaderListener.onCancel();
     }
 }

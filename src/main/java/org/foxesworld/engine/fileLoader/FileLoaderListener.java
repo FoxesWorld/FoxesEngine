@@ -1,11 +1,11 @@
 package org.foxesworld.engine.fileLoader;
 
 public interface FileLoaderListener {
-
-    void onDownloadStart();
+    void onFileAdd(FileAttributes file);
     void onFilesRead();
     void onFilesLoaded();
-    void onFileAdd(FileAttributes file);
+    void onDownloadStart();
     void onNewFileFound(FileLoader fileLoader);
     void filesProcessed();
+    void onCancel();
 }
