@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("unused")
 public class FileGuard {
@@ -18,14 +20,14 @@ public class FileGuard {
     private final String[] basicIgnoreDirs = {"saves", "resourcepacks", "shaderpacks", "screenshots", "logs", "config"};
     private final GameLauncher gameLauncher;
     private final Logger logger;
-    private int totalFiles = 0;
-    private int checkedFiles = 0;
-    private int filesDeleted = 0;
+    private final AtomicInteger totalFiles = new AtomicInteger(0);
+    private final AtomicInteger checkedFiles = new AtomicInteger(0);
+    private final AtomicInteger filesDeleted = new AtomicInteger(0);
 
     @SuppressWarnings("unused")
     public FileGuard(GameLauncher gameLauncher, List<String> checkList) {
         this.gameLauncher = gameLauncher;
-        this.checkList = checkList;
+        this.checkList = new CopyOnWriteArrayList<>(checkList);
         this.ignoreList = new HashSet<>();
         this.buildBasicIgnoreList();
         this.logger = this.gameLauncher.getLogger();
@@ -33,9 +35,9 @@ public class FileGuard {
 
     @SuppressWarnings("unused")
     public void scanAndDeleteFilesInSubdirectories(Set<String> filesToKeep) {
-        totalFiles = countTotalFiles();
-        checkedFiles = 0;
-        filesDeleted = 0;
+        totalFiles.set(countTotalFiles());
+        checkedFiles.set(0);
+        filesDeleted.set(0);
 
         for (String dir : checkList) {
             logger.debug("Checking Dir " + dir);
@@ -43,18 +45,15 @@ public class FileGuard {
             scanAndDeleteFilesRecursively(new File(dir), filesToKeep);
         }
 
-        fileGuardListener.onFilesChecked(filesDeleted);
+        fileGuardListener.onFilesChecked(filesDeleted.get());
     }
 
     private int countTotalFiles() {
-        int total = 0;
-        for (String dir : checkList) {
-            File directory = new File(dir);
-            if (directory.exists()) {
-                total += countFilesInDirectory(directory);
-            }
-        }
-        return total;
+        return checkList.stream()
+                .map(File::new)
+                .filter(File::exists)
+                .mapToInt(this::countFilesInDirectory)
+                .sum();
     }
 
     private int countFilesInDirectory(File directory) {
@@ -75,39 +74,40 @@ public class FileGuard {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void removeEmptyFolders(String dir, List<Boolean> parent_contains_files, boolean first_launch) {
+    public void removeEmptyFolders(String dir, List<Boolean> parentContainsFiles, boolean firstLaunch) {
         File file = new File(dir);
         if (!file.exists()) file.mkdirs();
         String[] content = file.list();
 
-        boolean dir_contains_files = false, dir_contains_folders = false;
+        boolean dirContainsFiles = false;
+        boolean dirContainsFolders = false;
 
         assert content != null;
         for (String object : content) {
             File obj = new File(dir + File.separator + object);
-            if (obj.isFile()) dir_contains_files = true;
-            else if (obj.isDirectory()) dir_contains_folders = true;
+            if (obj.isFile()) dirContainsFiles = true;
+            else if (obj.isDirectory()) dirContainsFolders = true;
         }
 
-        if (first_launch) dir_contains_files = true;
-        parent_contains_files.add(dir_contains_files);
+        if (firstLaunch) dirContainsFiles = true;
+        parentContainsFiles.add(dirContainsFiles);
 
-        if (!first_launch && !dir_contains_files && !dir_contains_folders) {
-            int num_folders_to_delete = 0;
+        if (!firstLaunch && !dirContainsFiles && !dirContainsFolders) {
+            int numFoldersToDelete = 0;
 
-            for (Boolean contains_or_not : parent_contains_files) {
-                if (!contains_or_not) num_folders_to_delete++;
-                else num_folders_to_delete = 0;
+            for (Boolean containsOrNot : parentContainsFiles) {
+                if (!containsOrNot) numFoldersToDelete++;
+                else numFoldersToDelete = 0;
             }
 
-            if (num_folders_to_delete > 1) {
-                File dir_to_delete = file;
-                for (int i = 0; i < num_folders_to_delete - 1; i++)
-                    dir_to_delete = dir_to_delete.getParentFile();
-
-                recursiveDelete(dir_to_delete);
+            if (numFoldersToDelete > 1) {
+                File dirToDelete = file;
+                for (int i = 0; i < numFoldersToDelete - 1; i++) {
+                    dirToDelete = dirToDelete.getParentFile();
+                }
+                recursiveDelete(dirToDelete);
                 Engine.LOGGER.debug("Removed empty directory " + file);
-            } else if (num_folders_to_delete == 1) {
+            } else if (numFoldersToDelete == 1) {
                 recursiveDelete(file);
                 Engine.LOGGER.debug("Removed empty directory " + file);
             }
@@ -115,9 +115,8 @@ public class FileGuard {
 
         for (String object : content) {
             File obj = new File(dir + File.separator + object);
-
             if (obj.isDirectory()) {
-                removeEmptyFolders(dir + File.separator + object, parent_contains_files, false);
+                removeEmptyFolders(dir + File.separator + object, parentContainsFiles, false);
             }
         }
     }
@@ -134,14 +133,14 @@ public class FileGuard {
                         boolean deleted = file.delete();
                         if (deleted) {
                             logger.debug("Deleted unlisted file: " + checkPath);
-                            filesDeleted++;
+                            filesDeleted.incrementAndGet();
                         } else {
                             logger.error("Failed to delete invalid file: " + checkPath);
                         }
                     } else {
                         logger.debug(checkPath + " is checked");
                     }
-                    checkedFiles++;
+                    checkedFiles.incrementAndGet();
                 } else if (file.isDirectory()) {
                     scanAndDeleteFilesRecursively(file, filesToKeep);
                 }
@@ -181,11 +180,11 @@ public class FileGuard {
     @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void recursiveDelete(File file) {
         try {
-            if (!file.exists())
-                return;
+            if (!file.exists()) return;
             if (file.isDirectory()) {
-                for (File f : Objects.requireNonNull(file.listFiles()))
+                for (File f : Objects.requireNonNull(file.listFiles())) {
                     recursiveDelete(f);
+                }
                 file.delete();
             } else {
                 file.delete();

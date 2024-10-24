@@ -59,13 +59,23 @@ public class FileLoader {
         this.loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
 
         fetchDownloadList(client, version, getPlatformNumber())
-                .thenAccept(fileAttributes -> SwingUtilities.invokeLater(() -> processFileAttributes(fileAttributes, forceUpdate)))
+                .thenAcceptAsync(fileAttributes -> {
+                    // processingFiles
+                    processFileAttributes(fileAttributes, forceUpdate);
+                }, executorService)
+                .thenRun(() -> {
+                    SwingUtilities.invokeLater(() -> {
+                        // Files Processed
+                        this.fileLoaderListener.filesProcessed();
+                    });
+                })
                 .exceptionally(e -> {
                     Engine.getLOGGER().error("Error retrieving file list: {}", e.getMessage(), e);
-                    SwingUtilities.invokeLater(() -> this.loadingManager.setLoadingText("file.error-desc", "file.error.title"));
+                    SwingUtilities.invokeLater(() -> this.loadingManager.setLoadingText(e.getMessage(), "error.file"));
                     return null;
                 });
     }
+
 
     private boolean isClientDataValid(String client, String version) {
         return client != null && !client.isEmpty() && version != null && !version.isEmpty();
@@ -77,7 +87,7 @@ public class FileLoader {
         }
 
         Engine.getLOGGER().info("Keeping " + this.filesToKeep.size() + " files");
-        this.loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt.title");
+        this.loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
 
         if (forceUpdate) {
             this.fileAttributes = Arrays.asList(fileAttributes);
@@ -125,16 +135,23 @@ public class FileLoader {
 
         totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
 
-        fileAttributes.forEach(file -> executorService.execute(() -> {
+        fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> {
             this.currentFile = file;
             fileExtension = getFileExtension(file.getFilename());
             fileLoaderListener.onNewFileFound(this);
-            filesDownloaded.incrementAndGet();
 
+            // Simulating file download
+            downloadFile(file);
+
+            filesDownloaded.incrementAndGet();
             if (filesDownloaded.get() == totalFiles) {
                 fileLoaderListener.onFilesLoaded();
             }
-        }));
+        }, executorService));
+    }
+
+    private void downloadFile(FileAttributes file) {
+        // Implementation of actual file download logic
     }
 
     public boolean isInvalidFile(File file, String expectedHash, long expectedSize) {

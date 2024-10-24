@@ -7,4 +7,5 @@ public interface FileLoaderListener {
     void onFilesLoaded();
     void onFileAdd(FileAttributes file);
     void onNewFileFound(FileLoader fileLoader);
+    void filesProcessed();
 }
