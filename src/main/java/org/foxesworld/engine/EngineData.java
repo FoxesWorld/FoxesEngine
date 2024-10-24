@@ -1,6 +1,7 @@
 package org.foxesworld.engine;
 
 import com.google.gson.Gson;
+import org.foxesworld.engine.utils.HTTP.HTTPconf;
 import org.foxesworld.engine.utils.HTTP.RequestProperty;
 import org.foxesworld.engine.gui.loadingManager.LoadManagerAttributes;
 
@@ -16,7 +17,8 @@ public class EngineData {
 
     private DownloadManager downloadManager;
     private LoadManagerAttributes loadManager[];
-    private List<RequestProperty> requestProperties;
+    private HTTPconf httpConf;
+    //private List<RequestProperty> requestProperties;
     private String[] tweakClasses;
     private Map<String, Object> files;
     public String getBindUrl() {
@@ -40,14 +42,18 @@ public class EngineData {
     public String getVkAPIversion() {
         return vkAPIversion;
     }
-
     public DownloadManager getDownloadManager() {
         return downloadManager;
     }
     public LoadManagerAttributes[] getLoadManager() { return  loadManager;};
-    public List<RequestProperty> getRequestProperties() {
-        return requestProperties;
+    //public List<RequestProperty> getRequestProperties() {
+    //    return requestProperties;
+    //}
+
+    public HTTPconf getHttPconf() {
+        return httpConf;
     }
+
     public String[] getTweakClasses() {
         return tweakClasses;
     }

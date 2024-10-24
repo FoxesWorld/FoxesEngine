@@ -37,7 +37,7 @@ public class DownloadUtils {
             HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             httpConnection.setDoOutput(false);
             httpConnection.setRequestMethod("GET");
-            engine.getGETrequest().setRequestProperties(httpConnection, engine.getEngineData().getRequestProperties());
+            engine.getGETrequest().setRequestProperties(httpConnection, engine.getEngineData().getHttPconf().getRequestProperties());
             long fileSize = httpConnection.getContentLength();
             long chunkSize = fileSize / 100;
 

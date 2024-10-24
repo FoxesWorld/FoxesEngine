@@ -2,12 +2,11 @@ package org.foxesworld.engine.utils.HTTP;
 
 import org.foxesworld.engine.Engine;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +19,14 @@ public class HTTPrequest {
 
     private final String requestMethod;
     private final Engine engine;
-    private HttpURLConnection httpURLConnection = null;
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private final ExecutorService executorService;
+    private HttpURLConnection httpURLConnection;
 
     public HTTPrequest(Engine engine, String requestMethod) {
         this.engine = engine;
-        Engine.LOGGER.debug("HTTP " + requestMethod + " init");
         this.requestMethod = requestMethod;
+        this.executorService = Executors.newCachedThreadPool();
+        Engine.LOGGER.info("HTTP {} init", requestMethod);
     }
 
     public void sendAsync(Map<String, Object> parameters, OnSuccess onSuccess, OnFailure onFailure) {
@@ -34,30 +34,20 @@ public class HTTPrequest {
             try {
                 URL url = new URL(engine.getEngineData().getBindUrl());
                 httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod(this.requestMethod);
-                this.setRequestProperties(httpURLConnection, engine.getEngineData().getRequestProperties());
-                httpURLConnection.setUseCaches(false);
-                httpURLConnection.setDoInput(true);
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.connect();
-
-                try (OutputStream os = httpURLConnection.getOutputStream()) {
-                    byte[] postDataBytes = this.formParams(parameters).toString().getBytes(StandardCharsets.UTF_8);
-                    os.write(postDataBytes);
+                configureConnection(httpURLConnection);
+                sendRequest(parameters);
+                String response = getResponse();
+                onSuccess.onSuccess(response);
+            } catch (SocketException e) {
+                Engine.LOGGER.warn("Socket closed unexpectedly {}", e);
+                if (onFailure != null) {
+                    onFailure.onFailure(e);
                 }
-
-                InputStream is = httpURLConnection.getInputStream();
-                StringBuilder response = new StringBuilder();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    response.append(line);
-                }
-                onSuccess.onSuccess(response.toString());
             } catch (Exception e) {
                 if (onFailure != null) {
                     onFailure.onFailure(e);
                 }
+                Engine.LOGGER.error("Request failed {}", e);
             } finally {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
@@ -67,42 +57,72 @@ public class HTTPrequest {
     }
 
 
-    private StringBuilder getBoundary(int length, int radix) {
-        StringBuilder boundary = new StringBuilder();
-        for (int k = 0; k < length; k++) {
-            boundary.append(Long.toString(new Random().nextLong(), radix));
-        }
-        return boundary;
+    private void configureConnection(HttpURLConnection connection) throws Exception {
+        connection.setRequestMethod(this.requestMethod);
+        HTTPconf httpConf = engine.getEngineData().getHttPconf();
+        setRequestProperties(connection, httpConf.getRequestProperties());
+        connection.setUseCaches(httpConf.isUseCaches());
+        connection.setDoInput(httpConf.isDoInput());
+        connection.setDoOutput(httpConf.isDoOutput());
+        connection.connect();
     }
 
-    private StringBuilder formParams(Map<String, Object> parameters) {
+    private void sendRequest(Map<String, Object> parameters) throws Exception {
+        try (OutputStream os = httpURLConnection.getOutputStream()) {
+            String postData = formParams(parameters).toString();
+            os.write(postData.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private String getResponse() throws Exception {
+        StringBuilder response = new StringBuilder();
+        try (InputStream is = httpURLConnection.getInputStream();
+             BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+            }
+        }
+        return response.toString();
+    }
+
+    private StringBuilder formParams(Map<String, Object> parameters) throws UnsupportedEncodingException {
         StringBuilder postData = new StringBuilder();
         for (Map.Entry<String, Object> param : parameters.entrySet()) {
             if (postData.length() != 0) {
                 postData.append('&');
             }
-            postData.append(param.getKey());
-            postData.append('=');
-            postData.append(param.getValue());
+            postData.append(URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8))
+                    .append('=')
+                    .append(URLEncoder.encode(param.getValue().toString(), StandardCharsets.UTF_8));
         }
         return postData;
     }
 
-    public void setRequestProperties(HttpURLConnection httpURLConnection, List<RequestProperty> properties) {
-        for(RequestProperty requestProperty: properties){
+    public void setRequestProperties(HttpURLConnection connection, List<RequestProperty> properties) {
+        for (RequestProperty requestProperty : properties) {
             String value = requestProperty.getPropertyValue();
             if (value.contains("{$boundary}")) {
-                value = value.replace("{$boundary}", this.getBoundary(3, 3));
+                value = value.replace("{$boundary}", getBoundary(3, 3));
             }
-            if(!httpURLConnection.getRequestProperties().containsKey(requestProperty.getPropertyKey())) {
-                httpURLConnection.setRequestProperty(requestProperty.getPropertyKey(), value);
-                //engine.getLOGGER().debug("Adding request header " + requestProperty.propertyKey);
-            }
-
+            connection.setRequestProperty(requestProperty.getPropertyKey(), value);
         }
+    }
+
+    private String getBoundary(int length, int radix) {
+        StringBuilder boundary = new StringBuilder();
+        Random random = new Random();
+        for (int k = 0; k < length; k++) {
+            boundary.append(Long.toString(random.nextLong(), radix));
+        }
+        return boundary.toString();
     }
 
     public HttpURLConnection getHttpURLConnection() {
         return httpURLConnection;
+    }
+
+    public void shutdown() {
+        executorService.shutdown();
     }
 }
