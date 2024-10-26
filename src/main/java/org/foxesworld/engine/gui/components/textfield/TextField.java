@@ -9,13 +9,13 @@ import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 
 
-public class Textfield extends JTextField {
+public class TextField extends JTextField {
 
 	private static final long serialVersionUID = 1L;
 
 	public BufferedImage texture;
 
-	public Textfield(String placeholder) {
+	public TextField(String placeholder) {
 		setOpaque(false);
 		setText(placeholder);
 

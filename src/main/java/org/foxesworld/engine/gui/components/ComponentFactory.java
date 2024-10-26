@@ -1,7 +1,5 @@
 package org.foxesworld.engine.gui.components;
 
-import static org.foxesworld.engine.utils.FontUtils.hexToColor;
-
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.attributes.ComponentAttributes;
 import org.foxesworld.engine.gui.components.button.Button;
@@ -18,10 +16,9 @@ import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
 import org.foxesworld.engine.gui.components.scrollBox.ScrollBox;
 import org.foxesworld.engine.gui.components.scrollBox.ScrollBoxStyle;
 import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
-import org.foxesworld.engine.gui.components.textfield.Textfield;
-import org.foxesworld.engine.gui.components.textfield.TextfieldStyle;
+import org.foxesworld.engine.gui.components.textfield.TextField;
+import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
-import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.utils.ImageUtils;
 
@@ -29,12 +26,14 @@ import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.foxesworld.engine.utils.FontUtils.hexToColor;
+
 public class ComponentFactory {
 
     public Engine engine;
     private LanguageProvider LANG;
     private Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
-    private TextfieldStyle textfieldStyle;
+    private TextFieldStyle textfieldStyle;
     private PassFieldStyle passfieldStyle;
     private ProgressBarStyle progressBarStyle;
     private LabelStyle labelStyle;
@@ -102,8 +101,8 @@ public class ComponentFactory {
                 return checkbox;
 
             case "textField":
-                textfieldStyle = new TextfieldStyle(this);
-                Textfield textfield = new Textfield(LANG.getString(componentAttributes.localeKey));
+                textfieldStyle = new TextFieldStyle(this);
+                TextField textfield = new TextField(LANG.getString(componentAttributes.localeKey));
                 textfieldStyle.apply(textfield);
                 textfield.setName(componentAttributes.componentId);
                 textfield.setBounds(xPos, yPos, textfieldStyle.width, textfieldStyle.height);
