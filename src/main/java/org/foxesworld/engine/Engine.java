@@ -25,6 +25,7 @@ import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.utils.OS;
 import org.foxesworld.engine.utils.ServerInfo;
 import org.foxesworld.engine.gui.ActionHandler;
+import org.fusesource.jansi.AnsiConsole;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -71,6 +72,8 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         fileProperties = new FileProperties(this);
         System.setProperty("log.dir", System.getProperty("user.dir"));
         LOGGER = LogManager.getLogger(this.getClass());
+        AnsiConsole.systemInstall();
+        Runtime.getRuntime().addShutdownHook(new Thread(AnsiConsole::systemUninstall));
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
         LOGGER.info(appTitle + " started...");

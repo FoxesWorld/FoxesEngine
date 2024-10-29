@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="info">
-    <Properties>
-        <Property name="logDir">${sys:log.dir}</Property>
-    </Properties>
+<Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{HH:mm:ss.SSS}][%p] %m%n" />
+            <PatternLayout
+                pattern="%style{[%d{HH:mm:ss}]}{bold,black} %highlight{[%p]}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=cyan} %style{%m}{white}%n"
+                disableAnsi="false" />
         </Console>
+
         <File name="File" fileName="${logDir}/logs/lastlog.log" append="false">
             <PatternLayout pattern="[%d{HH:mm:ss.SSS}][%p] %m%n" />
         </File>

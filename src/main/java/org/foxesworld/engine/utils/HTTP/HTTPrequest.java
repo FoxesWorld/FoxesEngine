@@ -17,8 +17,8 @@ import java.util.concurrent.Executors;
 @SuppressWarnings("unused")
 public class HTTPrequest {
 
-    private static final int MAX_RETRIES = 3;  // Максимальное число повторных попыток
-    private static final int RETRY_DELAY_MS = 1000;  // Задержка между повторными попытками
+    private static final int MAX_RETRIES = 3;  // Maximum retry attempts
+    private static final int RETRY_DELAY_MS = 1000;  // Delay between retries in milliseconds
 
     private final String requestMethod;
     private final Engine engine;
@@ -43,7 +43,7 @@ public class HTTPrequest {
                     sendRequest(parameters);
                     String response = getResponse();
                     onSuccess.onSuccess(response);
-                    return;  // Завершаем выполнение, если успех
+                    return;  // Exit if successful
                 } catch (SocketException e) {
                     attempt++;
                     Engine.LOGGER.warn("Socket closed unexpectedly on attempt {}: {}", attempt, e);
@@ -56,7 +56,7 @@ public class HTTPrequest {
                         onFailure.onFailure(e);
                     }
                     Engine.LOGGER.error("Request failed {}", e);
-                    return;  // Завершаем выполнение, если произошла непредвиденная ошибка
+                    return;  // Exit on unexpected error
                 } finally {
                     if (httpURLConnection != null) {
                         httpURLConnection.disconnect();
@@ -73,8 +73,8 @@ public class HTTPrequest {
         connection.setUseCaches(httpConf.isUseCaches());
         connection.setDoInput(httpConf.isDoInput());
         connection.setDoOutput(httpConf.isDoOutput());
-        connection.setConnectTimeout(5000);  // Задаем тайм-аут соединения (при необходимости)
-        connection.setReadTimeout(5000);     // Задаем тайм-аут для чтения данных
+        connection.setConnectTimeout(5000);  // Connection timeout
+        connection.setReadTimeout(5000);     // Read timeout
         connection.connect();
     }
 

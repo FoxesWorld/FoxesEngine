@@ -7,6 +7,7 @@ import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 import org.foxesworld.engine.utils.HTTP.OnFailure;
 import org.foxesworld.engine.utils.HTTP.OnSuccess;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
