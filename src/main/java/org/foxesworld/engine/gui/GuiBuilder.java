@@ -1,19 +1,19 @@
 package org.foxesworld.engine.gui;
 
-import com.google.gson.Gson;
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.components.Attributes;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.notification.Notification;
+import org.w3c.dom.Attr;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.InputStreamReader;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class GuiBuilder {
@@ -39,18 +39,23 @@ public class GuiBuilder {
     }
 
     public void buildGui(String framePath, JPanel parent) {
-        FrameAttributes frameAttributes = loadFrameAttributes(framePath);
+        Attributes frameAttributes = loadFrameAttributes(framePath);
         buildPanels(frameAttributes.getGroups(), parent);
     }
 
-    FrameAttributes loadFrameAttributes(String framePath) {
-        Gson gson = new Gson();
-        try (InputStreamReader reader = new InputStreamReader(
-                Objects.requireNonNull(GuiBuilder.class.getClassLoader().getResourceAsStream(framePath)))) {
-            return gson.fromJson(reader, FrameAttributes.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load frame attributes from path: " + framePath, e);
+    private Attributes loadFrameAttributes(String framePath) {
+        String fileType = getFileType(framePath);
+        FrameAttributesLoader loader = FrameAttributesLoaderFactory.getLoader(fileType);
+        return loader.load(framePath);
+    }
+
+    private String getFileType(String framePath) {
+        if (framePath.endsWith(".json")) {
+            return "json";
+        } else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
+            return "yaml";
         }
+        return "unknown";
     }
 
     public List<Component> getAllChildComponents(String parentPanel) {
@@ -59,8 +64,6 @@ public class GuiBuilder {
                 .forEach(child -> components.addAll(componentsMap.getOrDefault(child, Collections.emptyList())));
         return components;
     }
-
-
 
     private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
         if (panels != null) {
@@ -108,7 +111,7 @@ public class GuiBuilder {
     }
 
     private void processReadFromAttribute(ComponentAttributes componentAttributes, JPanel parentPanel) {
-        FrameAttributes frameAttributes = loadFrameAttributes(componentAttributes.getReadFrom());
+        Attributes frameAttributes = loadFrameAttributes(componentAttributes.getReadFrom());
         if (frameAttributes.getGroups() == null && frameAttributes.getChildComponents() != null) {
             processChildComponents(frameAttributes.getChildComponents(), parentPanel);
         } else {
@@ -128,6 +131,7 @@ public class GuiBuilder {
     private void updateChildParentMap(JPanel parentPanel, JPanel childPanel) {
         childParentMap.computeIfAbsent(parentPanel.getName(), k -> new ArrayList<>()).add(childPanel.getName());
     }
+
     public void buildAdditionalPanels() {
         if (!additionalPanelsBuilt) {
             if (guiBuilderListener != null) {
@@ -146,7 +150,6 @@ public class GuiBuilder {
         } else {
             Engine.LOGGER.error("Additional panels are already built!");
         }
-
     }
 
     private void addPanelGroup(JPanel parent, JPanel child) {
@@ -158,26 +161,33 @@ public class GuiBuilder {
     public Map<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }
+
     @Deprecated
     public void addPanelToMap(JPanel panel) {
         this.panelsMap.put(panel.getName(), panel);
     }
+
     @Deprecated
     public Map<String, JPanel> getPanelsMap() {
         return panelsMap;
     }
+
     public Map<String, List<String>> getChildParentMap() {
         return childParentMap;
     }
+
     public void setGuiBuilderListener(GuiBuilderListener guiBuilderListener) {
         this.guiBuilderListener = guiBuilderListener;
     }
+
     public Engine getEngine() {
         return engine;
     }
+
     public Notification getNotification() {
         return notification;
     }
+
     public ComponentFactory getComponentFactory() {
         return componentFactory;
     }

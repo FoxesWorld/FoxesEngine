@@ -1,11 +1,13 @@
 package org.foxesworld.engine.gui.components.frame;
 
+import org.foxesworld.engine.gui.components.Attributes;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 
 import java.util.List;
 import java.util.Map;
 
-public class FrameAttributes {
+@SuppressWarnings("unused")
+public class FrameAttributes extends Attributes {
     private String appTitle;
     private String appIcon;
     private int width, height, borderRadius;
@@ -17,8 +19,6 @@ public class FrameAttributes {
     private String winterImage;
     private String backgroundBlur;
     private boolean undecorated;
-    private Map<String, OptionGroups> panels;
-    private List<ComponentAttributes> childComponents;
 
     public String getAppTitle() {
         return appTitle;
@@ -67,15 +67,6 @@ public class FrameAttributes {
     public boolean isUndecorated() {
         return undecorated;
     }
-
-    public Map<String, OptionGroups> getGroups() {
-        return panels;
-    }
-
-    public List<ComponentAttributes> getChildComponents() {
-        return childComponents;
-    }
-
     public int getBorderRadius() {
         return borderRadius;
     }

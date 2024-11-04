@@ -1,6 +1,7 @@
 package org.foxesworld.engine;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.google.gson.Gson;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -80,7 +82,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
         this.FONTUTILS = new FontUtils(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
-
+        LOGGER.info("Engine version " + this.getEngineInfo().engineVersion);
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
         this.imageUtils = new ImageUtils(this);
@@ -137,6 +139,19 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         JOptionPane.showMessageDialog(this.getFrame(), errorMessage, errorTitle, warningMessage);
         if(terminate) {
             System.exit(0);
+        }
+    }
+
+    private EngineInfo getEngineInfo(){
+        InputStreamReader reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json"), StandardCharsets.UTF_8);
+       return new Gson().fromJson(reader, EngineInfo.class);
+    }
+
+    private static class EngineInfo {
+        private String engineVersion;
+
+        public String getEngineVersion() {
+            return engineVersion;
         }
     }
 

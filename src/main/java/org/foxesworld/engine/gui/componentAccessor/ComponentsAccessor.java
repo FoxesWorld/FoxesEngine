@@ -8,7 +8,6 @@ import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;

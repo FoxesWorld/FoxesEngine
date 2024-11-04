@@ -14,6 +14,7 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
     public BufferedImage defaultTX,rolloverTX,pressedTX,lockedTX;
     private final ComponentFactory componentFactory;
     private final ComponentAttributes buttonAttributes;
+    private final int hoverShiftY = 1;
 
     public Button(ComponentFactory componentFactory, String text) {
         this.componentFactory = componentFactory;
@@ -83,16 +84,26 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
 
         g.drawImage(imageToDraw, 0, 0, w, h, null);
 
+        int shiftY = entered ? hoverShiftY : 0;
+
         if (getText() != null && !getText().isEmpty()) {
             FontMetrics fm = g.getFontMetrics();
             int textX = (w - fm.stringWidth(getText())) / 2;
-            int textY = (h + fm.getAscent()) / 2;
+            int textY = (h + fm.getAscent()) / 2 + shiftY;
             if (isEnabled()) {
                 g.setColor(entered ? this.hoverColor : getForeground());
             }
             g.drawString(getText(), textX, textY);
         }
+
+        if (getIcon() != null) {
+            Icon icon = getIcon();
+            int iconX = (w - icon.getIconWidth()) / 2;
+            int iconY = (h - icon.getIconHeight()) / 2 + shiftY;
+            icon.paintIcon(this, g, iconX, iconY);
+        }
     }
+
 
     @Override
     public void mouseEntered(MouseEvent e) {

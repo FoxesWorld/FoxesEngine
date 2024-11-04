@@ -1,20 +1,15 @@
 package org.foxesworld.engine.gui.components;
 
-import org.foxesworld.engine.gui.components.frame.OptionGroups;
-
 import java.awt.*;
-import java.util.Map;
 
 @SuppressWarnings("unused")
-public class ComponentAttributes {
+public class ComponentAttributes extends Attributes {
     private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
     private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
     private  Object initialValue;
     private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment, toolTip;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
-    private Map<String, OptionGroups> panels;
     private Bounds bounds;
-
     public void setInitialValue(Object initialValue) {
         this.initialValue = initialValue;
     }
@@ -99,9 +94,6 @@ public class ComponentAttributes {
     public String getLoadPanel() {
         return loadPanel;
     }
-    public Map<String, OptionGroups> getGroups() {
-        return panels;
-    }
     public int getMinValue() {
         return minValue;
     }
@@ -129,7 +121,6 @@ public class ComponentAttributes {
     public boolean isRepeat() {
         return repeat;
     }
-
     public String getTooltipStyle() {
         return tooltipStyle;
     }

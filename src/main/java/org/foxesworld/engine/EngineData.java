@@ -14,11 +14,9 @@ import java.util.Map;
 public class EngineData {
     private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
     private String[] styles;
-
     private DownloadManager downloadManager;
     private LoadManagerAttributes loadManager[];
     private HTTPconf httpConf;
-    //private List<RequestProperty> requestProperties;
     private String[] tweakClasses;
     private Map<String, Object> files;
     public String getBindUrl() {
