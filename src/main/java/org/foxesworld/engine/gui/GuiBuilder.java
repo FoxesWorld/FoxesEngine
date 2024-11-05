@@ -1,14 +1,14 @@
 package org.foxesworld.engine.gui;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.adapters.FrameAttributesLoader;
+import org.foxesworld.engine.gui.adapters.FrameLoaderAdapters;
 import org.foxesworld.engine.gui.components.Attributes;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.notification.Notification;
-import org.w3c.dom.Attr;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +17,7 @@ import java.util.*;
 
 @SuppressWarnings("unused")
 public class GuiBuilder {
-
+    private final  FrameLoaderAdapters frameLoaderAdapters;
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
     private final Engine engine;
@@ -31,6 +31,7 @@ public class GuiBuilder {
 
     public GuiBuilder(Engine engine) {
         this.engine = engine;
+        this.frameLoaderAdapters = new FrameLoaderAdapters(engine);
         this.frameConstructor = engine.getFrame();
         this.componentFactory = new ComponentFactory(engine);
         this.notification = new Notification();
@@ -45,7 +46,7 @@ public class GuiBuilder {
 
     private Attributes loadFrameAttributes(String framePath) {
         String fileType = getFileType(framePath);
-        FrameAttributesLoader loader = FrameAttributesLoaderFactory.getLoader(fileType);
+        FrameAttributesLoader loader = this.frameLoaderAdapters.getLoader(fileType);
         return loader.load(framePath);
     }
 
@@ -54,6 +55,8 @@ public class GuiBuilder {
             return "json";
         } else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
             return "yaml";
+        } else if(framePath.endsWith(".xml")) {
+            return  "xml";
         }
         return "unknown";
     }
@@ -162,12 +165,10 @@ public class GuiBuilder {
         return componentsMap;
     }
 
-    @Deprecated
     public void addPanelToMap(JPanel panel) {
         this.panelsMap.put(panel.getName(), panel);
     }
 
-    @Deprecated
     public Map<String, JPanel> getPanelsMap() {
         return panelsMap;
     }
@@ -182,6 +183,10 @@ public class GuiBuilder {
 
     public Engine getEngine() {
         return engine;
+    }
+
+    public FrameLoaderAdapters getFrameLoaderAdapters() {
+        return frameLoaderAdapters;
     }
 
     public Notification getNotification() {

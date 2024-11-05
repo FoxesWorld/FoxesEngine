@@ -1,16 +1,16 @@
-package org.foxesworld.engine.gui;
+package org.foxesworld.engine.gui.adapters.json;
 
 import com.google.gson.Gson;
+import org.foxesworld.engine.gui.adapters.FrameAttributesLoader;
 import org.foxesworld.engine.gui.components.Attributes;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
-import org.foxesworld.engine.gui.components.frame.FrameAttributes;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-class JsonFrameAttributesLoader implements FrameAttributesLoader {
+public class JsonFrameAttributesLoader implements FrameAttributesLoader {
     private final Gson gson = new Gson();
 
     @Override

@@ -155,6 +155,7 @@ public class ComponentFactory extends JComponent {
                 if(componentAttributes.getColor() != null) {
                     component.setForeground(hexToColor(componentAttributes.getColor()));
                 }
+                ((TextArea) component).setEditable(componentAttributes.isEnabled());
             }
 
             case "checkBox" -> {

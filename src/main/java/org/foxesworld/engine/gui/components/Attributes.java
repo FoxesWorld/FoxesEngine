@@ -16,4 +16,7 @@ public abstract class Attributes {
         return childComponents;
     }
 
+    public void addChild(ComponentAttributes childAttributes) {
+        childComponents.add(childAttributes);
+    }
 }

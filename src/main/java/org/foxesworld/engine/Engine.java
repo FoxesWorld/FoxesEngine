@@ -65,11 +65,14 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private final HTTPrequest GETrequest, POSTrequest;
     public ActionHandler actionHandler;
     private boolean init = false;
+    private final EngineInfo engineInfo;
 
     public Engine(List<String> configFiles) {
         currentOS = OS.determineCurrentOS();
         this.engineData = new EngineData();
         this.configFiles = configFiles;
+        InputStreamReader reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json"), StandardCharsets.UTF_8);
+        this.engineInfo = new Gson().fromJson(reader, EngineInfo.class);
         setEngineData(engineData.initEngineValues("engine.json"));
         fileProperties = new FileProperties(this);
         System.setProperty("log.dir", System.getProperty("user.dir"));
@@ -82,7 +85,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
         this.FONTUTILS = new FontUtils(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
-        LOGGER.info("Engine version " + this.getEngineInfo().engineVersion);
+        LOGGER.info("Engine version " + this.getEngineInfo().engineVersion + this.getEngineInfo().engineBrand);
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
         this.imageUtils = new ImageUtils(this);
@@ -142,16 +145,16 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         }
     }
 
-    private EngineInfo getEngineInfo(){
-        InputStreamReader reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json"), StandardCharsets.UTF_8);
-       return new Gson().fromJson(reader, EngineInfo.class);
-    }
 
     private static class EngineInfo {
-        private String engineVersion;
+        private String engineVersion, engineBrand;
 
         public String getEngineVersion() {
             return engineVersion;
+        }
+
+        public String getEngineBrand() {
+            return engineBrand;
         }
     }
 
@@ -239,4 +242,8 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public Config getConfig() {
         return config;
     }
+    public EngineInfo getEngineInfo(){
+        return this.engineInfo;
+    }
+
 }

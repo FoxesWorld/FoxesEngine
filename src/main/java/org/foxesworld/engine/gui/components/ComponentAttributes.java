@@ -1,13 +1,18 @@
 package org.foxesworld.engine.gui.components;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 @SuppressWarnings("unused")
 public class ComponentAttributes extends Attributes {
+
+    public ComponentAttributes() {
+        this.childComponents = new ArrayList<>();
+    }
     private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
     private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
     private  Object initialValue;
-    private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, componentType, componentStyle, componentId,background, thumbImage, trackImage, alignment, toolTip;
+    private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, type, style, id,background, thumbImage, trackImage, alignment, toolTip;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius;
     private Bounds bounds;
     public void setInitialValue(Object initialValue) {
@@ -23,13 +28,13 @@ public class ComponentAttributes extends Attributes {
         return background;
     }
     public String getComponentType() {
-        return componentType;
+        return type;
     }
     public String getComponentStyle() {
-        return componentStyle;
+        return style;
     }
     public String getComponentId() {
-        return componentId;
+        return id;
     }
     public int getRowNum() {
         return rowNum;

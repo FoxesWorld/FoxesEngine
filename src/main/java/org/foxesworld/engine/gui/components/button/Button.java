@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 public class Button extends JButton implements MouseListener, MouseMotionListener {
     private Color hoverColor;
     private boolean entered = false, pressed = false;
-    public BufferedImage defaultTX,rolloverTX,pressedTX,lockedTX;
+    public BufferedImage defaultTX, rolloverTX, pressedTX, lockedTX;
     private final ComponentFactory componentFactory;
     private final ComponentAttributes buttonAttributes;
     private final int hoverShiftY = 1;
@@ -30,38 +30,8 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
     }
 
     public Button(ComponentFactory componentFactory, ImageIcon icon) {
-        super();
-        this.componentFactory = componentFactory;
-        this.buttonAttributes = componentFactory.getComponentAttribute();
-        addMouseListener(this);
-        addMouseMotionListener(this);
-
-        setBorderPainted(false);
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setOpaque(componentFactory.style.isOpaque());
-        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setHorizontalAlignment(JLabel.CENTER);
-        iconLabel.setVerticalAlignment(JLabel.CENTER);
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        setLayout(gridBagLayout);
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.fill = GridBagConstraints.BOTH;
-
-        gridBagLayout.setConstraints(iconLabel, constraints);
-        add(iconLabel);
-
-        setPreferredSize(new Dimension(
-                componentFactory.getComponentAttribute().getIconWidth(),
-                componentFactory.getComponentAttribute().getIconHeight()));
-        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        this(componentFactory, "");
+        setIcon(icon);
     }
 
     @Override
@@ -103,7 +73,6 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
             icon.paintIcon(this, g, iconX, iconY);
         }
     }
-
 
     @Override
     public void mouseEntered(MouseEvent e) {

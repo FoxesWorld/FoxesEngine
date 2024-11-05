@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class EngineData {
     private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
-    private String[] styles;
+    private String[] styles,loadAdapters;
     private DownloadManager downloadManager;
     private LoadManagerAttributes loadManager[];
     private HTTPconf httpConf;
@@ -69,6 +69,9 @@ public class EngineData {
         return styles;
     }
 
+    public String[] getLoadAdapters() {
+        return loadAdapters;
+    }
 
     public static class DownloadManager {
         private int downloadThreads;
