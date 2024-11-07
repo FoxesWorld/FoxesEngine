@@ -17,7 +17,7 @@ public class YamlFrameAttributesLoader implements FrameAttributesLoader {
     }
 
     @Override
-    public Attributes load(String framePath) {
+    public Attributes getAttributes(String framePath) {
         Engine.LOGGER.warn("USING EXPERIMENTAL Yaml ADAPTER");
         try (InputStream inputStream = YamlFrameAttributesLoader.class.getClassLoader().getResourceAsStream(framePath)) {
             if (inputStream == null) {

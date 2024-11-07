@@ -2,6 +2,7 @@ package org.foxesworld.engine.gui.adapters;
 
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.adapters.json.JsonFrameAttributesLoader;
+import org.foxesworld.engine.gui.adapters.json5.Json5FrameAttributesLoader;
 import org.foxesworld.engine.gui.adapters.xml.XmlFrameAttributesLoader;
 import org.foxesworld.engine.gui.adapters.yaml.YamlFrameAttributesLoader;
 
@@ -23,8 +24,9 @@ public class FrameLoaderAdapters {
 
     private void registerDefaultAdapters() {
         defaultAdapters.put("json", new JsonFrameAttributesLoader());
-        defaultAdapters.put("yaml", new YamlFrameAttributesLoader());
-        defaultAdapters.put("xml", new XmlFrameAttributesLoader());
+        defaultAdapters.put("json5", new Json5FrameAttributesLoader());
+        //defaultAdapters.put("yaml", new YamlFrameAttributesLoader());
+        //defaultAdapters.put("xml", new XmlFrameAttributesLoader());
     }
 
     private void registerEngineConfiguredAdapters() {

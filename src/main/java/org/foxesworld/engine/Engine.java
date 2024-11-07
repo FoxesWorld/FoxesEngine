@@ -136,13 +136,15 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
 
     public void showDialog(String messageKey, String errorTitle, int warningMessage, boolean terminate) {
-        String errorMessage = this.getLANG().getString(messageKey);
-        this.getSOUND().playSound("other", messageKey);
-        UIManager.put("OptionPane.messageFont", this.getFONTUTILS().getFont("mcfont", 12));
-        JOptionPane.showMessageDialog(this.getFrame(), errorMessage, errorTitle, warningMessage);
-        if(terminate) {
-            System.exit(0);
-        }
+        SwingUtilities.invokeLater(() -> {
+            String errorMessage = this.getLANG().getString(messageKey);
+            this.getSOUND().playSound("other", messageKey);
+            UIManager.put("OptionPane.messageFont", this.getFONTUTILS().getFont("mcfont", 12.0F));
+            JOptionPane.showMessageDialog(this.getFrame().getRootPane(), errorMessage, errorTitle, warningMessage);
+            if (terminate) {
+                System.exit(0);
+            }
+        });
     }
 
 

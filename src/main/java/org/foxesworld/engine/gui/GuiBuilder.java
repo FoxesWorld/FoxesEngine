@@ -12,12 +12,12 @@ import org.foxesworld.notification.Notification;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class GuiBuilder {
-    private final  FrameLoaderAdapters frameLoaderAdapters;
+    private final FrameLoaderAdapters frameLoaderAdapters;
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
     private final Engine engine;
@@ -47,18 +47,21 @@ public class GuiBuilder {
     private Attributes loadFrameAttributes(String framePath) {
         String fileType = getFileType(framePath);
         FrameAttributesLoader loader = this.frameLoaderAdapters.getLoader(fileType);
-        return loader.load(framePath);
+        return loader.getAttributes(framePath);
     }
 
     private String getFileType(String framePath) {
         if (framePath.endsWith(".json")) {
             return "json";
-        } else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
-            return "yaml";
-        } else if(framePath.endsWith(".xml")) {
-            return  "xml";
+        } else if(framePath.endsWith(".json5")) {
+            return "json5";
         }
-        return "unknown";
+        else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
+            return "yaml";
+        } else if (framePath.endsWith(".xml")) {
+            return "xml";
+        }
+        return "json";
     }
 
     public List<Component> getAllChildComponents(String parentPanel) {
@@ -88,7 +91,7 @@ public class GuiBuilder {
         return panel;
     }
 
-    void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
+    private void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
         for (ComponentAttributes componentAttributes : childComponents) {
             if (componentAttributes.getComponentType() != null) {
                 addComponentToParent(componentAttributes, parentPanel);

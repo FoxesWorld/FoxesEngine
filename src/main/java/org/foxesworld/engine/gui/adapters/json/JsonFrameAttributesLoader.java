@@ -14,7 +14,7 @@ public class JsonFrameAttributesLoader implements FrameAttributesLoader {
     private final Gson gson = new Gson();
 
     @Override
-    public Attributes load(String framePath) {
+    public Attributes getAttributes(String framePath) {
         try (InputStream inputStream = JsonFrameAttributesLoader.class.getClassLoader().getResourceAsStream(framePath)) {
             if (inputStream == null) {
                 throw new FileNotFoundException("Resource not found: " + framePath);

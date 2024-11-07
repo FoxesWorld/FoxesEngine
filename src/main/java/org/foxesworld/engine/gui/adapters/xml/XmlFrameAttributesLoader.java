@@ -25,7 +25,7 @@ public class XmlFrameAttributesLoader implements FrameAttributesLoader {
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
     @Override
-    public Attributes load(String framePath) {
+    public Attributes getAttributes(String framePath) {
         Engine.LOGGER.warn("USING EXPERIMENTAL Xml ADAPTER");
         try (InputStream inputStream = XmlFrameAttributesLoader.class.getClassLoader().getResourceAsStream(framePath)) {
             if (inputStream == null) {
