@@ -9,30 +9,30 @@ import org.foxesworld.engine.utils.Download.DownloadUtils;
 import javax.swing.*;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class FileLoader {
 
     private final AtomicBoolean isCancelled = new AtomicBoolean(false);
     private final Engine engine;
     private final LoadingManager loadingManager;
     private final Set<String> filesToKeep = new HashSet<>();
-    private final String homeDir, client, version;
+    private final String homeDir;
+    private final String client;
+    private final String version;
     private final DownloadUtils downloadUtils;
     private final ExecutorService executorService;
     private final AtomicInteger filesDownloaded = new AtomicInteger(0);
+    private final FileFetcher fileFetcher;
+    private final FileValidator fileValidator;
     private FileLoaderListener fileLoaderListener;
     private List<FileAttributes> fileAttributes = new ArrayList<>();
     private FileAttributes currentFile;
     private long totalSize = -1;
-
-    private final FileFetcher fileFetcher;
-    private final FileValidator fileValidator;
     private String fileExtension;
 
     public FileLoader(ActionHandler actionHandler) {
@@ -49,29 +49,17 @@ public class FileLoader {
 
     public void getFilesToDownload(boolean forceUpdate) {
         if (!isClientDataValid(this.client, this.version)) {
-            Engine.getLOGGER().warn("Invalid client data: client={}, version={}", this.client, this.version);
+            Engine.LOGGER.warn("Invalid client data: client={}, version={}", this.client, this.version);
             return;
         }
 
-        this.loadingManager.toggleLoader();
-        this.loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
+        toggleLoader(true);
+        setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
 
         fileFetcher.fetchDownloadList(client, version, getPlatformNumber())
-                .thenAcceptAsync(fileAttributes -> {
-                    // Processing files
-                    processFileAttributes(fileAttributes, forceUpdate);
-                }, executorService)
-                .thenRun(() -> {
-                    SwingUtilities.invokeLater(() -> {
-                        // Files Processed
-                        this.fileLoaderListener.filesProcessed();
-                    });
-                })
-                .exceptionally(e -> {
-                    Engine.getLOGGER().error("Error retrieving file list: {}", e.getMessage(), e);
-                    SwingUtilities.invokeLater(() -> this.loadingManager.setLoadingText(e.getMessage(), "error.file"));
-                    return null;
-                });
+                .thenAcceptAsync(fileAttributes -> processFileAttributes(fileAttributes, forceUpdate), executorService)
+                .thenRun(this::onFilesProcessed)
+                .exceptionally(this::handleFileListRetrievalError);
     }
 
     private boolean isClientDataValid(String client, String version) {
@@ -79,59 +67,60 @@ public class FileLoader {
     }
 
     private void processFileAttributes(FileAttributes[] fileAttributes, boolean forceUpdate) {
-        for (FileAttributes file : fileAttributes) {
-            this.fileLoaderListener.onFileAdd(file);
-        }
+        Arrays.stream(fileAttributes).forEach(fileLoaderListener::onFileAdd);
 
-        Engine.getLOGGER().info("Keeping " + this.filesToKeep.size() + " files");
-        this.loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
+        Engine.LOGGER.info("Keeping {} files", filesToKeep.size());
+        setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
 
-        if (forceUpdate) {
-            this.fileAttributes = Arrays.asList(fileAttributes);
-            Engine.getLOGGER().info("Force updating " + fileAttributes.length + " files");
-        } else {
-            this.fileAttributes = Arrays.stream(fileAttributes)
-                    .filter(file -> !filesToKeep.contains(file.getFilename()))
-                    .filter(this::shouldDownloadFile)
-                    .collect(Collectors.toList());
-        }
+        this.fileAttributes = forceUpdate ?
+                Arrays.asList(fileAttributes) :
+                filterFileAttributes(fileAttributes);
 
-        this.fileLoaderListener.onFilesRead();
+        fileLoaderListener.onFilesRead();
     }
 
-    private boolean shouldDownloadFile(FileAttributes fileSection) {
-        String localPath = fileSection.getFilename().replace(fileSection.getReplaceMask(), "");
+    private List<FileAttributes> filterFileAttributes(FileAttributes[] fileAttributes) {
+        return Arrays.stream(fileAttributes)
+                .filter(file -> !filesToKeep.contains(file.getFilename()))
+                .filter(this::shouldDownloadFile)
+                .collect(Collectors.toList());
+    }
+
+    public boolean shouldDownloadFile(FileAttributes fileAttributes) {
+        String localPath = fileAttributes.getFilename().replace(fileAttributes.getReplaceMask(), "");
         File localFile = new File(homeDir, localPath);
-        return fileValidator.isInvalidFile(localFile, fileSection.getHash(), fileSection.getSize());
+        return fileValidator.isInvalidFile(localFile, fileAttributes.getHash(), fileAttributes.getSize());
     }
 
     public void downloadFiles() {
         int totalFiles = fileAttributes.size();
         if (totalFiles == 0) {
             fileLoaderListener.onFilesLoaded();
-        } else {
-            fileLoaderListener.onDownloadStart();
+            return;
         }
 
+        fileLoaderListener.onDownloadStart();
         totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
 
-        fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> {
-            if (isCancelled.get()) {
-                return; // Stop execution if cancellation was called
-            }
-
-            this.currentFile = file;
-            fileExtension = getFileExtension(file.getFilename());
-            fileLoaderListener.onNewFileFound(this);
-
-
-            filesDownloaded.incrementAndGet();
-            if (filesDownloaded.get() == totalFiles) {
-                fileLoaderListener.onFilesLoaded();
-            }
-        }, executorService));
+        fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> downloadFile(file, totalFiles), executorService));
     }
-    public int getPlatformNumber() {
+
+    private void downloadFile(FileAttributes file, int totalFiles) {
+        if (isCancelled.get()) {
+            return; // Stop execution if cancellation was called
+        }
+
+        this.currentFile = file;
+        fileExtension = getFileExtension(file.getFilename());
+        fileLoaderListener.onNewFileFound(this);
+
+        filesDownloaded.incrementAndGet();
+        if (filesDownloaded.get() == totalFiles) {
+            fileLoaderListener.onFilesLoaded();
+        }
+    }
+
+    private int getPlatformNumber() {
         String osName = System.getProperty("os.name").toLowerCase();
         if (osName.contains("win")) {
             return 1;
@@ -146,38 +135,20 @@ public class FileLoader {
         }
     }
 
-    private String getFileExtension(String fileName) {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
-            return "file";
+    public String getFileExtension(String fileName) {
+        if (fileName != null && !fileName.isEmpty()) {
+            int lastSlashIndex = fileName.lastIndexOf('/');
+            String name = (lastSlashIndex == -1) ? fileName : fileName.substring(lastSlashIndex + 1);
+            int dotIndex = name.lastIndexOf('.');
+            return (dotIndex != -1 && dotIndex != name.length() - 1)
+                    ? name.substring(dotIndex + 1).toLowerCase()
+                    : "file";
         } else {
-            return fileName.substring(dotIndex + 1).toLowerCase();
+            return "file";
         }
     }
 
-    public String getFileType() {
-        return fileExtension;
-    }
 
-    public void setLoaderListener(FileLoaderListener fileLoaderListener) {
-        this.fileLoaderListener = fileLoaderListener;
-    }
-
-    public DownloadUtils getDownloadUtils() {
-        return downloadUtils;
-    }
-
-    public Set<String> getFilesToKeep() {
-        return filesToKeep;
-    }
-
-    public void addFileToKeep(String fileToKeep) {
-        this.filesToKeep.add(fileToKeep);
-    }
-
-    public void addFileToDownload(FileAttributes fileAttributes) {
-        this.fileAttributes.add(fileAttributes);
-    }
 
     public void cancel() {
         isCancelled.set(true);
@@ -188,12 +159,10 @@ public class FileLoader {
     public long getTotalSize() {
         if (totalSize == -1) {
             totalSize = fileAttributes.stream()
-                    .mapToLong(fileSection -> {
-                        String localPath = fileSection.getFilename().replace(fileSection.getReplaceMask(), "");
+                    .mapToLong(file -> {
+                        String localPath = file.getFilename().replace(file.getReplaceMask(), "");
                         File localFile = new File(homeDir, localPath);
-                        return (localFile.exists() && localFile.length() == fileSection.getSize())
-                                ? 0
-                                : fileSection.getSize();
+                        return (localFile.exists() && localFile.length() == file.getSize()) ? 0 : file.getSize();
                     })
                     .sum();
         }
@@ -216,15 +185,53 @@ public class FileLoader {
         return version;
     }
 
-    public FileFetcher getFileFetcher() {
-        return fileFetcher;
+    public String getFileType() {
+        return fileExtension;
+    }
+
+    public DownloadUtils getDownloadUtils() {
+        return downloadUtils;
+    }
+
+    public Set<String> getFilesToKeep() {
+        return filesToKeep;
     }
 
     public FileValidator getFileValidator() {
         return fileValidator;
     }
 
-    public String getFileExtension() {
-        return fileExtension;
+    public void addFileToKeep(String fileToKeep) {
+        this.filesToKeep.add(fileToKeep);
+    }
+
+    public void addFileToDownload(FileAttributes fileAttributes) {
+        this.fileAttributes.add(fileAttributes);
+    }
+
+    public void setLoaderListener(FileLoaderListener fileLoaderListener) {
+        this.fileLoaderListener = fileLoaderListener;
+    }
+
+    private void toggleLoader(boolean state) {
+        if (state) {
+            loadingManager.toggleLoader();
+        } else {
+            loadingManager.toggleLoader();
+        }
+    }
+
+    private void setLoadingText(String description, String title) {
+        loadingManager.setLoadingText(description, title);
+    }
+
+    private Void handleFileListRetrievalError(Throwable e) {
+        Engine.LOGGER.error("Error retrieving file list: {}", e.getMessage(), e);
+        SwingUtilities.invokeLater(() -> setLoadingText(e.getMessage(), "error.file"));
+        return null;
+    }
+
+    private void onFilesProcessed() {
+        SwingUtilities.invokeLater(fileLoaderListener::filesProcessed);
     }
 }

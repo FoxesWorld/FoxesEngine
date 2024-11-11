@@ -3,12 +3,15 @@ package org.foxesworld.engine.gui.components.utils.tooltip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
+import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 public class CustomTooltip extends JWindow {
-    private final List<CustomTooltip> activeTooltips = new ArrayList<>();
+    private static final List<WeakReference<CustomTooltip>> activeTooltips = new ArrayList<>();
     private final JLabel label;
+    private Timer tooltipTimer;
 
     public CustomTooltip(Color backgroundColor, Color textColor, int borderRadius, Font font) {
         setLayout(new BorderLayout());
@@ -18,6 +21,7 @@ public class CustomTooltip extends JWindow {
         panel.setBackground(backgroundColor);
         panel.setLayout(new BorderLayout());
         panel.setOpaque(false);
+
         label = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -37,34 +41,60 @@ public class CustomTooltip extends JWindow {
         setFocusableWindowState(false);
     }
 
-    public void attachToComponent(JComponent component, String tooltipText) {
-        if(component.isEnabled()) {
+    public void attachToComponent(JComponent component, String tooltipText, int autoHideDelay) {
+        if (component.isEnabled()) {
             label.setText(tooltipText);
-            setSize(tooltipText.length() * 10, 50);
-            activeTooltips.add(this);
+            setSize(Math.max(150, tooltipText.length() * 10), 50); // Гарантируем минимальный размер
+            activeTooltips.add(new WeakReference<>(this));
 
             component.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y + 20);
-                    setVisible(true);
+                    SwingUtilities.invokeLater(() -> {
+                        setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y + 20);
+                        setVisible(true);
+                        startAutoHideTimer(autoHideDelay);  // Используем переданную задержку
+                    });
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
+                    cancelAutoHideTimer();
                     setVisible(false);
                     dispose();
-                    if (!isVisible()) {
-                        activeTooltips.remove(CustomTooltip.this);
-                    }
                 }
             });
         }
     }
+
+
+    private void startAutoHideTimer(int delay) {
+        cancelAutoHideTimer();
+        tooltipTimer = new Timer();
+        tooltipTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                setVisible(false);
+                dispose();
+                activeTooltips.removeIf(ref -> ref.get() == CustomTooltip.this);
+            }
+        }, delay);
+    }
+
+    private void cancelAutoHideTimer() {
+        if (tooltipTimer != null) {
+            tooltipTimer.cancel();
+            tooltipTimer = null;
+        }
+    }
+
     public void clearAllTooltips() {
-        for (CustomTooltip tooltip : new ArrayList<>(activeTooltips)) {
-            tooltip.setVisible(false);
-            tooltip.dispose();
+        for (WeakReference<CustomTooltip> ref : new ArrayList<>(activeTooltips)) {
+            CustomTooltip tooltip = ref.get();
+            if (tooltip != null) {
+                tooltip.setVisible(false);
+                tooltip.dispose();
+            }
         }
         activeTooltips.clear();
     }

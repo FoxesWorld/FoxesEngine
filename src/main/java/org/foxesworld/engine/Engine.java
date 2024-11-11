@@ -34,6 +34,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -43,6 +45,8 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
     private final FileProperties fileProperties;
+    private final OperatingSystemMXBean osBean;
+
     public static String currentOS = "";
     protected LoadingManager loadingManager;
     private final List<String> configFiles;
@@ -69,6 +73,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
     public Engine(List<String> configFiles) {
         currentOS = OS.determineCurrentOS();
+        osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
         this.configFiles = configFiles;
         InputStreamReader reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json"), StandardCharsets.UTF_8);
@@ -248,4 +253,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         return this.engineInfo;
     }
 
+    public OperatingSystemMXBean getOsBean() {
+        return osBean;
+    }
 }

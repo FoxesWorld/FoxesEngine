@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.ComponentValue;
 import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.button.ButtonStyle;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
@@ -48,6 +49,7 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 public class ComponentFactory extends JComponent {
 
     public Engine engine;
+    private ComponentValue componentValue;
     private final LanguageProvider LANG;
     private final IconUtils iconUtils;
     private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
@@ -102,13 +104,13 @@ public class ComponentFactory extends JComponent {
             if (this.componentAttribute.getTooltipStyle() != null) {
                 tooltipStyle = this.componentAttribute.getTooltipStyle();
             }
-                TooltipAttributes attributes = loadTooltipAttributes(tooltipStyle);
-                if (attributes != null) {
-                    Color bgColor = hexToColor(attributes.getBgColor());
-                    Color textColor = hexToColor(attributes.getTextColor());
-                    Font font = this.engine.getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize());
-                    customTooltip = new CustomTooltip(bgColor, textColor, attributes.getBorderRadius(), font);
-                }
+            TooltipAttributes attributes = loadTooltipAttributes(tooltipStyle);
+            if (attributes != null) {
+                Color bgColor = hexToColor(attributes.getBgColor());
+                Color textColor = hexToColor(attributes.getTextColor());
+                Font font = this.engine.getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize());
+                customTooltip = new CustomTooltip(bgColor, textColor, attributes.getBorderRadius(), font);
+            }
         }
 
         switch (componentAttributes.getComponentType()) {
@@ -285,7 +287,8 @@ public class ComponentFactory extends JComponent {
         component.setName(componentAttributes.getComponentId());
         component.setOpaque(style.isOpaque());
         if(componentAttributes.getToolTip() != null) {
-            customTooltip.attachToComponent(component, this.engine.getLANG().getString(componentAttributes.getToolTip()));
+            int delay = (componentAttributes.getDelay() != 0) ? componentAttributes.getDelay() : 2000;
+            customTooltip.attachToComponent(component, this.engine.getLANG().getString(componentAttributes.getToolTip()), delay);
         }
         component.setBounds(bounds);
 
@@ -359,5 +362,9 @@ public class ComponentFactory extends JComponent {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public ComponentValue getComponentValue() {
+        return componentValue;
     }
 }

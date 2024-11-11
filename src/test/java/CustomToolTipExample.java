@@ -16,11 +16,11 @@ class CustomToolTipExample {
 
         // Создаем кастомные тултипы с параметрами стилей
         CustomTooltip customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
-        customTooltip.attachToComponent(button, "This is a button tooltip");
+        customTooltip.attachToComponent(button, "This is a button tooltip", 2000);
 
-        customTooltip.attachToComponent(textField, "This is a text field tooltip");
+        customTooltip.attachToComponent(textField, "This is a text field tooltip", 2000);
 
-        customTooltip.attachToComponent(label, "This is a label tooltip");
+        customTooltip.attachToComponent(label, "This is a label tooltip", 2000);
 
         frame.add(button);
         frame.add(textField);

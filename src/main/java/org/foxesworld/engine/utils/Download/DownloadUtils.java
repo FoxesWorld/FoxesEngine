@@ -1,6 +1,7 @@
 package org.foxesworld.engine.utils.Download;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.components.button.Button;
 
 import javax.swing.*;
 import java.io.*;
@@ -12,10 +13,12 @@ import java.util.LinkedList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+@SuppressWarnings("unused")
 public class DownloadUtils {
     private final Engine engine;
     private JLabel progressLabel;
     private JProgressBar progressBar;
+    private Button cancelButton;
     private int percent;
     private long downloaded = 0;
     public DownloadUtils(Engine engine) {
@@ -25,6 +28,7 @@ public class DownloadUtils {
     @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
     public void downloader(String downloadFile, String savePath, long totalSize) {
         this.progressBar.add(this.progressLabel);
+        this.progressBar.add(cancelButton);
 
         File parentDir = new File(savePath).getParentFile();
         if (!parentDir.isDirectory()) {
@@ -111,13 +115,15 @@ public class DownloadUtils {
         fileZip.delete();
     }
 
-    @SuppressWarnings("unused")
     public void setProgressLabel(JLabel progressLabel) {
         this.progressLabel = progressLabel;
     }
 
-    @SuppressWarnings("unused")
     public void setProgressBar(JProgressBar progressBar) {
         this.progressBar = progressBar;
+    }
+
+    public void setCancelButton(Button cancelButton) {
+        this.cancelButton = cancelButton;
     }
 }

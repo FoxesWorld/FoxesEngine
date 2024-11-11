@@ -56,21 +56,23 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
 
         int shiftY = entered ? hoverShiftY : 0;
 
-        if (getText() != null && !getText().isEmpty()) {
-            FontMetrics fm = g.getFontMetrics();
-            int textX = (w - fm.stringWidth(getText())) / 2;
-            int textY = (h + fm.getAscent()) / 2 + shiftY;
-            if (isEnabled()) {
-                g.setColor(entered ? this.hoverColor : getForeground());
+        if(isEnabled()) {
+            if (getText() != null && !getText().isEmpty()) {
+                FontMetrics fm = g.getFontMetrics();
+                int textX = (w - fm.stringWidth(getText())) / 2;
+                int textY = (h + fm.getAscent()) / 2 + shiftY;
+                if (isEnabled()) {
+                    g.setColor(entered ? this.hoverColor : getForeground());
+                }
+                g.drawString(getText(), textX, textY);
             }
-            g.drawString(getText(), textX, textY);
-        }
 
-        if (getIcon() != null) {
-            Icon icon = getIcon();
-            int iconX = (w - icon.getIconWidth()) / 2;
-            int iconY = (h - icon.getIconHeight()) / 2 + shiftY;
-            icon.paintIcon(this, g, iconX, iconY);
+            if (getIcon() != null) {
+                Icon icon = getIcon();
+                int iconX = (w - icon.getIconWidth()) / 2;
+                int iconY = (h - icon.getIconHeight()) / 2 + shiftY;
+                icon.paintIcon(this, g, iconX, iconY);
+            }
         }
     }
 
