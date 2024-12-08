@@ -1,7 +1,6 @@
 package org.foxesworld.engine.fileLoader.fileGuard;
 
 import org.apache.logging.log4j.Logger;
-import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.game.GameLauncher;
 
 import java.io.File;
@@ -35,13 +34,20 @@ public class FileGuard {
         totalFiles.set(countTotalFiles());
         resetCounters();
 
+        logger.info("Ignoring the following directories:");
+        ignoreList.forEach(dir -> logger.info("  - {}", dir));
+
         for (String dir : checkList) {
             logger.debug("Checking Directory: {}", dir);
-            fileGuardListener.onDirCheck(dir);
+            if (fileGuardListener != null) {
+                fileGuardListener.onDirCheck(dir);
+            }
             scanAndDeleteFilesRecursively(new File(dir), filesToKeep);
         }
 
-        fileGuardListener.onFilesChecked(filesDeleted.get());
+        if (fileGuardListener != null) {
+            fileGuardListener.onFilesChecked(filesDeleted.get());
+        }
     }
 
     private void resetCounters() {
@@ -104,7 +110,9 @@ public class FileGuard {
     }
 
     private void checkAndDeleteFile(File file, Set<String> filesToKeep) {
-        fileGuardListener.onFileCheck(file);
+        if (fileGuardListener != null) {
+            fileGuardListener.onFileCheck(file);
+        }
         String checkPath = getRelativePath(file);
         if (!filesToKeep.contains(checkPath) && !isUserConfig(file) && !isInIgnoreList(file)) {
             if (file.delete()) {
@@ -132,20 +140,21 @@ public class FileGuard {
 
     private void buildBasicIgnoreList() {
         Arrays.stream(basicIgnoreDirs).forEach(dir -> {
-            String ignoreDirPath = gameLauncher.getPathBuilders().buildClientDir()
+            String ignoreDirPath = (gameLauncher.getPathBuilders().buildClientDir()
                     .replace(gameLauncher.getPathBuilders().buildGameDir(), "")
-                    + File.separator + dir;
+                    + "/" + dir).replace("\\", "/");
             ignoreList.add(ignoreDirPath);
         });
     }
+
 
     @SuppressWarnings("unused")
     public void addIgnoreDirs(String dirs) {
         if (dirs != null) {
             Arrays.stream(dirs.split(","))
-                    .map(dir -> gameLauncher.getPathBuilders().buildClientDir()
+                    .map(dir -> (gameLauncher.getPathBuilders().buildClientDir()
                             .replace(gameLauncher.getPathBuilders().buildGameDir(), "")
-                            + File.separator + dir)
+                            + "/" + dir).replace("\\", "/"))
                     .forEach(ignoreList::add);
         }
     }

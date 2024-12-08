@@ -8,14 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("unused")
+
 public class FileFetcher {
 
     private final HTTPrequest postRequest;
-    private final Engine engine;
 
     public FileFetcher(Engine engine) {
-        this.engine = engine;
         this.postRequest = engine.getPOSTrequest();
     }
 

@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -121,6 +123,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     }
 
     public void restartApplication(int xmx, String jvmDir) {
+        System.gc();
         Runtime.getRuntime().addShutdownHook(new Thread(this.guiBuilder.getComponentFactory().getCustomTooltip()::clearAllTooltips));
         String path = Config.getFullPath();
         List<String> params = new LinkedList<>();
@@ -134,11 +137,37 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         builder.directory(new File(path + File.separator));
         try {
             builder.start();
-            System.exit(-1);
+            terminateAllThreads();
+            System.exit(0);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Restart Error occurred \n PLease try again" + e, "Restart Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    private void terminateAllThreads() {
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        long[] threadIds = threadMXBean.getAllThreadIds();
+        ThreadInfo[] threadInfos = threadMXBean.getThreadInfo(threadIds);
+
+        for (ThreadInfo threadInfo : threadInfos) {
+            if (threadInfo != null && threadInfo.getThreadId() != Thread.currentThread().getId()) {
+                Thread thread = findThread(threadInfo.getThreadId());
+                if (thread != null && thread != Thread.currentThread()) {
+                    thread.interrupt();
+                }
+            }
+        }
+    }
+
+    private Thread findThread(long threadId) {
+        for (Thread thread : Thread.getAllStackTraces().keySet()) {
+            if (thread.getId() == threadId) {
+                return thread;
+            }
+        }
+        return null;
+    }
+
 
     public void showDialog(String messageKey, String errorTitle, int warningMessage, boolean terminate) {
         SwingUtilities.invokeLater(() -> {

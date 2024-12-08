@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class FileLoader {
 
     private final AtomicBoolean isCancelled = new AtomicBoolean(false);
-    private final Engine engine;
+    private boolean forceUpdate = false;
     private final LoadingManager loadingManager;
     private final Set<String> filesToKeep = new HashSet<>();
     private final String homeDir;
@@ -36,7 +36,7 @@ public class FileLoader {
     private String fileExtension;
 
     public FileLoader(ActionHandler actionHandler) {
-        this.engine = actionHandler.getEngine();
+        Engine engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
         this.homeDir = Config.getFullPath();
@@ -48,13 +48,14 @@ public class FileLoader {
     }
 
     public void getFilesToDownload(boolean forceUpdate) {
+        this.forceUpdate = forceUpdate;
         if (!isClientDataValid(this.client, this.version)) {
             Engine.LOGGER.warn("Invalid client data: client={}, version={}", this.client, this.version);
             return;
         }
 
-        toggleLoader(true);
-        setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
+        this.loadingManager.toggleLoader();
+        loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
 
         fileFetcher.fetchDownloadList(client, version, getPlatformNumber())
                 .thenAcceptAsync(fileAttributes -> processFileAttributes(fileAttributes, forceUpdate), executorService)
@@ -70,7 +71,7 @@ public class FileLoader {
         Arrays.stream(fileAttributes).forEach(fileLoaderListener::onFileAdd);
 
         Engine.LOGGER.info("Keeping {} files", filesToKeep.size());
-        setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
+        loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
 
         this.fileAttributes = forceUpdate ?
                 Arrays.asList(fileAttributes) :
@@ -213,21 +214,10 @@ public class FileLoader {
         this.fileLoaderListener = fileLoaderListener;
     }
 
-    private void toggleLoader(boolean state) {
-        if (state) {
-            loadingManager.toggleLoader();
-        } else {
-            loadingManager.toggleLoader();
-        }
-    }
-
-    private void setLoadingText(String description, String title) {
-        loadingManager.setLoadingText(description, title);
-    }
-
     private Void handleFileListRetrievalError(Throwable e) {
         Engine.LOGGER.error("Error retrieving file list: {}", e.getMessage(), e);
-        SwingUtilities.invokeLater(() -> setLoadingText(e.getMessage(), "error.file"));
+        SwingUtilities.invokeLater(() -> loadingManager.setLoadingText(e.getMessage(), "error.file"));
+        this.getFilesToDownload(this.forceUpdate);
         return null;
     }
 

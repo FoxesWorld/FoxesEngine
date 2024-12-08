@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 @SuppressWarnings("unused")
 public class HTTPrequest {
 
-    private static final int MAX_RETRIES = 3;  // Maximum retry attempts
+    private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 1000;  // Delay between retries in milliseconds
 
     private final String requestMethod;

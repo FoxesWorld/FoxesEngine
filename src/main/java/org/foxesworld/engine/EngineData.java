@@ -2,7 +2,6 @@ package org.foxesworld.engine;
 
 import com.google.gson.Gson;
 import org.foxesworld.engine.utils.HTTP.HTTPconf;
-import org.foxesworld.engine.utils.HTTP.RequestProperty;
 import org.foxesworld.engine.gui.loadingManager.LoadManagerAttributes;
 
 import java.io.InputStream;
@@ -11,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class EngineData {
     private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
     private String[] styles,loadAdapters;
@@ -44,14 +44,9 @@ public class EngineData {
         return downloadManager;
     }
     public LoadManagerAttributes[] getLoadManager() { return  loadManager;};
-    //public List<RequestProperty> getRequestProperties() {
-    //    return requestProperties;
-    //}
-
     public HTTPconf getHttPconf() {
         return httpConf;
     }
-
     public String[] getTweakClasses() {
         return tweakClasses;
     }
@@ -87,8 +82,7 @@ public class EngineData {
     }
 
     public static class ReplaceMask {
-        private String mask;
-        private String replace;
+        private String mask, suffix, prefix,replace;
 
         public String getMask() {
             return mask;
@@ -96,6 +90,14 @@ public class EngineData {
 
         public String getReplace() {
             return replace;
+        }
+
+        public String getSuffix() {
+            return suffix;
+        }
+
+        public String getPrefix() {
+            return prefix;
         }
     }
 

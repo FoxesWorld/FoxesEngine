@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 
-@SuppressWarnings("unused")
 public class FileValidator {
 
     public boolean isInvalidFile(File file, String expectedHash, long expectedSize) {
