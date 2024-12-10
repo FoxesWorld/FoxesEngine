@@ -12,7 +12,7 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class EngineData {
-    private String logLevel,bindUrl,launcherBrand,launcherVersion,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
+    private String logLevel,bindUrl,launcherBrand,launcherVersion,launcherBuild,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
     private String[] styles,loadAdapters;
     private DownloadManager downloadManager;
     private LoadManagerAttributes loadManager[];
@@ -28,6 +28,11 @@ public class EngineData {
     public String getLauncherVersion() {
         return launcherVersion;
     }
+
+    public String getLauncherBuild() {
+        return launcherBuild;
+    }
+
     public String getAppId() {
         return appId;
     }

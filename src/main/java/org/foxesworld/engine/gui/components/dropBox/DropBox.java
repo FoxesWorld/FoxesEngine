@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.dropBox;
 
+import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 
 import javax.swing.*;
@@ -15,6 +16,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     private Color color, hoverColor;
     private volatile boolean loaded = false;
     private final ComponentFactory componentFactory;
+    private final Engine engine;
     private DropBoxListener dropBoxListener;
     private String[] values;
     private final int initialY;
@@ -31,6 +33,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     public DropBox(ComponentFactory componentFactory, String[] values, int initialY) {
         this.componentFactory = componentFactory;
+        this.engine = componentFactory.engine;
         this.values = values;
         this.initialY = initialY;
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -39,6 +42,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     public DropBox(ComponentFactory componentFactory, int initialY) {
         this.componentFactory = componentFactory;
+        this.engine = componentFactory.engine;
         this.initialY = initialY;
         setupListeners();
     }
@@ -71,14 +75,19 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
         // Call listener once to notify about component creation
         if (!loaded) {
-            dropBoxListener.onScrollBoxCreated(this);
-            loaded = true;
+            this.engine.getExecutorServiceProvider().submitTask(() -> {
+                if (dropBoxListener != null) {
+                    dropBoxListener.onScrollBoxCreated(this);
+                }
+                loaded = true;
+            }, "dropBoxPaint");
         }
     }
 
+
     private void drawOpenedState(Graphics2D g, int width) {
         int height = openedTX.getHeight();
-        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(width, height, openedTX), 0, getHeight() - height, width, height, null);
+        g.drawImage(this.engine.getImageUtils().genButton(width, height, openedTX), 0, getHeight() - height, width, height, null);
         int rightHeight = height * (values.length + 1);
         int rightY = initialY + height - rightHeight;
 
@@ -97,7 +106,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         int height = rolloverTX.getHeight();
         updateComponentSizeAndLocation(initialY, height);
 
-        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(width, height, rolloverTX), 0, 0, width, height, null);
+        g.drawImage(this.engine.getImageUtils().genButton(width, height, rolloverTX), 0, 0, width, height, null);
         g.setColor(hoverColor);
         g.drawString(values[selected], 10, height - g.getFontMetrics().getHeight() / 2 - 5);
     }
@@ -106,7 +115,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         int height = defaultTX.getHeight();
         updateComponentSizeAndLocation(initialY, height);
 
-        g.drawImage(this.componentFactory.engine.getImageUtils().genButton(width, height, defaultTX), 0, 0, width, height, null);
+        g.drawImage(this.engine.getImageUtils().genButton(width, height, defaultTX), 0, 0, width, height, null);
         g.drawString(values[selected], 10, height - g.getFontMetrics().getHeight() / 2 - 5);
     }
 
@@ -128,7 +137,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         try {
             state = State.CLOSED;
             hover = selected;
-            componentFactory.engine.getFrame().repaint();
+            this.engine.getFrame().repaint();
             dropBoxListener.onScrollBoxClose(this);
             repaint();
         } finally {
@@ -152,10 +161,10 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
             if (state == State.OPENED) {
                 dropBoxListener.onScrollBoxOpen(this);
-                componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
+                this.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
             } else {
                 dropBoxListener.onScrollBoxClose(this);
-                componentFactory.engine.getSOUND().playSound("dropBox", "dropBoxClose");
+                this.engine.getSOUND().playSound("dropBox", "dropBoxClose");
             }
 
             state = (state == State.OPENED) ? State.CLOSED : State.OPENED;
@@ -168,7 +177,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     @Override
     public void mouseEntered(MouseEvent e) {
         if (state != State.OPENED) {
-            componentFactory.engine.getSOUND().playSound("button", "hover");
+            this.engine.getSOUND().playSound("button", "hover");
         }
         state = State.ROLLOVER;
         hover = -1;
@@ -200,15 +209,24 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         int newY = e.getY();
         int newHover = (state == State.OPENED) ? (newY / openedTX.getHeight()) : (newY / defaultTX.getHeight());
 
-        // Only update hover if it's changed and within bounds
-        if (newHover >= 0 && newHover < values.length && newHover != hover) {
-            hover = newHover;
-            if (state == State.OPENED) {
-                dropBoxListener.onServerHover(this, newHover);
+        // Ensure hover changes only if it is within bounds and not the same as the previous hover index
+        if (values.length > 1) {
+            // Multiple values, handle as usual
+            if (newHover >= 0 && newHover < values.length && newHover != hover) {
+                hover = newHover;
+                // Trigger hover event processing if state is OPENED
+                if (state == State.OPENED && dropBoxListener != null) {
+                    this.engine.getExecutorServiceProvider().submitTask(() -> dropBoxListener.onServerHover(this, newHover), "dropBoxHover");
+                }
+                repaint();
             }
+        } else {
+            hover = 0;
             repaint();
         }
     }
+
+
 
     public int getSelectedIndex() {
         return selected;

@@ -36,7 +36,7 @@ public abstract class User extends ComponentsAccessor {
         skinData.put("show", "head");
         skinData.put("login", login);
 
-        HTTPrequest httpRequest = new HTTPrequest(engine, "POST");
+        HTTPrequest httpRequest = engine.getPOSTrequest();
         httpRequest.sendAsync(skinData, response -> {
             if (response == null || response.toString().isEmpty()) {
                 Engine.getLOGGER().warn("Received empty or null response for user head request for login: {}", login);

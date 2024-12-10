@@ -25,40 +25,43 @@ public class SoundPlayer implements LineListener {
 
     public void playSound(String path, boolean loop, PlaybackStatusListener listener) {
         if (Boolean.parseBoolean(String.valueOf(this.engine.getConfig().getConfig().get("enableSound")))) {
-            float volume;
-            try {
-                InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
-                AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioInputStream);
-                clip.addLineListener(this);
+            engine.getExecutorServiceProvider().submitTask(() -> {
+                try {
+                    float volume;
+                    InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
+                    AudioInputStream audioInputStream = vorbisAudioFileReader.getAudioInputStream(inputStream);
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioInputStream);
+                    clip.addLineListener(this);
 
-                clipPaths.put(clip, path);
-                clipListeners.put(clip, listener);
+                    clipPaths.put(clip, path);
+                    clipListeners.put(clip, listener);
 
-                if (path.contains("mus")) {
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getConfig().get("volume"))) / 100.0f - 0.15f;
-                } else {
-                    volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getConfig().get("volume"))) / 100.0f;
+                    if (path.contains("mus")) {
+                        volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getConfig().get("volume"))) / 100.0f - 0.15f;
+                    } else {
+                        volume = Float.parseFloat(String.valueOf(this.engine.getConfig().getConfig().get("volume"))) / 100.0f;
+                    }
+                    setVolume(clip, volume);
+
+                    if (loop) {
+                        clip.loop(Clip.LOOP_CONTINUOUSLY);
+                    }
+
+                    clip.start();
+
+                    if (listener != null) {
+                        listener.onPlaybackStarted(path);
+                    }
+
+                    startPlaybackTimer(clip, path, listener);
+                } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+                    // Handle exception
                 }
-                setVolume(clip, volume);
-
-                if (loop) {
-                    clip.loop(Clip.LOOP_CONTINUOUSLY);
-                }
-
-                clip.start();
-
-                if (listener != null) {
-                    listener.onPlaybackStarted(path);
-                }
-
-                startPlaybackTimer(clip, path, listener);
-            } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
-                // e.printStackTrace();
-            }
+            }, "Play Sound Task");
         }
     }
+
 
     public void playSound(String path, boolean loop) {
         playSound(path, loop, null);

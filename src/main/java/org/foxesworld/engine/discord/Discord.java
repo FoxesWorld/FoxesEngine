@@ -7,6 +7,8 @@ import org.foxesworld.engine.Engine;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Discord implements DiscordListener {
@@ -15,10 +17,14 @@ public class Discord implements DiscordListener {
     private  String smallImageText, largeImageText;
     private final DiscordRPC lib;
     private final DiscordRichPresence presence;
-    private final ExecutorService rpcExecutorService = Executors.newSingleThreadExecutor();
+    private final  Engine engine;
     private final AtomicBoolean shutdownRequested = new AtomicBoolean(false);
 
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+
     public Discord(Engine engine, String iconKey) {
+        this.engine = engine;
         this.iconKey = iconKey;
         String applicationId = engine.getEngineData().getAppId();
         lib = DiscordRPC.INSTANCE;
@@ -30,7 +36,6 @@ public class Discord implements DiscordListener {
         lib.Discord_Initialize(applicationId, handlers, true, steamId);
         presence = new DiscordRichPresence();
         lib.Discord_UpdatePresence(presence);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
     @Override
     public void discordRpcStart(String state, String details, String detailsIcon) {
@@ -43,20 +48,15 @@ public class Discord implements DiscordListener {
         presence.smallImageText = this.smallImageText;
         lib.Discord_UpdatePresence(presence);
 
-        rpcExecutorService.submit(() -> {
-            while (!shutdownRequested.get() && !Thread.currentThread().isInterrupted()) {
+        // Запуск периодической задачи с задержкой
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            if (!shutdownRequested.get()) {
                 lib.Discord_RunCallbacks();
-                //try {Thread.sleep(500); } catch (InterruptedException e) {}
             }
-        });
+        }, 0, 500, TimeUnit.MILLISECONDS);
     }
 
-    private void shutdown() {
-        shutdownRequested.set(true);
-        lib.Discord_Shutdown();
-        rpcExecutorService.shutdown();
-        Thread.currentThread().interrupt();
-    }
+
     @Override
     public DiscordRPC getDiscordLib() {
         return lib;
@@ -68,5 +68,10 @@ public class Discord implements DiscordListener {
 
     public void setLargeImageText(String largeImageText) {
         this.largeImageText = largeImageText;
+    }
+
+    public void shutdown() {
+        shutdownRequested.set(true);
+        scheduledExecutorService.shutdown();
     }
 }

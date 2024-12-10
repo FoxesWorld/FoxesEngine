@@ -44,40 +44,40 @@ public class CustomTooltip extends JWindow {
     }
 
     public void attachToComponent(JComponent component, String tooltipText, int autoHideDelay) {
-        if (component.isEnabled()) {
-            label.setText(tooltipText);
-            setSize(Math.max(150, tooltipText.length() * 10), 50);
-            activeTooltips.add(new WeakReference<>(this));
+            if (component.isEnabled()) {
+                label.setText(tooltipText);
+                setSize(Math.max(150, tooltipText.length() * 10), 50);
+                activeTooltips.add(new WeakReference<>(this));
 
-            component.addMouseListener(new MouseAdapter() {
-                private Timer hoverDelayTimer;
+                component.addMouseListener(new MouseAdapter() {
+                    private Timer hoverDelayTimer;
 
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    hoverDelayTimer = new Timer();
-                    hoverDelayTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            SwingUtilities.invokeLater(() -> {
-                                Point location = component.getLocationOnScreen();
-                                setLocation(location.x, location.y + component.getHeight() + 5);
-                                setVisible(true);
-                                startAutoHideTimer(autoHideDelay);
-                            });
-                        }
-                    }, 500);
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    if (hoverDelayTimer != null) {
-                        hoverDelayTimer.cancel();
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        hoverDelayTimer = new Timer();
+                        hoverDelayTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                SwingUtilities.invokeLater(() -> {
+                                    Point location = component.getLocationOnScreen();
+                                    setLocation(location.x, location.y + component.getHeight() + 5);
+                                    setVisible(true);
+                                    startAutoHideTimer(autoHideDelay);
+                                });
+                            }
+                        }, 500);
                     }
-                    cancelAutoHideTimer();
-                    fadeOutTooltip();
-                }
-            });
-        }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        if (hoverDelayTimer != null) {
+                            hoverDelayTimer.cancel();
+                        }
+                        cancelAutoHideTimer();
+                        fadeOutTooltip();
+                    }
+                });
+            }
     }
 
     private void startAutoHideTimer(int delay) {

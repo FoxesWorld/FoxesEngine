@@ -17,14 +17,12 @@ import org.foxesworld.engine.gui.components.panel.PanelVisibility;
 import org.foxesworld.engine.gui.styles.StyleProvider;
 import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.news.News;
+import org.foxesworld.engine.service.ExecutorServiceProvider;
 import org.foxesworld.engine.sound.Sound;
+import org.foxesworld.engine.utils.*;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
-import org.foxesworld.engine.utils.FontUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
-import org.foxesworld.engine.utils.ImageUtils;
 import org.foxesworld.engine.gui.loadingManager.LoadingManager;
-import org.foxesworld.engine.utils.OS;
-import org.foxesworld.engine.utils.ServerInfo;
 import org.foxesworld.engine.gui.ActionHandler;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -43,12 +41,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
-public abstract class Engine extends JFrame implements ActionListener, GuiBuilderListener {
+public abstract class Engine implements ActionListener, GuiBuilderListener {
+    private final ExecutorServiceProvider executorServiceProvider;
     private final FileProperties fileProperties;
     private final OperatingSystemMXBean osBean;
-
     public static String currentOS = "";
     protected LoadingManager loadingManager;
     private final List<String> configFiles;
@@ -73,7 +72,8 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     private boolean init = false;
     private final EngineInfo engineInfo;
 
-    public Engine(List<String> configFiles) {
+    public Engine(int poolSize, List<String> configFiles) {
+        executorServiceProvider = new ExecutorServiceProvider(poolSize, "foxWorker-");
         currentOS = OS.determineCurrentOS();
         osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
@@ -137,6 +137,7 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
         builder.directory(new File(path + File.separator));
         try {
             builder.start();
+            shutdownExecutorService();
             terminateAllThreads();
             System.exit(0);
         } catch (IOException e) {
@@ -191,6 +192,21 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
 
         public String getEngineBrand() {
             return engineBrand;
+        }
+    }
+
+    public void shutdownExecutorService(){
+        executorServiceProvider.shutdown();
+        try {
+            if (!executorServiceProvider.getExecutorService().awaitTermination(60, TimeUnit.MILLISECONDS)) {
+                executorServiceProvider.getExecutorService().shutdownNow();
+                if (!executorServiceProvider.getExecutorService().awaitTermination(60, TimeUnit.MILLISECONDS)) {
+                    LOGGER.warn("Executor service did not terminate");
+                }
+            }
+        } catch (InterruptedException ie) {
+            executorServiceProvider.getExecutorService().shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -281,8 +297,11 @@ public abstract class Engine extends JFrame implements ActionListener, GuiBuilde
     public EngineInfo getEngineInfo(){
         return this.engineInfo;
     }
-
     public OperatingSystemMXBean getOsBean() {
         return osBean;
+    }
+
+    public ExecutorServiceProvider getExecutorServiceProvider() {
+        return executorServiceProvider;
     }
 }

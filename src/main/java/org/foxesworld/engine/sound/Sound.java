@@ -13,45 +13,49 @@ import java.util.*;
 
 public class Sound {
     private final SoundPlayer soundPlayer;
+    private final Engine engine;
     private final Map<String, Map<String, List<String>>> soundsMap = new HashMap<>();
     private final Random random = new Random();
 
     @SuppressWarnings("unused")
     public Sound(Engine engine, InputStream inputStream) {
+        this.engine = engine;
         Engine.getLOGGER().debug("FoxesSound init");
         this.soundPlayer = new SoundPlayer(engine);
         loadSounds(inputStream);
     }
 
     private void loadSounds(InputStream inputStream) {
-        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            JsonParser parser = new JsonParser();
-            JsonObject jsonObject = parser.parse(reader).getAsJsonObject();
+        engine.getExecutorServiceProvider().submitTask(() -> {
+            try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+                JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
 
-            Set<Map.Entry<String, JsonElement>> entries = jsonObject.entrySet();
-            for (Map.Entry<String, JsonElement> entry : entries) {
-                String category = entry.getKey();
-                JsonObject categoryObj = entry.getValue().getAsJsonObject();
-                Map<String, List<String>> subCategorySoundsMap = new HashMap<>();
+                Set<Map.Entry<String, JsonElement>> entries = jsonObject.entrySet();
+                for (Map.Entry<String, JsonElement> entry : entries) {
+                    String category = entry.getKey();
+                    JsonObject categoryObj = entry.getValue().getAsJsonObject();
+                    Map<String, List<String>> subCategorySoundsMap = new HashMap<>();
 
-                Set<Map.Entry<String, JsonElement>> subCategoryEntries = categoryObj.entrySet();
-                for (Map.Entry<String, JsonElement> subCategoryEntry : subCategoryEntries) {
-                    String subCategory = subCategoryEntry.getKey();
-                    JsonArray soundsArray = subCategoryEntry.getValue().getAsJsonObject().getAsJsonArray("sounds");
-                    List<String> subCategorySounds = new ArrayList<>();
+                    Set<Map.Entry<String, JsonElement>> subCategoryEntries = categoryObj.entrySet();
+                    for (Map.Entry<String, JsonElement> subCategoryEntry : subCategoryEntries) {
+                        String subCategory = subCategoryEntry.getKey();
+                        JsonArray soundsArray = subCategoryEntry.getValue().getAsJsonObject().getAsJsonArray("sounds");
+                        List<String> subCategorySounds = new ArrayList<>();
 
-                    for (JsonElement soundElement : soundsArray) {
-                        subCategorySounds.add(soundElement.getAsString());
+                        for (JsonElement soundElement : soundsArray) {
+                            subCategorySounds.add(soundElement.getAsString());
+                        }
+
+                        subCategorySoundsMap.put(subCategory, subCategorySounds);
                     }
 
-                    subCategorySoundsMap.put(subCategory, subCategorySounds);
+                    soundsMap.put(category, subCategorySoundsMap);
                 }
-
-                soundsMap.put(category, subCategorySoundsMap);
+                Engine.getLOGGER().info("Sounds loaded successfully");
+            } catch (IOException e) {
+                Engine.getLOGGER().error("Failed to load sounds", e);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }, "Load Sounds Task");
     }
 
     public List<String> getSounds(String category, String subCategory) {
@@ -92,6 +96,7 @@ public class Sound {
             this.soundPlayer.playSound(randomSound, loop);
         }
     }
+
     public SoundPlayer getSoundPlayer() {
         return soundPlayer;
     }

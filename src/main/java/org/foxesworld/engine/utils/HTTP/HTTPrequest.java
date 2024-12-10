@@ -22,18 +22,16 @@ public class HTTPrequest {
 
     private final String requestMethod;
     private final Engine engine;
-    private final ExecutorService executorService;
     private HttpURLConnection httpURLConnection;
 
     public HTTPrequest(Engine engine, String requestMethod) {
         this.engine = engine;
         this.requestMethod = requestMethod;
-        this.executorService = Executors.newCachedThreadPool();
         Engine.LOGGER.info("HTTP {} init", requestMethod);
     }
 
     public void sendAsync(Map<String, Object> parameters, OnSuccess onSuccess, OnFailure onFailure) {
-        executorService.submit(() -> {
+        engine.getExecutorServiceProvider().submitTask(() -> {
             int attempt = 0;
             while (attempt < MAX_RETRIES) {
                 try {
@@ -63,7 +61,7 @@ public class HTTPrequest {
                     }
                 }
             }
-        });
+        }, "HTTP Request Task");
     }
 
     private void configureConnection(HttpURLConnection connection) throws Exception {
@@ -97,7 +95,7 @@ public class HTTPrequest {
         return response.toString();
     }
 
-    private StringBuilder formParams(Map<String, Object> parameters) throws UnsupportedEncodingException {
+    private StringBuilder formParams(Map<String, Object> parameters) {
         StringBuilder postData = new StringBuilder();
         for (Map.Entry<String, Object> param : parameters.entrySet()) {
             if (postData.length() != 0) {
@@ -139,9 +137,5 @@ public class HTTPrequest {
 
     public HttpURLConnection getHttpURLConnection() {
         return httpURLConnection;
-    }
-
-    public void shutdown() {
-        executorService.shutdown();
     }
 }

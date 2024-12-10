@@ -42,7 +42,7 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
         backgroundPanel.setLayout(basePanel.getLayout());
         backgroundPanel.setBounds(basePanel.getX(), basePanel.getY(), basePanel.getWidth(), basePanel.getHeight());
         backgroundPanel.setName(basePanel.getName());
-        for(Component component: basePanel.getComponents()){
+        for (Component component : basePanel.getComponents()) {
             backgroundPanel.add(component);
         }
         return backgroundPanel;
@@ -84,12 +84,14 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
     }
 
     public void toggleLoader() {
-        if (isVisible()) {
-            animateLoadingWindow(false);
-        } else {
-            setSize(FRAME_WIDTH, FRAME_HEIGHT);
-            animateLoadingWindow(true);
-        }
+        this.engine.getExecutorServiceProvider().submitTask(() -> {
+            if (isVisible()) {
+                animateLoadingWindow(false);
+            } else {
+                setSize(FRAME_WIDTH, FRAME_HEIGHT);
+                animateLoadingWindow(true);
+            }
+        }, "loaderAnimation");
     }
 
     public void setLabelFont(String labelFont) {
@@ -111,6 +113,7 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
     public void setAnimating(boolean animating) {
         this.animating = animating;
     }
+
     protected int getANIMATION_DURATION() {
         return ANIMATION_DURATION;
     }
@@ -135,11 +138,11 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
         this.ANIMATION_SPEED = ANIMATION_SPEED;
     }
 
-    protected int getFrameWidth(){
+    protected int getFrameWidth() {
         return this.FRAME_WIDTH;
     }
 
-    protected int getFrameHeight(){
+    protected int getFrameHeight() {
         return this.FRAME_HEIGHT;
     }
 

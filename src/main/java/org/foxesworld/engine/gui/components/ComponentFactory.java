@@ -287,8 +287,10 @@ public class ComponentFactory extends JComponent {
         component.setName(componentAttributes.getComponentId());
         component.setOpaque(style.isOpaque());
         if(componentAttributes.getToolTip() != null) {
-            int delay = (componentAttributes.getDelay() != 0) ? componentAttributes.getDelay() : 2000;
-            customTooltip.attachToComponent(component, this.engine.getLANG().getString(componentAttributes.getToolTip()), delay);
+            if(component.getBounds() != null) {
+                int delay = (componentAttributes.getDelay() != 0) ? componentAttributes.getDelay() : 2000;
+                customTooltip.attachToComponent(component, this.engine.getLANG().getString(componentAttributes.getToolTip()), delay);
+            }
         }
         component.setBounds(bounds);
 
