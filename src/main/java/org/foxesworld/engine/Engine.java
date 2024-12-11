@@ -82,6 +82,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
         setEngineData(engineData.initEngineValues("engine.json"));
         fileProperties = new FileProperties(this);
         System.setProperty("log.dir", System.getProperty("user.dir"));
+        System.setProperty("log.level", engineData.getLogLevel());
         LOGGER = LogManager.getLogger(this.getClass());
         AnsiConsole.systemInstall();
 
@@ -91,13 +92,23 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
         LOGGER.info(appTitle + " started...");
 
         this.FONTUTILS = new FontUtils(this);
-        Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
+        setLogLevel(Level.valueOf(engineData.getLogLevel()));
         LOGGER.info("Engine version " + this.getEngineInfo().engineVersion + this.getEngineInfo().engineBrand);
         executorServiceProvider = new ExecutorServiceProvider(poolSize, "foxWorker-");
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
         this.imageUtils = new ImageUtils(this);
         FlatIntelliJLaf.setup();
+    }
+
+    /**
+     * Устанавливает уровень логирования для текущего логгера.
+     *
+     * @param level уровень логирования
+     */
+    public void setLogLevel(Level level) {
+        Configurator.setLevel(LOGGER.getName(), level);
+        LOGGER.info("Log level set to " + level);
     }
 
     public abstract void init();
