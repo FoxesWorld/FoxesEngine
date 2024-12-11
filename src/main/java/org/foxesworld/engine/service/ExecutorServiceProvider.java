@@ -88,7 +88,7 @@ public class ExecutorServiceProvider {
     public void submitTask(Runnable task, String taskName) {
         String taskId = executorProgress.generateTaskId();
         executorProgress.addTask(taskId, taskName);
-        Engine.LOGGER.info("Submitting task: {} with ID: {}", taskName, taskId);
+        Engine.LOGGER.debug("Submitting task: {} with ID: {}", taskName, taskId);
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
@@ -96,10 +96,10 @@ public class ExecutorServiceProvider {
                 try {
                     task.run();
                     executorProgress.updateTask(taskId, 100);
-                    Engine.LOGGER.info("Task completed: {} with ID: {}", taskName, taskId);
+                    Engine.LOGGER.debug("Task completed: {} with ID: {}", taskName, taskId);
                 } finally {
                     executorProgress.removeTask(taskId);
-                    Engine.LOGGER.info("Task removed: {} with ID: {}", taskName, taskId);
+                    Engine.LOGGER.debug("Task removed: {} with ID: {}", taskName, taskId);
                 }
                 return null;
             }
@@ -120,7 +120,7 @@ public class ExecutorServiceProvider {
     public <T> void submitDynamicTaskWithCallback(Callable<T> task, String taskName, Consumer<T> callback) {
         String taskId = executorProgress.generateTaskId();
         executorProgress.addTask(taskId, taskName);
-        Engine.LOGGER.info("Submitting dynamic task: {} with ID: {}", taskName, taskId);
+        Engine.LOGGER.debug("Submitting dynamic task: {} with ID: {}", taskName, taskId);
 
         SwingWorker<T, Void> worker = new SwingWorker<>() {
             @Override
@@ -141,7 +141,7 @@ public class ExecutorServiceProvider {
                     Engine.LOGGER.error("Error executing dynamic task: {} with ID: {}: {}", taskName, taskId, e.getMessage());
                 } finally {
                     executorProgress.removeTask(taskId);
-                    Engine.LOGGER.info("Dynamic task removed: {} with ID: {}", taskName, taskId);
+                    Engine.LOGGER.debug("Dynamic task removed: {} with ID: {}", taskName, taskId);
                 }
             }
         };
@@ -178,7 +178,7 @@ public class ExecutorServiceProvider {
     protected void setRejectedExecutionHandler(RejectedExecutionHandler handler) {
         if (executorService instanceof ThreadPoolExecutor threadPoolExecutor) {
             threadPoolExecutor.setRejectedExecutionHandler(handler);
-            Engine.LOGGER.info("RejectedExecutionHandler set for the ExecutorService");
+            Engine.LOGGER.debug("RejectedExecutionHandler set for the ExecutorService");
         }
     }
 

@@ -73,7 +73,6 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
     private final EngineInfo engineInfo;
 
     public Engine(int poolSize, List<String> configFiles) {
-        executorServiceProvider = new ExecutorServiceProvider(poolSize, "foxWorker-");
         currentOS = OS.determineCurrentOS();
         osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
@@ -85,6 +84,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
         System.setProperty("log.dir", System.getProperty("user.dir"));
         LOGGER = LogManager.getLogger(this.getClass());
         AnsiConsole.systemInstall();
+
         Runtime.getRuntime().addShutdownHook(new Thread(AnsiConsole::systemUninstall));
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
@@ -93,6 +93,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
         this.FONTUTILS = new FontUtils(this);
         Configurator.setLevel(getLOGGER().getName(), Level.valueOf(engineData.getLogLevel()));
         LOGGER.info("Engine version " + this.getEngineInfo().engineVersion + this.getEngineInfo().engineBrand);
+        executorServiceProvider = new ExecutorServiceProvider(poolSize, "foxWorker-");
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
         this.imageUtils = new ImageUtils(this);
