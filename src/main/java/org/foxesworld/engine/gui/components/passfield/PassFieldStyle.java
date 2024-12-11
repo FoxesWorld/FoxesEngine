@@ -29,14 +29,14 @@ public class PassFieldStyle {
 
     public PassFieldStyle(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
-        this.texture = this.componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
-        this.setBorder(componentFactory.style);
+        this.texture = this.componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getStyle().getTexture());
+        this.setBorder(componentFactory.getStyle());
 
-        this.textColor = hexToColor(componentFactory.style.getColor());
-        this.caretColor = hexToColor(componentFactory.style.getCaretColor());
+        this.textColor = hexToColor(componentFactory.getStyle().getColor());
+        this.caretColor = hexToColor(componentFactory.getStyle().getCaretColor());
         this.echoChar = "*";
-        if(componentFactory.style.getBorderRadius() != 0) {
-            this.texture = this.componentFactory.engine.getImageUtils().getRoundedImage(this.texture, componentFactory.style.getBorderRadius());
+        if(componentFactory.getStyle().getBorderRadius() != 0) {
+            this.texture = this.componentFactory.getEngine().getImageUtils().getRoundedImage(this.texture, componentFactory.getStyle().getBorderRadius());
         }
     }
 
@@ -50,12 +50,12 @@ public class PassFieldStyle {
 
     public void apply(PassField pass) {
         pass.texture = this.texture;
-        pass.setPaddingX(this.componentFactory.style.getPaddingX());
-        pass.setPaddingY(this.componentFactory.style.getPaddingY());
+        pass.setPaddingX(this.componentFactory.getStyle().getPaddingX());
+        pass.setPaddingY(this.componentFactory.getStyle().getPaddingY());
         pass.setCaretColor(this.caretColor);
         pass.setBackground(this.textColor);
         pass.setForeground(this.textColor);
-        if(this.componentFactory.style.getBorderColor() != null) {
+        if(this.componentFactory.getStyle().getBorderColor() != null) {
             pass.setBorder(new BevelBorder(this.bevel, borderColor.get(0), borderColor.get(1)));
         } else {
             pass.setBorder(null);

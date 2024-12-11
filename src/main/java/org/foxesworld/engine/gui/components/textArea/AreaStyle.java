@@ -13,10 +13,10 @@ public class AreaStyle {
 	public Color activeColor;
 
 	public AreaStyle(ComponentFactory componentFactory) {
-		this.fontName = componentFactory.style.getFont();
-		this.fontSize = componentFactory.style.getFontSize();
-		this.idleColor = hexToColor(componentFactory.style.getColor());
-		this.activeColor = hexToColor(componentFactory.style.getColor());
+		this.fontName = componentFactory.getStyle().getFont();
+		this.fontSize = componentFactory.getStyle().getFontSize();
+		this.idleColor = hexToColor(componentFactory.getStyle().getColor());
+		this.activeColor = hexToColor(componentFactory.getStyle().getColor());
 	}
 
 	public void apply(TextArea textArea) {

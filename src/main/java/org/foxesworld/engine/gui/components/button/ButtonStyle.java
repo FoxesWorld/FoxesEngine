@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.button;
 
+import org.foxesworld.engine.gui.components.Align;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.utils.ImageUtils;
 
@@ -14,38 +15,38 @@ public class ButtonStyle {
 	public  int width,height;
 	public String font,color;
 	public float fontSize;
-	public ComponentFactory.Align align;
+	public Align align;
 	public BufferedImage texture;
 	private final ComponentFactory componentFactory;
 	private final ImageUtils imageUtils;
 	public ButtonStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;
-		this.imageUtils = this.componentFactory.engine.getImageUtils();
-		this.width = componentFactory.style.getWidth();
-		this.height = componentFactory.style.getHeight();
-		this.color = componentFactory.style.getColor();
-		this.font = componentFactory.style.getFont();
-		this.fontSize = componentFactory.style.getFontSize();
-		this.align = ComponentFactory.Align.valueOf(componentFactory.style.getAlign());
-		this.texture = this.componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
+		this.imageUtils = this.componentFactory.getEngine().getImageUtils();
+		this.width = componentFactory.getStyle().getWidth();
+		this.height = componentFactory.getStyle().getHeight();
+		this.color = componentFactory.getStyle().getColor();
+		this.font = componentFactory.getStyle().getFont();
+		this.fontSize = componentFactory.getStyle().getFontSize();
+		this.align = Align.valueOf(componentFactory.getStyle().getAlign());
+		this.texture = this.componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getStyle().getTexture());
 	}
 	public void apply(Button button) {
 		button.setVisible(visible);
-		button.setHorizontalAlignment(align == ComponentFactory.Align.LEFT ? SwingConstants.LEFT : align == ComponentFactory.Align.CENTER ? SwingConstants.CENTER : SwingConstants.RIGHT);
-		button.setFont(componentFactory.engine.getFONTUTILS().getFont(font, fontSize));
-		button.setHoverColor(hexToColor(this.componentFactory.style.getHoverColor()));
+		button.setHorizontalAlignment(align == Align.LEFT ? SwingConstants.LEFT : align == Align.CENTER ? SwingConstants.CENTER : SwingConstants.RIGHT);
+		button.setFont(componentFactory.getEngine().getFONTUTILS().getFont(font, fontSize));
+		button.setHoverColor(hexToColor(this.componentFactory.getStyle().getHoverColor()));
 		button.setForeground(hexToColor(color));
 		int i = texture.getHeight() / 4;
-		button.defaultTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(), 0, 0, texture.getWidth(), i);
-		button.rolloverTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(),0, i, texture.getWidth(), i);
-		button.pressedTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(),0, i * 2, texture.getWidth(), i);
-		button.lockedTX = this.imageUtils.getTexture(texture, componentFactory.style.getBorderRadius(),0, i * 3, texture.getWidth(), i);
+		button.defaultTX = this.imageUtils.getTexture(texture, componentFactory.getStyle().getBorderRadius(), 0, 0, texture.getWidth(), i);
+		button.rolloverTX = this.imageUtils.getTexture(texture, componentFactory.getStyle().getBorderRadius(),0, i, texture.getWidth(), i);
+		button.pressedTX = this.imageUtils.getTexture(texture, componentFactory.getStyle().getBorderRadius(),0, i * 2, texture.getWidth(), i);
+		button.lockedTX = this.imageUtils.getTexture(texture, componentFactory.getStyle().getBorderRadius(),0, i * 3, texture.getWidth(), i);
 	}
 
 	public BufferedImage getTexture(int startX, int startY, int subWidth, int subHeight) {
 		BufferedImage buttTexture = texture.getSubimage(startX, startY, subWidth, subHeight);
-		if(componentFactory.style.getBorderRadius() != 0) {
-			return this.componentFactory.engine.getImageUtils().getRoundedImage(buttTexture, componentFactory.style.getBorderRadius());
+		if(componentFactory.getStyle().getBorderRadius() != 0) {
+			return this.componentFactory.getEngine().getImageUtils().getRoundedImage(buttTexture, componentFactory.getStyle().getBorderRadius());
 		}
 		return buttTexture;
 	}

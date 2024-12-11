@@ -26,17 +26,17 @@ public class TexturedSliderUI extends BasicSliderUI {
 
     public TexturedSliderUI(ComponentFactory componentFactory, JSlider slider, StyleAttributes style) {
         super(slider);
-        this.imageUtils = componentFactory.engine.getImageUtils();
+        this.imageUtils = componentFactory.getEngine().getImageUtils();
         this.componentFactory = componentFactory;
 
-        thumbTexture = componentFactory.engine.getImageUtils().getLocalImage(style.getThumbImage());
+        thumbTexture = componentFactory.getEngine().getImageUtils().getLocalImage(style.getThumbImage());
         int thumbWidth = thumbTexture.getWidth() / 3;
         int thumbHeight = thumbTexture.getHeight();
 
-        this.thumbImageNormal = this.imageUtils.getTexture(thumbTexture, componentFactory.style.getBorderRadius(),0, 0, thumbWidth, thumbHeight);
-        this.thumbImageHover = this.imageUtils.getTexture(thumbTexture, componentFactory.style.getBorderRadius(), thumbWidth, 0, thumbWidth, thumbHeight);
-        this.thumbImageDisabled = this.imageUtils.getTexture(thumbTexture, componentFactory.style.getBorderRadius(), thumbWidth * 2, 0, thumbWidth, thumbHeight);
-        this.trackImage =  new ImageIcon(componentFactory.engine.getImageUtils().getScaledImage(componentFactory.engine.getImageUtils().getLocalImage(style.getTrackImage()), style.getWidth(), 10));
+        this.thumbImageNormal = this.imageUtils.getTexture(thumbTexture, componentFactory.getStyle().getBorderRadius(),0, 0, thumbWidth, thumbHeight);
+        this.thumbImageHover = this.imageUtils.getTexture(thumbTexture, componentFactory.getStyle().getBorderRadius(), thumbWidth, 0, thumbWidth, thumbHeight);
+        this.thumbImageDisabled = this.imageUtils.getTexture(thumbTexture, componentFactory.getStyle().getBorderRadius(), thumbWidth * 2, 0, thumbWidth, thumbHeight);
+        this.trackImage =  new ImageIcon(componentFactory.getEngine().getImageUtils().getScaledImage(componentFactory.getEngine().getImageUtils().getLocalImage(style.getTrackImage()), style.getWidth(), 10));
         this.currentThumbImage = thumbImageNormal;
         slider.setSize(style.getWidth(), style.getHeight());
 

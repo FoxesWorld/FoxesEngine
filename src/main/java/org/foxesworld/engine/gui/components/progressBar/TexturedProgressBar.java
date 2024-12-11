@@ -27,7 +27,7 @@ class TexturedProgressBar extends BasicProgressBarUI {
         int barWidth = progressBar.getWidth();
         int barHeight = progressBar.getHeight();
 
-        BufferedImage texture = this.componentFactory.engine.getImageUtils().genButton(barWidth, barHeight, this.componentFactory.engine.getImageUtils().getLocalImage(textureImagePath));
+        BufferedImage texture = this.componentFactory.getEngine().getImageUtils().genButton(barWidth, barHeight, this.componentFactory.getEngine().getImageUtils().getLocalImage(textureImagePath));
 
         int progressWidth = (int) (barWidth * progressBar.getPercentComplete());
 

@@ -7,21 +7,17 @@ import java.awt.*;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-
 public class LabelStyle {
-	public String fontName;
-	public float fontSize;
-	public Color idleColor;
-	public Color activeColor;
+	private String fontName;
+	private float fontSize;
+	private Color idleColor;
+	private Color activeColor;
 
 	public LabelStyle(ComponentFactory componentFactory) {
-		this.fontName = componentFactory.style.getFont();
-		this.fontSize = componentFactory.style.getFontSize();
-		this.idleColor = hexToColor(componentFactory.style.getColor());
-		this.activeColor = hexToColor(componentFactory.style.getColor());
+		this(componentFactory.getStyle());
 	}
 
-	public LabelStyle(StyleAttributes style){
+	public LabelStyle(StyleAttributes style) {
 		this.fontName = style.getFont();
 		this.fontSize = style.getFontSize();
 		this.idleColor = hexToColor(style.getColor());
@@ -29,6 +25,39 @@ public class LabelStyle {
 	}
 
 	public void apply(Label label) {
-		label.setForeground(activeColor);
+		label.setFont(new Font(fontName, Font.PLAIN, Math.round(fontSize)));
+		label.setForeground(idleColor);
+	}
+
+	public String getFontName() {
+		return fontName;
+	}
+
+	public void setFontName(String fontName) {
+		this.fontName = fontName;
+	}
+
+	public float getFontSize() {
+		return fontSize;
+	}
+
+	public void setFontSize(float fontSize) {
+		this.fontSize = fontSize;
+	}
+
+	public Color getIdleColor() {
+		return idleColor;
+	}
+
+	public void setIdleColor(Color idleColor) {
+		this.idleColor = idleColor;
+	}
+
+	public Color getActiveColor() {
+		return activeColor;
+	}
+
+	public void setActiveColor(Color activeColor) {
+		this.activeColor = activeColor;
 	}
 }

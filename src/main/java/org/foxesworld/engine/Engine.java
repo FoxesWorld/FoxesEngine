@@ -136,7 +136,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
 
     public void restartApplication(int xmx, String jvmDir) {
         System.gc();
-        Runtime.getRuntime().addShutdownHook(new Thread(this.guiBuilder.getComponentFactory().getCustomTooltip()::clearAllTooltips));
+        //Runtime.getRuntime().addShutdownHook(new Thread(this.guiBuilder.getComponentFactory().getCustomTooltip()::clearAllTooltips));
         String path = Config.getFullPath();
         List<String> params = new LinkedList<>();
         params.add(path + "/runtime/"+ jvmDir + "/bin/java");

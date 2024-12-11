@@ -14,20 +14,20 @@ public class CheckboxStyle {
     public float fontSize;
     public Color color;
     public BufferedImage texture;
-    private ComponentFactory componentFactory;
+    private final ComponentFactory componentFactory;
 
     public CheckboxStyle(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
-        this.fontName = componentFactory.style.getFont();
-        this.fontSize = componentFactory.style.getFontSize();
-        this.color = hexToColor(componentFactory.style.getColor());
-        this.texture = componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
+        this.fontName = componentFactory.getStyle().getFont();
+        this.fontSize = componentFactory.getStyle().getFontSize();
+        this.color = hexToColor(componentFactory.getStyle().getColor());
+        this.texture = componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getStyle().getTexture());
     }
 
     public void apply(Checkbox checkbox) {
         checkbox.setVisible(true);
         checkbox.setForeground(this.color);
-        checkbox.setFont(componentFactory.engine.getFONTUTILS().getFont(this.fontName, this.fontSize));
+        checkbox.setFont(componentFactory.getEngine().getFONTUTILS().getFont(this.fontName, this.fontSize));
         int i = this.texture.getWidth() / 4;
         checkbox.defaultTX = this.texture.getSubimage(0, 0, i, i);
         checkbox.rolloverTX = this.texture.getSubimage(i, 0, i, i);

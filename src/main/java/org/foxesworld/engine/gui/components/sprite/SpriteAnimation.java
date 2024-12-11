@@ -29,7 +29,7 @@ public class SpriteAnimation extends JComponent {
     }
 
     private void initialize(ComponentAttributes componentAttributes) {
-        this.spriteSheet = componentFactory.engine.getImageUtils().getLocalImage(componentAttributes.getImageIcon());
+        this.spriteSheet = componentFactory.getEngine().getImageUtils().getLocalImage(componentAttributes.getImageIcon());
         this.setOpaque(componentAttributes.isOpaque());
         this.rows = componentAttributes.getRowNum();
         this.columns = componentAttributes.getColNum();

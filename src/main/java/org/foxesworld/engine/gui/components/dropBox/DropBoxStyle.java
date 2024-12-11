@@ -19,32 +19,32 @@ public class DropBoxStyle {
 
     public DropBoxStyle(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
-        this.fontName = componentFactory.style.getFont();
-        this.fontSize = componentFactory.style.getFontSize();
-        this.color = hexToColor(componentFactory.style.getColor());
-        this.texture = componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
+        this.fontName = componentFactory.getStyle().getFont();
+        this.fontSize = componentFactory.getStyle().getFontSize();
+        this.color = hexToColor(componentFactory.getStyle().getColor());
+        this.texture = componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getStyle().getTexture());
     }
 
     public void apply(DropBox dropBox) {
         dropBox.setForeground(this.color);
-        dropBox.setFont(componentFactory.engine.getFONTUTILS().getFont(this.fontName, this.fontSize));
+        dropBox.setFont(componentFactory.getEngine().getFONTUTILS().getFont(this.fontName, this.fontSize));
         int dropBoxH = this.texture.getHeight() / 7;
         int dropBoxW = this.texture.getWidth();
         dropBox.setColor(this.color);
-        dropBox.setHoverColor(hexToColor(componentFactory.style.getHoverColor()));
+        dropBox.setHoverColor(hexToColor(componentFactory.getStyle().getHoverColor()));
         dropBox.setDefaultTX(getTexture(0, 0, dropBoxW, dropBoxH));
         dropBox.setRolloverTX(getTexture(0, dropBoxH, dropBoxW, dropBoxH));
         dropBox.setOpenedTX(getTexture(0, dropBoxH * 2, dropBoxW, dropBoxH));
         dropBox.setPanelTX(getTexture(0, dropBoxH * 3, dropBoxW - 45, dropBoxH));
         dropBox.setSelectedTX(getTexture(0, dropBoxH * 4, dropBoxW - 45, dropBoxH));
-        dropBox.setPoint(this.componentFactory.engine.getImageUtils().getLocalImage("assets/ui/icons/point.png"));
+        dropBox.setPoint(this.componentFactory.getEngine().getImageUtils().getLocalImage("assets/ui/icons/point.png"));
     }
 
     private BufferedImage getTexture(int x, int y, int width, int height){
         BufferedImage clippedTexture;
        clippedTexture =  this.texture.getSubimage(x, y, width, height);
-        if(componentFactory.style.getBorderRadius() != 0) {
-            clippedTexture =  this.componentFactory.engine.getImageUtils().getRoundedImage(clippedTexture, componentFactory.style.getBorderRadius());
+        if(componentFactory.getStyle().getBorderRadius() != 0) {
+            clippedTexture =  this.componentFactory.getEngine().getImageUtils().getRoundedImage(clippedTexture, componentFactory.getStyle().getBorderRadius());
         }
         return  clippedTexture;
     }

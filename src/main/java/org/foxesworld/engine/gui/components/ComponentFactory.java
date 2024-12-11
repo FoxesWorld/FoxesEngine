@@ -5,15 +5,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.ComponentValue;
+import org.foxesworld.engine.gui.components.button.*;
 import org.foxesworld.engine.gui.components.button.Button;
-import org.foxesworld.engine.gui.components.button.ButtonStyle;
+import org.foxesworld.engine.gui.components.checkbox.*;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
-import org.foxesworld.engine.gui.components.checkbox.CheckboxStyle;
 import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
-import org.foxesworld.engine.gui.components.dropBox.DropBox;
-import org.foxesworld.engine.gui.components.dropBox.DropBoxStyle;
+import org.foxesworld.engine.gui.components.dropBox.*;
+import org.foxesworld.engine.gui.components.label.*;
 import org.foxesworld.engine.gui.components.label.Label;
-import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.components.multiButton.MultiButton;
 import org.foxesworld.engine.gui.components.multiButton.MultiButtonStyle;
 import org.foxesworld.engine.gui.components.passfield.PassField;
@@ -22,7 +21,6 @@ import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
 import org.foxesworld.engine.gui.components.serverBox.ServerBox;
 import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
-import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
 import org.foxesworld.engine.gui.components.spinner.Spinner;
 import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
 import org.foxesworld.engine.gui.components.textArea.AreaStyle;
@@ -46,15 +44,14 @@ import java.util.Objects;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
-@SuppressWarnings("unused")
 public class ComponentFactory extends JComponent {
 
-    public Engine engine;
+    private final Engine engine;
     private ComponentValue componentValue;
     private final LanguageProvider LANG;
     private final IconUtils iconUtils;
     private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
-    public StyleAttributes style = null;
+    private StyleAttributes style;
     private ComponentAttributes componentAttribute;
     private Rectangle bounds;
     private ComponentFactoryListener componentFactoryListener;
@@ -67,316 +64,242 @@ public class ComponentFactory extends JComponent {
     }
 
     public void createComponentAsync(ComponentAttributes componentAttributes, ComponentCreationCallback callback) {
-        // Using the dynamic task submission method with callback
-        this.engine.getExecutorServiceProvider().submitDynamicTaskWithCallback(() -> {
-            // Task logic for creating the component
-            return createComponent(componentAttributes); // This returns a JComponent
-        }, "create" + componentAttributes.getComponentType(), component -> {
-            // Callback when the component is created
+        engine.getExecutorServiceProvider().submitDynamicTaskWithCallback(() -> createComponent(componentAttributes), "create" + componentAttributes.getComponentType(), component -> {
             if (component instanceof JComponent) {
-                SwingUtilities.invokeLater(() -> {
-                    callback.onComponentCreated(component); // Pass the created component to the callback
-                });
+                SwingUtilities.invokeLater(() -> callback.onComponentCreated(component));
             }
         });
     }
 
-
     public JComponent createComponent(ComponentAttributes componentAttributes) {
-        customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
+        initializeTooltip(componentAttributes);
+        loadStyle(componentAttributes);
         componentFactoryListener.onComponentCreation(componentAttributes);
-        if(componentAttributes.getComponentStyle() != null && componentAttributes.getComponentStyle() != null) {
-            if(componentStyles.get(componentAttributes.getComponentStyle()) == null){
-                componentStyles.put(componentAttributes.getComponentType(), engine.getStyleProvider().getElementStyles().get(componentAttributes.getComponentType()));
-            }
-            style = componentStyles.get(componentAttributes.getComponentType()).get(componentAttributes.getComponentStyle());
-        }
-        JComponent component;
+
         bounds = componentAttributes.getBounds();
         this.componentAttribute = componentAttributes;
 
-        if (this.componentAttribute.getToolTip() != null) {
-            String tooltipStyle = "default";
-            if (this.componentAttribute.getTooltipStyle() != null) {
-                tooltipStyle = this.componentAttribute.getTooltipStyle();
-            }
-            TooltipAttributes attributes = loadTooltipAttributes(tooltipStyle);
-            if (attributes != null) {
-                Color bgColor = hexToColor(attributes.getBgColor());
-                Color textColor = hexToColor(attributes.getTextColor());
-                Font font = this.engine.getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize());
-                customTooltip = new CustomTooltip(bgColor, textColor, attributes.getBorderRadius(), font);
-            }
+        JComponent component = createComponentByType(componentAttributes);
+        component.setName(componentAttributes.getComponentId());
+        component.setBounds(bounds);
+        component.setOpaque(style.isOpaque());
+
+        if (componentAttributes.getToolTip() != null) {
+            setTooltip(component, componentAttributes);
         }
 
+        return component;
+    }
+
+    private void initializeTooltip(ComponentAttributes componentAttributes) {
+        customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
+        if (componentAttributes.getToolTip() != null) {
+            TooltipAttributes attributes = loadTooltipAttributes(componentAttributes.getTooltipStyle());
+            if (attributes != null) {
+                customTooltip = new CustomTooltip(hexToColor(attributes.getBgColor()), hexToColor(attributes.getTextColor()), attributes.getBorderRadius(), engine.getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize()));
+            }
+        }
+    }
+
+    private void loadStyle(ComponentAttributes componentAttributes) {
+        if (componentAttributes.getComponentStyle() != null) {
+            componentStyles.putIfAbsent(componentAttributes.getComponentType(), engine.getStyleProvider().getElementStyles().get(componentAttributes.getComponentType()));
+            style = componentStyles.get(componentAttributes.getComponentType()).get(componentAttributes.getComponentStyle());
+        }
+    }
+
+    private JComponent createComponentByType(ComponentAttributes componentAttributes) {
+        JComponent component = null;
+
         switch (componentAttributes.getComponentType()) {
-
-            case "progressBar" -> {
-                ProgressBarStyle progressBarStyle = new ProgressBarStyle(this);
-                component = new JProgressBar();
-                progressBarStyle.apply((JProgressBar) component);
-                component.setName(componentAttributes.getComponentId());
-                component.setBounds(bounds);
-            }
-
-            case "label" -> {
-                LabelStyle labelStyle = new LabelStyle(this);
-                component = new Label(this);
-                labelStyle.apply((Label) component);
-                if(componentAttributes.getImageIcon() != null) {
-                    ImageIcon icon = this.iconUtils.getIcon(componentAttributes);
-                    ((Label) component).setIcon(icon);
-                }
-
-                component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
-
-                if(componentAttributes.getInitialValue() != null) {
-                    ((Label) component).setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
-                }
-
-                if(componentAttributes.getColor() != null) {
-                    component.setForeground(hexToColor(componentAttributes.getColor()));
-                }
-            }
-
-            case "textArea" -> {
-                AreaStyle areaStyle = new AreaStyle(this);
-                component = new TextArea(this);
-                ((TextArea)component).setLineWrap(componentAttributes.isLineWrap());
-                areaStyle.apply((TextArea) component);
-                component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
-
-                if(componentAttributes.getInitialValue() != null) {
-                    ((TextArea) component).setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
-                }
-
-                if(componentAttributes.getColor() != null) {
-                    component.setForeground(hexToColor(componentAttributes.getColor()));
-                }
-                ((TextArea) component).setEditable(componentAttributes.isEnabled());
-            }
-
-            case "checkBox" -> {
-                CheckboxStyle checkboxStyle = new CheckboxStyle(this);
-                component = new Checkbox(this, LANG.getString(componentAttributes.getLocaleKey()));
-                checkboxStyle.apply((Checkbox) component);
-                if(componentAttributes.getInitialValue() != null) {
-                    ((Checkbox)component).setSelected(Boolean.parseBoolean(String.valueOf(componentAttributes.getInitialValue())));
-                }
-                if (componentAttributes.getKeyCode() != null) {
-                    component.setFocusable(true);
-                    component.requestFocus();
-                    KeyStroke keyStroke = KeyStroke.getKeyStroke(componentAttributes.getKeyCode());
-                    AbstractAction buttonAction = new AbstractAction() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            ((Checkbox)component).toggleCheckbox();
-                            ((Checkbox)component).doClick();
-                        }
-                    };
-
-                    component.getActionMap().put(componentAttributes.getComponentId(), buttonAction);
-                    component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, componentAttributes.getComponentId());
-                    component.setEnabled(componentAttributes.isEnabled());
-                }
-            }
-
-            case "textField" -> {
-                TextFieldStyle textfieldStyle = new TextFieldStyle(this);
-                component = new TextField(this);
-                textfieldStyle.apply((TextField) component);
-                ((TextField)component).setActionCommand(componentAttributes.getComponentId());
-                ((TextField)component).addActionListener(engine);
-                if(componentAttributes.getInitialValue() != null) ((TextField)component).setText(String.valueOf(componentAttributes.getInitialValue()));
-            }
-
-            case "spriteImage" -> component = new SpriteAnimation(this);
-
-            case "passField" -> {
-                PassFieldStyle passfieldStyle = new PassFieldStyle(this);
-                component = new PassField(this, LANG.getString(componentAttributes.getLocaleKey()));
-                passfieldStyle.apply((PassField) component);
-                component.setFont(this.engine.getFONTUTILS().getFont(style.getFont(), style.getFontSize()));
-                ((PassField)component).setActionCommand(componentAttributes.getComponentId());
-            }
-
-            case "spinner" -> {
-                component = new Spinner(Integer.parseInt((String) componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
-                ((Spinner)component).init();
-            }
-
-            case "button" -> {
-                ButtonStyle buttonStyle = new ButtonStyle(this);
-                if (componentAttributes.getImageIcon() != null) {
-                    ImageIcon icon = iconUtils.getIcon(componentAttributes);
-                    component = new Button(this, icon);
-                } else {
-                    component = new Button(this, LANG.getString(componentAttributes.getLocaleKey()));
-                }
-                component.setBounds(bounds);
-                buttonStyle.apply((Button) component);
-                ((Button)component).setActionCommand(componentAttributes.getComponentId());
-                ((Button) component).addActionListener(engine);
-                if (componentAttributes.getKeyCode() != null) {
-                    component.setFocusable(true);
-                    component.requestFocus();
-                    KeyStroke keyStroke = KeyStroke.getKeyStroke(componentAttributes.getKeyCode());
-                    AbstractAction buttonAction = new AbstractAction() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            ((Button) component).ButtonClick();
-                            ((Button) component).doClick();
-                            ((Button) component).setPressed(false);
-                        }
-                    };
-
-                    component.getActionMap().put(componentAttributes.getComponentId(), buttonAction);
-                    component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, componentAttributes.getComponentId());
-                    component.setEnabled(componentAttributes.isEnabled());
-                }
-            }
-
-            case "multiButton" -> {
-                MultiButtonStyle multiButtonStyle = new MultiButtonStyle(this, componentAttributes);
-                component = new MultiButton(this);
-                multiButtonStyle.apply((MultiButton) component);
-                ((MultiButton) component).setActionCommand(componentAttributes.getComponentId());
-                ((MultiButton) component).addActionListener(engine);
-            }
-
-            case "dropBox" -> {
-                DropBoxStyle dropBoxStyle = new DropBoxStyle(this);
-                component = new DropBox(this, (int) bounds.getY());
-                dropBoxStyle.apply((DropBox) component);
-                component.repaint();
-            }
-
-            case "serverBox" -> {
-                ServerBoxStyle serverBoxStyle = new ServerBoxStyle(this);
-                component = new ServerBox();
-                ((ServerBox) component).updateBox(componentAttributes.getComponentId(), this.engine.getImageUtils().getLocalImage(style.getTexture()).getSubimage(16, 0, 16, 16));
-                serverBoxStyle.apply((ServerBox) component);
-                component.setBackground(hexToColor(componentAttributes.getColor()));
-                component.setForeground(hexToColor(componentAttributes.getColor()));
-            }
-
-            case "slider" -> {
-                component = new Slider(this);
-                component.setBounds(bounds);
-                ((Slider) component).setMinimum(componentAttributes.getMinValue());
-                ((Slider) component).setMaximum(componentAttributes.getMaxValue());
-                if(componentAttributes.getInitialValue() != null) {
-                    ((Slider) component).setValue(Integer.parseInt(String.valueOf(componentAttributes.getInitialValue())));
-                }
-                ((Slider) component).setMajorTickSpacing(componentAttributes.getMajorSpacing());
-                ((Slider) component).setMinorTickSpacing(componentAttributes.getMinorSpacing());
-                ((Slider) component).setPaintTicks(true);
-                ((Slider) component).setPaintLabels(true);
-                ((Slider) component).setSnapToTicks(true);
-                if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
-                    ((Slider) component).setUI(new TexturedSliderUI(this, (Slider) component, style));
-                }
-            }
-
-            case "compositeSlider" -> {
-                component = new CompositeSlider(this);
-                //TexturedSliderUI sliderUI = new TexturedSliderUI(this, ((CompositeSlider) component).getSlider(), style);
-                //((CompositeSlider)component).getSlider().setUI(sliderUI);
-                //labelStyle.apply(((CompositeSlider) component).getLabel());
-                //((CompositeSlider)component).getLabel().setFont(this.engine.getFONTUTILS().getFont(labelStyle.fontName, componentAttributes.getFontSize()));
-                component.setOpaque(componentAttribute.isOpaque());
-            }
-
+            case "progressBar" -> component = createProgressBar(componentAttributes);
+            case "label" -> component = createLabel(componentAttributes);
+            case "textArea" -> component = createTextArea(componentAttributes);
+            case "checkBox" -> component = createCheckbox(componentAttributes);
+            case "textField" -> component = createTextField(componentAttributes);
+            case "spriteImage" -> component = createSpriteImage(componentAttributes);
+            case "passField" -> component = createPassField(componentAttributes);
+            case "spinner" -> component = createSpinner(componentAttributes);
+            case "button" -> component = createButton(componentAttributes);
+            case "multiButton" -> component = createMultiButton(componentAttributes);
+            case "dropBox" -> component = createDropBox(componentAttributes);
+            case "serverBox" -> component = createServerBox(componentAttributes);
+            case "slider" -> component = createSlider(componentAttributes);
+            case "compositeSlider" -> component = createCompositeSlider(componentAttributes);
             default -> throw new IllegalArgumentException("Unsupported component type: " + componentAttributes.getComponentType());
         }
 
-        component.setName(componentAttributes.getComponentId());
-        component.setOpaque(style.isOpaque());
+        return component;
+    }
+
+    private JComponent createProgressBar(ComponentAttributes componentAttributes) {
+        ProgressBarStyle progressBarStyle = new ProgressBarStyle(this);
+        JProgressBar progressBar = new JProgressBar();
+        progressBarStyle.apply(progressBar);
+        progressBar.setBounds(bounds);
+        return progressBar;
+    }
+
+    private JComponent createLabel(ComponentAttributes componentAttributes) {
+        LabelStyle labelStyle = new LabelStyle(this);
+        Label label = new Label(this);
+        labelStyle.apply(label);
+        label.setIcon(iconUtils.getIcon(componentAttributes));
+        label.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
+        label.setForeground(hexToColor(componentAttributes.getColor()));
+        label.setFont(engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
+        return label;
+    }
+
+    private JComponent createTextArea(ComponentAttributes componentAttributes) {
+        AreaStyle areaStyle = new AreaStyle(this);
+        TextArea textArea = new TextArea(this);
+        textArea.setLineWrap(componentAttributes.isLineWrap());
+        areaStyle.apply(textArea);
+        textArea.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
+        textArea.setForeground(hexToColor(componentAttributes.getColor()));
+        textArea.setEditable(componentAttributes.isEnabled());
+        textArea.setFont(engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
+        return textArea;
+    }
+
+    private JComponent createCheckbox(ComponentAttributes componentAttributes) {
+        CheckboxStyle checkboxStyle = new CheckboxStyle(this);
+        Checkbox checkbox = new Checkbox(this, LANG.getString(componentAttributes.getLocaleKey()));
+        checkboxStyle.apply(checkbox);
+        checkbox.setSelected(Boolean.parseBoolean(String.valueOf(componentAttributes.getInitialValue())));
+        return checkbox;
+    }
+
+    private JComponent createTextField(ComponentAttributes componentAttributes) {
+        TextFieldStyle textFieldStyle = new TextFieldStyle(this);
+        TextField textField = new TextField(this);
+        textFieldStyle.apply(textField);
+        textField.setActionCommand(componentAttributes.getComponentId());
+        textField.addActionListener(engine);
+        return textField;
+    }
+
+    private JComponent createSpriteImage(ComponentAttributes componentAttributes) {
+        return new SpriteAnimation(this);
+    }
+
+    private JComponent createPassField(ComponentAttributes componentAttributes) {
+        PassFieldStyle passFieldStyle = new PassFieldStyle(this);
+        PassField passField = new PassField(this, LANG.getString(componentAttributes.getLocaleKey()));
+        passFieldStyle.apply(passField);
+        passField.setFont(engine.getFONTUTILS().getFont(style.getFont(), style.getFontSize()));
+        passField.setActionCommand(componentAttributes.getComponentId());
+        return passField;
+    }
+
+    private JComponent createSpinner(ComponentAttributes componentAttributes) {
+        Spinner spinner = new Spinner(Integer.parseInt((String) componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
+        spinner.init();
+        return spinner;
+    }
+
+    private JComponent createButton(ComponentAttributes componentAttributes) {
+        ButtonStyle buttonStyle = new ButtonStyle(this);
+        Button button = (componentAttributes.getImageIcon() != null) ? new Button(this, iconUtils.getIcon(componentAttributes)) : new Button(this, LANG.getString(componentAttributes.getLocaleKey()));
+        buttonStyle.apply(button);
+        button.setBounds(bounds);
+        button.setActionCommand(componentAttributes.getComponentId());
+        button.addActionListener(engine);
+        return button;
+    }
+
+    private JComponent createMultiButton(ComponentAttributes componentAttributes) {
+        MultiButtonStyle multiButtonStyle = new MultiButtonStyle(this, componentAttributes);
+        MultiButton multiButton = new MultiButton(this);
+        multiButtonStyle.apply(multiButton);
+        multiButton.setActionCommand(componentAttributes.getComponentId());
+        multiButton.addActionListener(engine);
+        return multiButton;
+    }
+
+    private JComponent createDropBox(ComponentAttributes componentAttributes) {
+        DropBoxStyle dropBoxStyle = new DropBoxStyle(this);
+        DropBox dropBox = new DropBox(this, componentAttributes.getBounds().y);
+        dropBoxStyle.apply(dropBox);
+        return dropBox;
+    }
+
+    private JComponent createServerBox(ComponentAttributes componentAttributes) {
+        ServerBoxStyle serverBoxStyle = new ServerBoxStyle(this);
+        ServerBox serverBox = new ServerBox();
+        serverBox.updateBox(componentAttributes.getComponentId(), this.engine.getImageUtils().getLocalImage(style.getTexture()).getSubimage(16, 0, 16, 16));
+        serverBoxStyle.apply(serverBox);
+        serverBox.setBackground(hexToColor(componentAttributes.getColor()));
+        serverBox.setForeground(hexToColor(componentAttributes.getColor()));
+
+        return  serverBox;
+    }
+
+    private JComponent createSlider(ComponentAttributes componentAttributes) {
+        Slider slider = new Slider(this);
+        slider.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
+        return slider;
+    }
+
+    private JComponent createCompositeSlider(ComponentAttributes componentAttributes) {
+        CompositeSlider compositeSlider = new CompositeSlider(this);
+        compositeSlider.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
+        return compositeSlider;
+    }
+
+    private void setTooltip(JComponent component, ComponentAttributes componentAttributes) {
         if(componentAttributes.getToolTip() != null) {
             if(component.getBounds() != null) {
                 int delay = (componentAttributes.getDelay() != 0) ? componentAttributes.getDelay() : 2000;
                 customTooltip.attachToComponent(component, this.engine.getLANG().getString(componentAttributes.getToolTip()), delay);
             }
         }
-        component.setBounds(bounds);
-
-        return  component;
     }
 
-    @Override
-    public void setToolTipText(String text) {
-        String oldText = getToolTipText();
-        putClientProperty(TOOL_TIP_TEXT_KEY, text);
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.setInitialDelay(1);
+    private TooltipAttributes loadTooltipAttributes(String tooltipStyle) {
+        JsonObject jsonObject = parseJson("tooltips.json");
+        return jsonObject != null ? new Gson().fromJson(jsonObject.get(tooltipStyle), TooltipAttributes.class) : null;
+    }
 
-        if (text != null) {
-            if (oldText == null) {
-                toolTipManager.registerComponent(this);
-            }
-        } else {
-            toolTipManager.unregisterComponent(this);
+    private JsonObject parseJson(String fileName) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+             InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(inputStream))) {
+            return JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (Exception e) {
+            return null;
         }
     }
 
-
     public void setComponentFactoryListener(ComponentFactoryListener componentFactoryListener) {
         this.componentFactoryListener = componentFactoryListener;
-    }
-    public enum Align {
-        LEFT, CENTER, RIGHT
-    }
-    public LanguageProvider getLANG() {
-        return LANG;
-    }
-    public IconUtils getIconUtils() {
-        return iconUtils;
-    }
-    public Rectangle getBounds() {
-        return bounds;
-    }
-    public ComponentAttributes getComponentAttribute() {
-        return componentAttribute;
-    }
-
-    public CustomTooltip getCustomTooltip() {
-        return customTooltip;
     }
 
     public interface ComponentCreationCallback {
         void onComponentCreated(JComponent component);
     }
 
-    private TooltipAttributes loadTooltipAttributes(String styleKey) {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/styles/tooltip.json");
-             InputStreamReader reader = new InputStreamReader(inputStream)) {
-
-            if (inputStream == null) {
-                System.out.println("Could not find the JSON file.");
-                return null;
-            }
-
-            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-            JsonObject attributes = jsonObject.getAsJsonObject(styleKey);
-
-            if (attributes != null) {
-                Gson gson = new Gson();
-                return gson.fromJson(attributes, TooltipAttributes.class);
-            } else {
-                System.out.println("Style key not found: " + styleKey);
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public interface ComponentFactoryListener {
+        void onComponentCreation(ComponentAttributes componentAttributes);
     }
 
-    public ComponentValue getComponentValue() {
-        return componentValue;
+    public Engine getEngine() {
+        return engine;
     }
 
-    public Map<String, Map<String, StyleAttributes>> getComponentStyles() {
-        return componentStyles;
+    public StyleAttributes getStyle() {
+        return style;
+    }
+
+    public ComponentAttributes getComponentAttribute() {
+        return componentAttribute;
+    }
+
+    public IconUtils getIconUtils() {
+        return iconUtils;
+    }
+
+    public CustomTooltip getCustomTooltip() {
+        return customTooltip;
     }
 }

@@ -12,9 +12,9 @@ public class ServerBoxStyle {
     }
 
     public void apply(ServerBox serverBox) {
-        serverBox.setFont(componentFactory.engine.getFONTUTILS().getFont(componentFactory.style.getFont(), componentFactory.style.getFontSize()));
-        serverBox.setBackground(hexToColor(componentFactory.style.getColor()));
-        serverBox.setForeground(hexToColor(componentFactory.style.getColor()));
+        serverBox.setFont(componentFactory.getEngine().getFONTUTILS().getFont(componentFactory.getStyle().getFont(), componentFactory.getStyle().getFontSize()));
+        serverBox.setBackground(hexToColor(componentFactory.getStyle().getColor()));
+        serverBox.setForeground(hexToColor(componentFactory.getStyle().getColor()));
         serverBox.sb = this;
     }
 }

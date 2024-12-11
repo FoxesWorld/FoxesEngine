@@ -1,7 +1,6 @@
 package org.foxesworld.engine.gui.components.passfield;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -107,7 +106,7 @@ public class PassField extends JPasswordField {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(this.componentFactory.engine.getImageUtils().genButton(getWidth(), getHeight(), texture), 0, 0, getWidth(), getHeight(), null);
+        g2.drawImage(this.componentFactory.getEngine().getImageUtils().genButton(getWidth(), getHeight(), texture), 0, 0, getWidth(), getHeight(), null);
 
         if (!hasFocus() && getPassword().length == 0 && placeholder != null) {
             g2.drawString(placeholder, getInsets().left + paddingX, g.getFontMetrics().getMaxAscent() + getInsets().top + paddingY);

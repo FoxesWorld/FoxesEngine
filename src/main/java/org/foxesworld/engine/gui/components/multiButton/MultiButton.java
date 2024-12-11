@@ -19,7 +19,7 @@ public class MultiButton extends JButton implements MouseListener, MouseMotionLi
     private Engine engine;
 
     public MultiButton(ComponentFactory componentFactory) {
-        this.engine = componentFactory.engine;
+        this.engine = componentFactory.getEngine();
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.setBorderPainted(false);

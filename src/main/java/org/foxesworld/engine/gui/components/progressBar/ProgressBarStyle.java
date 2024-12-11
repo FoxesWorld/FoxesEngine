@@ -12,16 +12,16 @@ public class ProgressBarStyle {
 
     public ProgressBarStyle(ComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
-        this.background = componentFactory.style.getBackground();
-        this.foreground = componentFactory.style.getColor();
-        this.border = componentFactory.style.getBorderColor();
+        this.background = componentFactory.getStyle().getBackground();
+        this.foreground = componentFactory.getStyle().getColor();
+        this.border = componentFactory.getStyle().getBorderColor();
     }
 
     public void apply(JProgressBar progressBar) {
         progressBar.setBorder(BorderFactory.createLineBorder(hexToColor(border)));
         progressBar.setBackground(hexToColor(this.background));
         progressBar.setForeground(hexToColor(this.foreground));
-        this.setTexture(progressBar, componentFactory.style.getTexture());
+        this.setTexture(progressBar, componentFactory.getStyle().getTexture());
     }
 
     private void setTexture(JProgressBar progressBar, String imagePath) {

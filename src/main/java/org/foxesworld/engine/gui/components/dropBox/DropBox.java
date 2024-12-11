@@ -33,7 +33,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     public DropBox(ComponentFactory componentFactory, String[] values, int initialY) {
         this.componentFactory = componentFactory;
-        this.engine = componentFactory.engine;
+        this.engine = componentFactory.getEngine();
         this.values = values;
         this.initialY = initialY;
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -42,7 +42,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     public DropBox(ComponentFactory componentFactory, int initialY) {
         this.componentFactory = componentFactory;
-        this.engine = componentFactory.engine;
+        this.engine = componentFactory.getEngine();
         this.initialY = initialY;
         setupListeners();
     }
@@ -63,7 +63,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     protected void paintComponent(Graphics gmain) {
         Graphics2D g = (Graphics2D) gmain;
         int width = getWidth();
-        g.setColor(hexToColor(componentFactory.style.getColor()));
+        g.setColor(hexToColor(componentFactory.getStyle().getColor()));
 
         // Optimize state handling by using a method to handle the drawing
         switch (state) {

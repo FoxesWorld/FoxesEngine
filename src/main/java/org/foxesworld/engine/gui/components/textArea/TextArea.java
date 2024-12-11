@@ -10,9 +10,9 @@ public class TextArea extends JTextArea {
 
     public TextArea(ComponentFactory componentFactory) {
         if(componentFactory.getComponentAttribute().getLocaleKey() != null) {
-            setText(componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
+            setText(componentFactory.getEngine().getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
         }
-        setOpaque(componentFactory.style.isOpaque());
+        setOpaque(componentFactory.getStyle().isOpaque());
         setPreferredSize(new Dimension((int) componentFactory.getBounds().getWidth(), (int) componentFactory.getBounds().getHeight()));
         if(componentFactory.getComponentAttribute().getBorder() != null) {
             List borders = new List();

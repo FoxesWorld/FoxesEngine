@@ -30,8 +30,8 @@ public class TextField extends JTextField {
 	private final String placeholder;
 
 	public TextField(ComponentFactory componentFactory) {
-		this.placeholder = componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey());
-		this.selectionColor = hexToColor(componentFactory.style.getSelectionColor());
+		this.placeholder = componentFactory.getEngine().getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey());
+		this.selectionColor = hexToColor(componentFactory.getStyle().getSelectionColor());
 		setOpaque(false);
 		setText(this.placeholder);
 

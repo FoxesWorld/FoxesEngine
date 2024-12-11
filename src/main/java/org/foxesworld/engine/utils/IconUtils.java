@@ -16,16 +16,18 @@ public class IconUtils {
 
     public ImageIcon getIcon(ComponentAttributes componentAttributes) {
         ImageIcon icon = null;
-        String iconPath = componentAttributes.getImageIcon();
-        if (iconPath.endsWith(".png") || iconPath.endsWith(".jpg")) {
-            icon = new ImageIcon(this.engine.getImageUtils().getScaledImage(this.engine.getImageUtils().getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
-            if (componentAttributes.getBorderRadius() != 0) {
-                icon = new ImageIcon(this.engine.getImageUtils().getRoundedImage(icon.getImage(), componentAttributes.getBorderRadius()));
+        if(componentAttributes.getImageIcon() != null) {
+            String iconPath = componentAttributes.getImageIcon();
+            if (iconPath.endsWith(".png") || iconPath.endsWith(".jpg")) {
+                icon = new ImageIcon(this.engine.getImageUtils().getScaledImage(this.engine.getImageUtils().getLocalImage(componentAttributes.getImageIcon()), componentAttributes.getIconWidth(), componentAttributes.getIconHeight()));
+                if (componentAttributes.getBorderRadius() != 0) {
+                    icon = new ImageIcon(this.engine.getImageUtils().getRoundedImage(icon.getImage(), componentAttributes.getBorderRadius()));
+                }
+            } else if (iconPath.endsWith(".svg")) {
+                icon = this.getVectorIcon(iconPath, componentAttributes.getIconWidth(), componentAttributes.getIconHeight());
+            } else if (iconPath.endsWith(".gif")) {
+                Engine.LOGGER.error("GIF is not supported yet!");
             }
-        } else if (iconPath.endsWith(".svg")) {
-            icon = this.getVectorIcon(iconPath, componentAttributes.getIconWidth(), componentAttributes.getIconHeight());
-        } else if (iconPath.endsWith(".gif")) {
-            Engine.LOGGER.error("GIF is not supported yet!");
         }
 
         return icon;

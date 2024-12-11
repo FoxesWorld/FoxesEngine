@@ -22,17 +22,17 @@ public class TextFieldStyle {
 
 	public TextFieldStyle(ComponentFactory componentFactory) {
 		this.componentFactory = componentFactory;
-		this.foregroundColor = hexToColor(componentFactory.style.getColor());
-		this.backgroundColor = hexToColor(componentFactory.style.getBackground());
-		this.setBorder(componentFactory.style);
-		this.caretColor = hexToColor(componentFactory.style.getCaretColor());
-		this.width = componentFactory.style.getWidth();
-		this.height = componentFactory.style.getHeight();
-		this.font = componentFactory.style.getFont();
-		this.fontSize = componentFactory.style.getFontSize();
-		this.texture = this.componentFactory.engine.getImageUtils().getLocalImage(componentFactory.style.getTexture());
-		if(componentFactory.style.getBorderRadius() != 0) {
-			this.texture = this.componentFactory.engine.getImageUtils().getRoundedImage(this.texture, componentFactory.style.getBorderRadius());
+		this.foregroundColor = hexToColor(componentFactory.getStyle().getColor());
+		this.backgroundColor = hexToColor(componentFactory.getStyle().getBackground());
+		this.setBorder(componentFactory.getStyle());
+		this.caretColor = hexToColor(componentFactory.getStyle().getCaretColor());
+		this.width = componentFactory.getStyle().getWidth();
+		this.height = componentFactory.getStyle().getHeight();
+		this.font = componentFactory.getStyle().getFont();
+		this.fontSize = componentFactory.getStyle().getFontSize();
+		this.texture = this.componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getStyle().getTexture());
+		if(componentFactory.getStyle().getBorderRadius() != 0) {
+			this.texture = this.componentFactory.getEngine().getImageUtils().getRoundedImage(this.texture, componentFactory.getStyle().getBorderRadius());
 		}
 	}
 
@@ -46,16 +46,16 @@ public class TextFieldStyle {
 
 	public void apply(TextField text) {
 		text.texture = texture;
-		text.setPaddingX(componentFactory.style.getPaddingX());
-		text.setPaddingY(componentFactory.style.getPaddingY());
+		text.setPaddingX(componentFactory.getStyle().getPaddingX());
+		text.setPaddingY(componentFactory.getStyle().getPaddingY());
 		text.setCaretColor(caretColor);
 		text.setBackground(backgroundColor);
 		text.setForeground(foregroundColor);
-		if(this.componentFactory.style.getBorderColor() != null) {
+		if(this.componentFactory.getStyle().getBorderColor() != null) {
 			text.setBorder(new BevelBorder(this.bevel, borderColor.get(0), borderColor.get(1)));
 		} else {
 			text.setBorder(null);
 		}
-		text.setFont(componentFactory.engine.getFONTUTILS().getFont(font, fontSize));
+		text.setFont(componentFactory.getEngine().getFONTUTILS().getFont(font, fontSize));
 	}
 }

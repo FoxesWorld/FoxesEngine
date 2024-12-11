@@ -1,7 +1,5 @@
 package org.foxesworld.engine.gui.components.compositeSlider;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.management.OperatingSystemMXBean;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
@@ -67,10 +65,10 @@ public class CompositeSlider extends JComponent {
     }
 
     private void configureLabel() {
-        labelStyle = new LabelStyle(componentFactory.engine.getStyleProvider()
+        labelStyle = new LabelStyle(componentFactory.getEngine().getStyleProvider()
                 .getElementStyles().get("label").get(componentAttribute.getStyles().get("label")));
         labelStyle.apply(label);
-        label.setFont(componentFactory.engine.getFONTUTILS().getFont(labelStyle.fontName, componentAttribute.getFontSize()));
+        label.setFont(componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), componentAttribute.getFontSize()));
     }
 
     private void configureSlider(List<Integer> values) {
@@ -80,14 +78,14 @@ public class CompositeSlider extends JComponent {
         slider.setMajorTickSpacing((values.get(values.size() - 1) - values.get(0)) / 9);
         slider.setMinorTickSpacing((values.get(1) - values.get(0)) / 2);
         slider.setOpaque(false);
-        slider.setUI(new TexturedSliderUI(componentFactory, slider, componentFactory.engine.getStyleProvider()
+        slider.setUI(new TexturedSliderUI(componentFactory, slider, componentFactory.getEngine().getStyleProvider()
                 .getElementStyles().get("slider").get(componentAttribute.getStyles().get("slider"))));
 
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
         for (int value : values) {
             JLabel tableLabel = new JLabel(String.valueOf(value));
-            tableLabel.setFont(this.componentFactory.engine.getFONTUTILS().getFont(labelStyle.fontName, this.componentAttribute.getFontSize()));
-            tableLabel.setForeground(labelStyle.activeColor);
+            tableLabel.setFont(this.componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), this.componentAttribute.getFontSize()));
+            tableLabel.setForeground(labelStyle.getActiveColor());
             labelTable.put(value, tableLabel);
         }
         slider.setLabelTable(labelTable);
@@ -180,5 +178,9 @@ public class CompositeSlider extends JComponent {
         }
         values.set(values.size() - 1, maxValue);
         return values;
+    }
+
+    public void setValue(int value){
+        this.slider.setValue(value);
     }
 }

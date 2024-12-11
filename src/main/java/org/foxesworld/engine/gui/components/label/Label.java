@@ -6,36 +6,55 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.Serial;
-
-
+import java.util.Arrays;
+import java.util.List;
 
 public class Label extends JLabel {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Label(ComponentFactory componentFactory) {
-		if(componentFactory.getComponentAttribute().getLocaleKey() != null) {
-			setText(componentFactory.getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
+		String localeKey = componentFactory.getComponentAttribute().getLocaleKey();
+		if (localeKey != null) {
+			setText(componentFactory.getEngine().getLANG().getString(localeKey));
 		}
-		setOpaque(componentFactory.style.isOpaque());
-		setPreferredSize(new Dimension((int) componentFactory.getBounds().getWidth(), (int) componentFactory.getBounds().getHeight()));
-		if(componentFactory.getComponentAttribute().getAlignment() != null) {
-			setHorizontalAlignment(LabelAlignment.fromString(componentFactory.getComponentAttribute().getAlignment()).getType());
+
+		setOpaque(componentFactory.getStyle().isOpaque());
+
+		Dimension preferredSize = new Dimension(
+				(int) componentFactory.getBounds().getWidth(),
+				(int) componentFactory.getBounds().getHeight()
+		);
+		setPreferredSize(preferredSize);
+
+		String alignment = componentFactory.getComponentAttribute().getAlignment();
+		if (alignment != null) {
+			setHorizontalAlignment(LabelAlignment.fromString(alignment).getType());
 		}
-		if(componentFactory.getComponentAttribute().getBorder() != null) {
-			List borders = new List();
-			for (String val : componentFactory.getComponentAttribute().getBorder().split(",")) {
-				borders.add(val);
-			}
-			setBorder(new EmptyBorder(
-					Integer.parseInt(borders.getItem(0)),
-					Integer.parseInt(borders.getItem(1)),
-					Integer.parseInt(borders.getItem(2)),
-					Integer.parseInt(borders.getItem(3))));
+
+		String border = componentFactory.getComponentAttribute().getBorder();
+		if (border != null) {
+			setBorder(parseBorder(border));
 		}
 	}
 
-	public void paintComponent(Graphics g) {
+	private EmptyBorder parseBorder(String border) {
+		List<Integer> borderValues = Arrays.stream(border.split(","))
+				.map(Integer::parseInt)
+				.toList();
+		if (borderValues.size() != 4) {
+			throw new IllegalArgumentException("Border must have exactly 4 values");
+		}
+		return new EmptyBorder(
+				borderValues.get(0),
+				borderValues.get(1),
+				borderValues.get(2),
+				borderValues.get(3)
+		);
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 	}
 }
