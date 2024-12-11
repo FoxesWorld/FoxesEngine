@@ -29,25 +29,26 @@ public class FileGuard {
         this.logger = this.gameLauncher.getLogger();
     }
 
-    @SuppressWarnings("unused")
     public void scanAndDeleteFilesInSubdirectories(Set<String> filesToKeep) {
-        totalFiles.set(countTotalFiles());
-        resetCounters();
+        this.gameLauncher.getEngine().getExecutorServiceProvider().submitTask(() -> {
+            totalFiles.set(countTotalFiles());
+            resetCounters();
 
-        logger.info("Ignoring the following directories:");
-        ignoreList.forEach(dir -> logger.info("  - {}", dir));
+            logger.info("Ignoring the following directories:");
+            ignoreList.forEach(dir -> logger.info("  - {}", dir));
 
-        for (String dir : checkList) {
-            logger.debug("Checking Directory: {}", dir);
-            if (fileGuardListener != null) {
-                fileGuardListener.onDirCheck(dir);
+            for (String dir : checkList) {
+                logger.debug("Checking Directory: {}", dir);
+                if (fileGuardListener != null) {
+                    fileGuardListener.onDirCheck(dir);
+                }
+                scanAndDeleteFilesRecursively(new File(dir), filesToKeep);
             }
-            scanAndDeleteFilesRecursively(new File(dir), filesToKeep);
-        }
 
-        if (fileGuardListener != null) {
-            fileGuardListener.onFilesChecked(filesDeleted.get());
-        }
+            if (fileGuardListener != null) {
+                fileGuardListener.onFilesChecked(filesDeleted.get());
+            }
+        }, "fileGuard");
     }
 
     private void resetCounters() {
@@ -179,7 +180,6 @@ public class FileGuard {
         return file.getName().endsWith(".txt");
     }
 
-    @SuppressWarnings("unused")
     public void setFileGuardListener(FileGuardListener fileGuardListener) {
         this.fileGuardListener = fileGuardListener;
     }

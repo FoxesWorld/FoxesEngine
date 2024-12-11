@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
 public class ExecutorServiceProvider {
@@ -34,14 +35,18 @@ public class ExecutorServiceProvider {
      */
     private ExecutorService initializeExecutorService(int poolSize) {
         Properties properties = new Properties();
+        Engine.LOGGER.info("Initializing ExecutorService with pool size: {}", poolSize);
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("executor-config.properties")) {
             if (input == null) {
+                Engine.LOGGER.warn("executor-config.properties not found, using default settings.");
                 return createDefaultExecutorService(poolSize);
             }
             properties.load(input);
             int configuredPoolSize = Integer.parseInt(properties.getProperty("executor.pool.size", String.valueOf(poolSize)));
+            Engine.LOGGER.info("Configured pool size from properties file: {}", configuredPoolSize);
             return createExecutorService(configuredPoolSize);
         } catch (IOException ex) {
+            Engine.LOGGER.error("Error loading executor-config.properties, using default settings: {}", ex.getMessage());
             return createDefaultExecutorService(poolSize);
         }
     }
@@ -52,6 +57,7 @@ public class ExecutorServiceProvider {
      * @return A default ExecutorService.
      */
     private ExecutorService createDefaultExecutorService(int poolSize) {
+        Engine.LOGGER.info("Creating default ExecutorService with pool size: {}", poolSize);
         return Executors.newFixedThreadPool(poolSize, new CustomThreadFactory(this.threadNamePrefix));
     }
 
@@ -62,6 +68,7 @@ public class ExecutorServiceProvider {
      * @return A custom ExecutorService.
      */
     private ExecutorService createExecutorService(int poolSize) {
+        Engine.LOGGER.info("Creating custom ExecutorService with pool size: {}", poolSize);
         return new ThreadPoolExecutor(
                 poolSize,
                 poolSize,
@@ -81,6 +88,7 @@ public class ExecutorServiceProvider {
     public void submitTask(Runnable task, String taskName) {
         String taskId = executorProgress.generateTaskId();
         executorProgress.addTask(taskId, taskName);
+        Engine.LOGGER.info("Submitting task: {} with ID: {}", taskName, taskId);
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
@@ -88,8 +96,10 @@ public class ExecutorServiceProvider {
                 try {
                     task.run();
                     executorProgress.updateTask(taskId, 100);
+                    Engine.LOGGER.info("Task completed: {} with ID: {}", taskName, taskId);
                 } finally {
                     executorProgress.removeTask(taskId);
+                    Engine.LOGGER.info("Task removed: {} with ID: {}", taskName, taskId);
                 }
                 return null;
             }
@@ -99,12 +109,44 @@ public class ExecutorServiceProvider {
                 try {
                     get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    Engine.LOGGER.error("Error executing task: {} with ID: {}: {}", taskName, taskId, e.getMessage());
                 }
             }
         };
 
         executorService.submit(worker);
+    }
+
+    public <T> void submitDynamicTaskWithCallback(Callable<T> task, String taskName, Consumer<T> callback) {
+        String taskId = executorProgress.generateTaskId();
+        executorProgress.addTask(taskId, taskName);
+        Engine.LOGGER.info("Submitting dynamic task: {} with ID: {}", taskName, taskId);
+
+        SwingWorker<T, Void> worker = new SwingWorker<>() {
+            @Override
+            protected T doInBackground() throws Exception {
+                return task.call();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    T result = get(); // Get the result of the task
+                    SwingUtilities.invokeLater(() -> {
+                        if (callback != null) {
+                            callback.accept(result); // Execute the callback with the result
+                        }
+                    });
+                } catch (Exception e) {
+                    Engine.LOGGER.error("Error executing dynamic task: {} with ID: {}: {}", taskName, taskId, e.getMessage());
+                } finally {
+                    executorProgress.removeTask(taskId);
+                    Engine.LOGGER.info("Dynamic task removed: {} with ID: {}", taskName, taskId);
+                }
+            }
+        };
+
+        executorService.submit(worker); // Submit the worker to the executor service
     }
 
     /**
@@ -136,6 +178,7 @@ public class ExecutorServiceProvider {
     protected void setRejectedExecutionHandler(RejectedExecutionHandler handler) {
         if (executorService instanceof ThreadPoolExecutor threadPoolExecutor) {
             threadPoolExecutor.setRejectedExecutionHandler(handler);
+            Engine.LOGGER.info("RejectedExecutionHandler set for the ExecutorService");
         }
     }
 
@@ -148,11 +191,11 @@ public class ExecutorServiceProvider {
         return this.executorService;
     }
 
-
     /**
      * Shuts down the ExecutorService.
      */
     public void shutdown() {
+        Engine.LOGGER.info("Shutting down ExecutorService");
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(60, TimeUnit.MILLISECONDS)) {

@@ -12,14 +12,12 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public abstract class GameLauncher {
     protected GameListener gameListener;
     protected ServerAttributes gameClient;
-    protected final ExecutorService executorService = Executors.newSingleThreadExecutor();
     protected Engine engine;
     protected Logger logger;
     protected ArgsReader argsReader;

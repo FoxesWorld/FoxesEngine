@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components.label;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.gui.styles.StyleAttributes;
 
 import java.awt.*;
 
@@ -18,6 +19,13 @@ public class LabelStyle {
 		this.fontSize = componentFactory.style.getFontSize();
 		this.idleColor = hexToColor(componentFactory.style.getColor());
 		this.activeColor = hexToColor(componentFactory.style.getColor());
+	}
+
+	public LabelStyle(StyleAttributes style){
+		this.fontName = style.getFont();
+		this.fontSize = style.getFontSize();
+		this.idleColor = hexToColor(style.getColor());
+		this.activeColor = hexToColor(style.getColor());
 	}
 
 	public void apply(Label label) {

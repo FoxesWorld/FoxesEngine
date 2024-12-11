@@ -2,12 +2,14 @@ package org.foxesworld.engine.gui.componentAccessor;
 
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
+import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
 import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -28,7 +30,8 @@ public class ComponentsAccessor {
             PassField.class, c -> ((PassField) c).getText(),
             Checkbox.class, c -> String.valueOf(((Checkbox) c).isSelected()),
             Slider.class, c -> String.valueOf(((Slider) c).getValue()),
-            DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex())
+            DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex()),
+            CompositeSlider.class, c -> String.valueOf(((CompositeSlider) c).getValue())
     );
 
     public ComponentsAccessor(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {

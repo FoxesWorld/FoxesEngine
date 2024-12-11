@@ -29,11 +29,12 @@ public class PassField extends JPasswordField {
         this.setOpaque(false);
 
         if (componentFactory.getComponentAttribute().isrevealButton()) {
-            this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
-            this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
+            this.showIcon = componentFactory.getIconUtils().getVectorIcon(componentFactory.getComponentAttribute().getShowIcon(), 16, 16);
+            this.hideIcon = componentFactory.getIconUtils().getVectorIcon(componentFactory.getComponentAttribute().getHideIcon(), 16, 16);
+
             // Initialize the icon label
             iconLabel = new JLabel(showIcon);
-            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 10));
+            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 0)); // Padding left for better spacing
             iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             iconLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -46,8 +47,14 @@ public class PassField extends JPasswordField {
                     togglePasswordVisibility();
                 }
             });
+
+            // Use layered layout to ensure proper positioning
+            JPanel iconPanel = new JPanel(new BorderLayout());
+            iconPanel.setOpaque(false); // To ensure the texture is not blocked
+            iconPanel.add(iconLabel, BorderLayout.CENTER);
+
             setLayout(new BorderLayout());
-            add(iconLabel, BorderLayout.EAST);
+            add(iconPanel, BorderLayout.EAST);
         }
 
         this.addFocusListener(new FocusAdapter() {
@@ -64,6 +71,7 @@ public class PassField extends JPasswordField {
             }
         });
     }
+
 
     private void startCaretBlinking() {
         if (caretTimer == null || !caretTimer.isRunning()) {

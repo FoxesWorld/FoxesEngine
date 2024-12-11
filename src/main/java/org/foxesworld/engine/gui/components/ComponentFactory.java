@@ -9,6 +9,7 @@ import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.button.ButtonStyle;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.checkbox.CheckboxStyle;
+import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
 import org.foxesworld.engine.gui.components.dropBox.DropBoxStyle;
 import org.foxesworld.engine.gui.components.label.Label;
@@ -66,25 +67,20 @@ public class ComponentFactory extends JComponent {
     }
 
     public void createComponentAsync(ComponentAttributes componentAttributes, ComponentCreationCallback callback) {
-        new SwingWorker<JComponent, Void>() {
-            @Override
-            protected JComponent doInBackground() {
-                return createComponent(componentAttributes);
+        // Using the dynamic task submission method with callback
+        this.engine.getExecutorServiceProvider().submitDynamicTaskWithCallback(() -> {
+            // Task logic for creating the component
+            return createComponent(componentAttributes); // This returns a JComponent
+        }, "create" + componentAttributes.getComponentType(), component -> {
+            // Callback when the component is created
+            if (component instanceof JComponent) {
+                SwingUtilities.invokeLater(() -> {
+                    callback.onComponentCreated(component); // Pass the created component to the callback
+                });
             }
-
-            @Override
-            protected void done() {
-                try {
-                    JComponent component = get();
-                    SwingUtilities.invokeLater(() -> {
-                        callback.onComponentCreated(component);
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }.execute();
+        });
     }
+
 
     public JComponent createComponent(ComponentAttributes componentAttributes) {
         customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
@@ -206,6 +202,7 @@ public class ComponentFactory extends JComponent {
 
             case "spinner" -> {
                 component = new Spinner(Integer.parseInt((String) componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
+                ((Spinner)component).init();
             }
 
             case "button" -> {
@@ -277,8 +274,17 @@ public class ComponentFactory extends JComponent {
                 ((Slider) component).setPaintLabels(true);
                 ((Slider) component).setSnapToTicks(true);
                 if(!Objects.equals(style.getThumbImage(), "") & !Objects.equals(style.getTrackImage(), "")) {
-                    ((Slider) component).setUI(new TexturedSliderUI(this, (Slider) component, style.getThumbImage(), style.getTrackImage()));
+                    ((Slider) component).setUI(new TexturedSliderUI(this, (Slider) component, style));
                 }
+            }
+
+            case "compositeSlider" -> {
+                component = new CompositeSlider(this);
+                //TexturedSliderUI sliderUI = new TexturedSliderUI(this, ((CompositeSlider) component).getSlider(), style);
+                //((CompositeSlider)component).getSlider().setUI(sliderUI);
+                //labelStyle.apply(((CompositeSlider) component).getLabel());
+                //((CompositeSlider)component).getLabel().setFont(this.engine.getFONTUTILS().getFont(labelStyle.fontName, componentAttributes.getFontSize()));
+                component.setOpaque(componentAttribute.isOpaque());
             }
 
             default -> throw new IllegalArgumentException("Unsupported component type: " + componentAttributes.getComponentType());
@@ -368,5 +374,9 @@ public class ComponentFactory extends JComponent {
 
     public ComponentValue getComponentValue() {
         return componentValue;
+    }
+
+    public Map<String, Map<String, StyleAttributes>> getComponentStyles() {
+        return componentStyles;
     }
 }

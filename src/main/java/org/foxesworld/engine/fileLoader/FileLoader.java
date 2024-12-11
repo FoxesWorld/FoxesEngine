@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class FileLoader {
 
+    private final Engine engine;
     private final AtomicBoolean isCancelled = new AtomicBoolean(false);
     private boolean forceUpdate = false;
     private final LoadingManager loadingManager;
@@ -25,7 +26,6 @@ public class FileLoader {
     private final String client;
     private final String version;
     private final DownloadUtils downloadUtils;
-    private final ExecutorService executorService;
     private final AtomicInteger filesDownloaded = new AtomicInteger(0);
     private final FileFetcher fileFetcher;
     private final FileValidator fileValidator;
@@ -36,12 +36,11 @@ public class FileLoader {
     private String fileExtension;
 
     public FileLoader(ActionHandler actionHandler) {
-        Engine engine = actionHandler.getEngine();
+        this.engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
         this.homeDir = Config.getFullPath();
         this.downloadUtils = new DownloadUtils(engine);
-        this.executorService = Executors.newFixedThreadPool(engine.getEngineData().getDownloadManager().getDownloadThreads());
         this.loadingManager = engine.getLoadingManager();
         this.fileFetcher = new FileFetcher(engine);
         this.fileValidator = new FileValidator();
@@ -58,7 +57,7 @@ public class FileLoader {
         loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
 
         fileFetcher.fetchDownloadList(client, version, getPlatformNumber())
-                .thenAcceptAsync(fileAttributes -> processFileAttributes(fileAttributes, forceUpdate), executorService)
+                .thenAcceptAsync(fileAttributes -> processFileAttributes(fileAttributes, forceUpdate))
                 .thenRun(this::onFilesProcessed)
                 .exceptionally(this::handleFileListRetrievalError);
     }
@@ -94,16 +93,18 @@ public class FileLoader {
     }
 
     public void downloadFiles() {
+
         int totalFiles = fileAttributes.size();
         if (totalFiles == 0) {
             fileLoaderListener.onFilesLoaded();
             return;
         }
+        this.engine.getExecutorServiceProvider().submitTask(() -> {
+            fileLoaderListener.onDownloadStart();
+            totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
 
-        fileLoaderListener.onDownloadStart();
-        totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
-
-        fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> downloadFile(file, totalFiles), executorService));
+            fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> downloadFile(file, totalFiles)));
+        }, "fileLoader");
     }
 
     private void downloadFile(FileAttributes file, int totalFiles) {
@@ -150,10 +151,9 @@ public class FileLoader {
     }
 
 
-
     public void cancel() {
         isCancelled.set(true);
-        executorService.shutdownNow();
+        //executorService.shutdownNow();
         fileLoaderListener.onCancel();
     }
 

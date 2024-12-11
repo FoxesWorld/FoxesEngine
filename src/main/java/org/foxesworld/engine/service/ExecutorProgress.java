@@ -13,7 +13,6 @@ import java.util.TimerTask;
 public class ExecutorProgress {
     private static final ConcurrentHashMap<String, TaskProgress> progressMap = new ConcurrentHashMap<>();
     private JFrame statusFrame;
-    //private JProgressBar globalProgressBar;
     private final JTextArea taskStatisticsArea = new JTextArea();
 
     private static final long UPDATE_INTERVAL = 100;
@@ -56,12 +55,11 @@ public class ExecutorProgress {
             @Override
             public void run() {
                 progressMap.remove(taskId);
-                updateStatistics(); // Update task statistics after removal
+                updateStatistics();
             }
-        }, 500); // Delay for 500ms
+        }, 500);
         updateStatistics();
     }
-
 
     private void startUpdating() {
         Timer updateTimer = new Timer();
@@ -77,14 +75,11 @@ public class ExecutorProgress {
         SwingUtilities.invokeLater(() -> {
             String statistics = getFormattedTaskStatistics();
             taskStatisticsArea.setText(statistics);
-
-            //int totalProgress = calculateTotalProgress();
-            //globalProgressBar.setValue(totalProgress);
         });
     }
 
     private void initializeFrame() {
-        statusFrame = new JFrame("Task Progress");
+        statusFrame = new JFrame("Task Manager");
         statusFrame.setLayout(new BorderLayout());
         statusFrame.setSize(650, 350);
         statusFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -94,22 +89,17 @@ public class ExecutorProgress {
         int y = (screenSize.height - statusFrame.getHeight()) / 2;
         statusFrame.setLocation(x, y);
 
-        //globalProgressBar = new JProgressBar(0, 100);
-        //globalProgressBar.setStringPainted(true);
-        //globalProgressBar.setForeground(new Color(76, 175, 80));
-
         taskStatisticsArea.setEditable(false);
         taskStatisticsArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         taskStatisticsArea.setBackground(new Color(245, 245, 245));
         taskStatisticsArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel statsPanel = new JPanel(new BorderLayout());
-        statsPanel.setBorder(BorderFactory.createTitledBorder("Task Statistics"));
+        statsPanel.setBorder(BorderFactory.createTitledBorder("Task Manager"));
         statsPanel.add(new JScrollPane(taskStatisticsArea), BorderLayout.CENTER);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        //mainPanel.add(globalProgressBar);
         mainPanel.add(statsPanel);
 
         statusFrame.add(mainPanel, BorderLayout.CENTER);
@@ -197,3 +187,4 @@ public class ExecutorProgress {
         return statusFrame;
     }
 }
+

@@ -7,7 +7,6 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.Timer;
 
 public class SoundPlayer implements LineListener {
 
@@ -17,10 +16,12 @@ public class SoundPlayer implements LineListener {
     private final Map<Clip, PlaybackStatusListener> clipListeners = new HashMap<>();
     private final Map<Clip, String> clipPaths = new HashMap<>();
     private final Map<Clip, Timer> clipTimers = new HashMap<>();
+    private volatile int activeClipCount = 0;
+    private volatile Runnable stopAllSoundsCallback;
 
     public SoundPlayer(Engine engine) {
         this.engine = engine;
-        vorbisAudioFileReader = new VorbisAudioFileReader();
+        this.vorbisAudioFileReader = new VorbisAudioFileReader();
     }
 
     public void playSound(String path, boolean loop, PlaybackStatusListener listener) {
@@ -57,11 +58,11 @@ public class SoundPlayer implements LineListener {
                     startPlaybackTimer(clip, path, listener);
                 } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
                     // Handle exception
+                    e.printStackTrace();
                 }
             }, "Play Sound Task");
         }
     }
-
 
     public void playSound(String path, boolean loop) {
         playSound(path, loop, null);
@@ -92,23 +93,38 @@ public class SoundPlayer implements LineListener {
                     listener.onPlaybackProgress(path, microsecondPosition, microsecondLength);
                 }
             }
-        }, 0, UPDATE_RATE); // Update every second
+        }, 0, UPDATE_RATE); // Update at the specified rate
     }
 
-    @SuppressWarnings("unused")
     public void changeActiveVolume(float volume) {
         for (Clip clip : clipListeners.keySet()) {
             setVolume(clip, volume);
         }
     }
 
-    public void stopAllSounds() {
+    public void stopAllSounds(Runnable onStopAction) {
         synchronized (clipListeners) {
+            stopAllSoundsCallback = onStopAction;
+            activeClipCount = 0;
             for (Clip clip : new HashSet<>(clipListeners.keySet())) {
                 if (clip.isRunning()) {
+                    activeClipCount++;
                     fadeOut(clip);
                 }
             }
+            checkAndRunCallback();
+        }
+    }
+
+    public void stopAllSounds() {
+        stopAllSounds(null);
+    }
+
+
+    private void checkAndRunCallback() {
+        if (activeClipCount == 0 && stopAllSoundsCallback != null) {
+            stopAllSoundsCallback.run();
+            stopAllSoundsCallback = null;
         }
     }
 
@@ -139,12 +155,12 @@ public class SoundPlayer implements LineListener {
                     if (timer != null) {
                         timer.cancel();
                     }
+                    activeClipCount--;
+                    checkAndRunCallback();
                 }
             }
         }).start();
     }
-
-
     @Override
     public void update(LineEvent event) {
         Clip clip = (Clip) event.getLine();
@@ -160,6 +176,9 @@ public class SoundPlayer implements LineListener {
                 if (listener != null && path != null) {
                     listener.onPlaybackStopped(path);
                 }
+
+                activeClipCount--;
+                checkAndRunCallback();
             }
             clip.close();
         }

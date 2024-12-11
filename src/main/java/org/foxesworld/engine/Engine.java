@@ -300,7 +300,6 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
     public OperatingSystemMXBean getOsBean() {
         return osBean;
     }
-
     public ExecutorServiceProvider getExecutorServiceProvider() {
         return executorServiceProvider;
     }

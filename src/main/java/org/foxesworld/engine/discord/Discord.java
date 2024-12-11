@@ -5,7 +5,6 @@ import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
 import org.foxesworld.engine.Engine;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +16,7 @@ public class Discord implements DiscordListener {
     private  String smallImageText, largeImageText;
     private final DiscordRPC lib;
     private final DiscordRichPresence presence;
-    private final  Engine engine;
+    private final Engine engine;
     private final AtomicBoolean shutdownRequested = new AtomicBoolean(false);
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();

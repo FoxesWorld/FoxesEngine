@@ -7,10 +7,9 @@ public class Spinner extends JSpinner {
     private SpinnerListener spinnerListener;
     public Spinner(Number initialValue, Comparable<?> minimum, Comparable<?> maximum, Number stepSize) {
         super(new SpinnerNumberModel(initialValue, minimum, maximum, stepSize));
-        init();
     }
 
-    private void init() {
+    public void init() {
         addChangeListener(e -> spinnerListener.onSpinnerChange(this));
     }
 
