@@ -145,7 +145,8 @@ public class ComponentFactory extends JComponent {
         Label label = new Label(this);
         labelStyle.apply(label);
         label.setIcon(iconUtils.getIcon(componentAttributes));
-        label.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
+        String initial = (componentAttributes.getInitialValue() != null) ? String.valueOf(componentAttributes.getInitialValue()) : "";
+        label.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + initial);
         label.setForeground(hexToColor(componentAttributes.getColor()));
         label.setFont(engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
         return label;
@@ -156,7 +157,8 @@ public class ComponentFactory extends JComponent {
         TextArea textArea = new TextArea(this);
         textArea.setLineWrap(componentAttributes.isLineWrap());
         areaStyle.apply(textArea);
-        textArea.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + componentAttributes.getInitialValue());
+        String initial = (componentAttributes.getInitialValue() != null) ? String.valueOf(componentAttributes.getInitialValue()) : "";
+        textArea.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + initial);
         textArea.setForeground(hexToColor(componentAttributes.getColor()));
         textArea.setEditable(componentAttributes.isEnabled());
         textArea.setFont(engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
@@ -168,6 +170,22 @@ public class ComponentFactory extends JComponent {
         Checkbox checkbox = new Checkbox(this, LANG.getString(componentAttributes.getLocaleKey()));
         checkboxStyle.apply(checkbox);
         checkbox.setSelected(Boolean.parseBoolean(String.valueOf(componentAttributes.getInitialValue())));
+        if (componentAttributes.getKeyCode() != null) {
+            checkbox.setFocusable(true);
+            checkbox.requestFocus();
+            KeyStroke keyStroke = KeyStroke.getKeyStroke(componentAttributes.getKeyCode());
+            AbstractAction buttonAction = new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    checkbox.toggleCheckbox();
+                    checkbox.doClick();
+                }
+            };
+
+            checkbox.getActionMap().put(componentAttributes.getComponentId(), buttonAction);
+            checkbox.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, componentAttributes.getComponentId());
+            checkbox.setEnabled(componentAttributes.isEnabled());
+        }
         return checkbox;
     }
 
@@ -206,6 +224,23 @@ public class ComponentFactory extends JComponent {
         button.setBounds(bounds);
         button.setActionCommand(componentAttributes.getComponentId());
         button.addActionListener(engine);
+        if (componentAttributes.getKeyCode() != null) {
+            button.setFocusable(true);
+            button.requestFocus();
+            KeyStroke keyStroke = KeyStroke.getKeyStroke(componentAttributes.getKeyCode());
+            AbstractAction buttonAction = new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    button.ButtonClick();
+                    button.doClick();
+                    button.setPressed(false);
+                }
+            };
+
+            button.getActionMap().put(componentAttributes.getComponentId(), buttonAction);
+            button.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, componentAttributes.getComponentId());
+            button.setEnabled(componentAttributes.isEnabled());
+        }
         return button;
     }
 

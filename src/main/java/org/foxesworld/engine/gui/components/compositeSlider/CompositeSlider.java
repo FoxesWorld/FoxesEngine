@@ -84,7 +84,7 @@ public class CompositeSlider extends JComponent {
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
         for (int value : values) {
             JLabel tableLabel = new JLabel(String.valueOf(value));
-            tableLabel.setFont(this.componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), this.componentAttribute.getFontSize()));
+            tableLabel.setFont(this.componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), this.componentAttribute.getFontSize() - 3f));
             tableLabel.setForeground(labelStyle.getActiveColor());
             labelTable.put(value, tableLabel);
         }
@@ -170,13 +170,19 @@ public class CompositeSlider extends JComponent {
         return new SliderRange(minValue, maxValue, initialValue, values);
     }
 
-    private List<Integer> getValues(int minValue, int maxValue, int steps) {
-        int step = (maxValue - minValue) / steps;
-        List<Integer> values = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            values.add(minValue + i * step);
+    public List<Integer> getValues(int minValue, int maxValue, int steps) {
+        if (steps < 2) {
+            throw new IllegalArgumentException("Steps must be at least 2 to create a range.");
         }
-        values.set(values.size() - 1, maxValue);
+
+        List<Integer> values = new ArrayList<>();
+        double step = (double) (maxValue - minValue) / (steps - 1);
+
+        for (int i = 0; i < steps; i++) {
+            int value = minValue + (int) Math.round(i * step);
+            values.add(value);
+        }
+
         return values;
     }
 
