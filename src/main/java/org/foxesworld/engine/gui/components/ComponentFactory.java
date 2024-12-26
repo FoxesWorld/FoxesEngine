@@ -11,6 +11,7 @@ import org.foxesworld.engine.gui.components.checkbox.*;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
 import org.foxesworld.engine.gui.components.dropBox.*;
+import org.foxesworld.engine.gui.components.fileSelector.FileSelector;
 import org.foxesworld.engine.gui.components.label.*;
 import org.foxesworld.engine.gui.components.label.Label;
 import org.foxesworld.engine.gui.components.multiButton.MultiButton;
@@ -92,12 +93,15 @@ public class ComponentFactory extends JComponent {
     }
 
     private void initializeTooltip(ComponentAttributes componentAttributes) {
-        customTooltip = new CustomTooltip(hexToColor("#000000c4"), Color.WHITE, 15, new Font("Arial", Font.PLAIN, 12));
+        String toolTipStyle = "default";
         if (componentAttributes.getToolTip() != null) {
-            TooltipAttributes attributes = loadTooltipAttributes(componentAttributes.getTooltipStyle());
-            if (attributes != null) {
-                customTooltip = new CustomTooltip(hexToColor(attributes.getBgColor()), hexToColor(attributes.getTextColor()), attributes.getBorderRadius(), engine.getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize()));
+            if (componentAttributes.getTooltipStyle() != null) {
+                toolTipStyle = componentAttributes.getTooltipStyle();
+                } else {
+                Engine.LOGGER.warn("You have tooltip for #{} but no style! Using `default`", componentAttributes.getComponentId());
             }
+            TooltipAttributes attributes = loadTooltipAttributes(toolTipStyle);
+            customTooltip = new CustomTooltip(hexToColor(attributes.getBgColor()), hexToColor(attributes.getTextColor()), attributes.getBorderRadius(), this.getEngine().getFONTUTILS().getFont(attributes.getFont(), attributes.getFontSize()));
         }
     }
 
@@ -126,6 +130,7 @@ public class ComponentFactory extends JComponent {
             case "serverBox" -> component = createServerBox(componentAttributes);
             case "slider" -> component = createSlider(componentAttributes);
             case "compositeSlider" -> component = createCompositeSlider(componentAttributes);
+            case "fileSelector"-> component = createFileSelector(componentAttributes);
             default -> throw new IllegalArgumentException("Unsupported component type: " + componentAttributes.getComponentType());
         }
 
@@ -213,7 +218,9 @@ public class ComponentFactory extends JComponent {
 
     private JComponent createSpinner(ComponentAttributes componentAttributes) {
         Spinner spinner = new Spinner(Integer.parseInt((String) componentAttributes.getInitialValue()), componentAttributes.getMinValue(), componentAttributes.getMaxValue(), componentAttributes.getMajorSpacing());
-        spinner.init();
+        if(spinner.getSpinnerListener() != null) {
+            spinner.init();
+        }
         return spinner;
     }
 
@@ -283,6 +290,12 @@ public class ComponentFactory extends JComponent {
         return compositeSlider;
     }
 
+    private JComponent createFileSelector(ComponentAttributes componentAttributes) {
+        FileSelector fileSelector = new FileSelector(this);
+        //fileSelector.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
+        return fileSelector;
+    }
+
     private void setTooltip(JComponent component, ComponentAttributes componentAttributes) {
         if(componentAttributes.getToolTip() != null) {
             if(component.getBounds() != null) {
@@ -293,7 +306,7 @@ public class ComponentFactory extends JComponent {
     }
 
     private TooltipAttributes loadTooltipAttributes(String tooltipStyle) {
-        JsonObject jsonObject = parseJson("tooltips.json");
+        JsonObject jsonObject = parseJson("assets/styles/tooltip.json");
         return jsonObject != null ? new Gson().fromJson(jsonObject.get(tooltipStyle), TooltipAttributes.class) : null;
     }
 

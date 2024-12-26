@@ -7,22 +7,22 @@
     "fontSize": 12
   },
   "warning": {
-    "bgColor": "#FFA500",
-    "textColor": "#000000",
+    "bgColor": "#000000c4",
+    "textColor": "#a8a21c",
     "font": "mcfont",
     "borderRadius": 15,
-    "fontSize": 14
+    "fontSize": 12
   },
   "error": {
-    "bgColor": "#FF0000",
-    "textColor": "#FFFFFF",
-    "font": "FSElliotPro-Heavy",
+    "bgColor": "#000000c4",
+    "textColor": "#d14f16",
+    "font": "mcfont",
     "borderRadius": 20,
     "fontSize": 12
   },
   "success": {
-    "bgColor": "#008000",
-    "textColor": "#FFFFFF",
+    "bgColor": "#000000c4",
+    "textColor": "#22ba44",
     "font": "mcfont",
     "borderRadius": 15,
     "fontSize": 12

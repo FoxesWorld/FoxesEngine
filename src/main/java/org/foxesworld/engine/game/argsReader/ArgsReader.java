@@ -21,25 +21,23 @@ public class ArgsReader {
     private JsonArray jvmArguments, gameArguments;
     private LibraryReader libraryReader;
     private final String path;
-    private GameLauncher gameLauncher;
+    private final GameLauncher gameLauncher;
     private String mainClass, assets;
     private boolean authLib;
 
-    public ArgsReader(GameLauncher gameLauncher){
+    public ArgsReader(GameLauncher gameLauncher, boolean checkHash){
         this.gameLauncher = gameLauncher;
         this.path = gameLauncher.getPathBuilders().getArgsFile();
         this.ruleChecker = new RuleChecker();
         if(new File(path).exists()) {
-            this.libraryReader = new LibraryReader(this);
+            this.libraryReader = new LibraryReader(this, checkHash);
             this.readArgs();
         }
     }
 
     private void readArgs() {
-        try {
-            FileReader fileReader = new FileReader(path);
-            JsonParser jsonParser = new JsonParser();
-            JsonObject jsonObject = (JsonObject) jsonParser.parse(fileReader);
+        try (FileReader fileReader = new FileReader(path)) {
+            JsonObject jsonObject = JsonParser.parseReader(fileReader).getAsJsonObject();
 
             mainClass = jsonObject.get("mainClass").getAsString();
             authLib = jsonObject.get("authLib").getAsBoolean();
@@ -49,12 +47,12 @@ public class ArgsReader {
             gameArguments = jsonObject.getAsJsonObject("arguments").getAsJsonArray("game");
 
             jvmArguments = applyRules(jvmArguments);
-            //gameArguments = applyRules(gameArguments);
-            fileReader.close();
+            // gameArguments = applyRules(gameArguments);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     private JsonArray applyRules(JsonArray argumentsArray) {
         JsonArray resultArray = new JsonArray();

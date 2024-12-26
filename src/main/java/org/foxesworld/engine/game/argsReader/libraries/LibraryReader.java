@@ -20,14 +20,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class LibraryReader {
+    private final boolean checkHash;
     private final RuleChecker ruleChecker;
     private final String path, currentOS;
     private final GameLauncher gameLauncher;
     private List<Library> libraries = new ArrayList<>(); //Do not remove the initializer!11!!!1
     private long size;
 
-    public LibraryReader(ArgsReader argsReader) {
+    public LibraryReader(ArgsReader argsReader, boolean checkHash) {
         this.gameLauncher = argsReader.getGameLauncher();
+        this.checkHash = checkHash;
         this.path = this.gameLauncher.getPathBuilders().getArgsFile();
         this.ruleChecker = new RuleChecker();
         currentOS = Engine.currentOS;
@@ -40,16 +42,26 @@ public class LibraryReader {
             JsonObject jsonObject = new Gson().fromJson(reader, JsonObject.class);
             JsonArray librariesArray = jsonObject.getAsJsonArray("libraries");
             Engine.LOGGER.debug("Total libraries to process: {}", librariesArray.size());
+
             if (libraries.size() != librariesArray.size()) {
                 for (JsonElement libraryElement : librariesArray) {
                     JsonObject libraryObject = libraryElement.getAsJsonObject();
                     if (isLibraryAllowed(libraryObject)) {
                         Library library = convertToLibrary(libraryObject);
-                        libraryFullPath = this.gameLauncher.getPathBuilders().buildLibrariesPath() + File.separator + library.getArtifact().getPath();
-                        if (new File(libraryFullPath).exists()) {
-                            if (library.getArtifact().getSha1().equals(HashUtils.calculateSHA1(libraryFullPath))) {
+                        libraryFullPath = this.gameLauncher.getPathBuilders().buildLibrariesPath()
+                                + File.separator + library.getArtifact().getPath();
+
+                        File libraryFile = new File(libraryFullPath);
+                        if (libraryFile.exists()) {
+                            boolean isValidHash = library.getArtifact().getSha1().equals(HashUtils.calculateSHA1(libraryFullPath));
+
+                            if (this.checkHash && isValidHash) {
                                 size += library.getArtifact().getSize() / (1024 * 1024);
                                 Engine.LOGGER.debug("Adding {} for {} ENV", library.getName(), currentOS);
+                                libraries.add(library);
+                            } else if (!this.checkHash) {
+                                size += library.getArtifact().getSize() / (1024 * 1024);
+                                Engine.LOGGER.debug("Adding {} for {} ENV (hash skipped) Damn you legacy lover", library.getName(), currentOS);
                                 libraries.add(library);
                             } else {
                                 Engine.LOGGER.warn("Invalid hash for {} library skipped", libraryFullPath);
@@ -67,6 +79,8 @@ public class LibraryReader {
         }
         return libraries;
     }
+
+
 
     private boolean isLibraryAllowed(JsonObject libraryObject) {
         return ruleChecker.checkRules(libraryObject) && ruleChecker.checkPlatform(libraryObject, "natives") && ruleChecker.checkPlatform(libraryObject, "classifies");

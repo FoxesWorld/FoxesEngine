@@ -5,7 +5,9 @@ import org.foxesworld.engine.Engine;
 import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -15,6 +17,7 @@ public class ExecutorServiceProvider {
     private final ExecutorService executorService;
     private final ExecutorProgress executorProgress;
     private final String threadNamePrefix;
+    private final ConcurrentHashMap<UUID, SwingWorker<?, ?>> taskMap = new ConcurrentHashMap<>();
 
     /**
      * Constructor to initialize the ExecutorServiceProvider with a specified pool size and thread name prefix.
@@ -84,24 +87,33 @@ public class ExecutorServiceProvider {
      *
      * @param task     The task to execute.
      * @param taskName The name of the task.
+     * @return The UUID of the submitted task.
      */
-    public void submitTask(Runnable task, String taskName) {
-        String taskId = executorProgress.generateTaskId();
-        executorProgress.addTask(taskId, taskName);
+    public UUID submitTask(Runnable task, String taskName) {
+        UUID taskId = UUID.randomUUID();
+        executorProgress.addTask(taskId.toString(), taskName);
         Engine.LOGGER.debug("Submitting task: {} with ID: {}", taskName, taskId);
 
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 try {
                     task.run();
-                    executorProgress.updateTask(taskId, 100);
+                    publish(100);  // Mark progress as complete
                     Engine.LOGGER.debug("Task completed: {} with ID: {}", taskName, taskId);
                 } finally {
-                    executorProgress.removeTask(taskId);
+                    executorProgress.removeTask(taskId.toString());
+                    taskMap.remove(taskId);
                     Engine.LOGGER.debug("Task removed: {} with ID: {}", taskName, taskId);
                 }
                 return null;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                for (int progress : chunks) {
+                    executorProgress.updateTask(taskId.toString(), progress);
+                }
             }
 
             @Override
@@ -115,38 +127,77 @@ public class ExecutorServiceProvider {
         };
 
         executorService.submit(worker);
+        taskMap.put(taskId, worker);
+        return taskId;
     }
 
-    public <T> void submitDynamicTaskWithCallback(Callable<T> task, String taskName, Consumer<T> callback) {
-        String taskId = executorProgress.generateTaskId();
-        executorProgress.addTask(taskId, taskName);
+    /**
+     * Submits a dynamic task to the executor service with a callback and progress tracking.
+     *
+     * @param task     The task to execute.
+     * @param taskName The name of the task.
+     * @param callback The callback to execute with the result of the task.
+     * @param <T>      The type of the result produced by the task.
+     * @return The UUID of the submitted task.
+     */
+    public <T> UUID submitDynamicTaskWithCallback(Callable<T> task, String taskName, Consumer<T> callback) {
+        UUID taskId = UUID.randomUUID();
+        executorProgress.addTask(taskId.toString(), taskName);
         Engine.LOGGER.debug("Submitting dynamic task: {} with ID: {}", taskName, taskId);
 
-        SwingWorker<T, Void> worker = new SwingWorker<>() {
+        SwingWorker<T, Integer> worker = new SwingWorker<>() {
             @Override
             protected T doInBackground() throws Exception {
-                return task.call();
+                T result = task.call();
+                publish(100);  // Mark progress as complete
+                return result;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                for (int progress : chunks) {
+                    executorProgress.updateTask(taskId.toString(), progress);
+                }
             }
 
             @Override
             protected void done() {
                 try {
-                    T result = get(); // Get the result of the task
+                    T result = get();
                     SwingUtilities.invokeLater(() -> {
                         if (callback != null) {
-                            callback.accept(result); // Execute the callback with the result
+                            callback.accept(result);
                         }
                     });
                 } catch (Exception e) {
                     Engine.LOGGER.error("Error executing dynamic task: {} with ID: {}: {}", taskName, taskId, e.getMessage());
                 } finally {
-                    executorProgress.removeTask(taskId);
+                    executorProgress.removeTask(taskId.toString());
+                    taskMap.remove(taskId);
                     Engine.LOGGER.debug("Dynamic task removed: {} with ID: {}", taskName, taskId);
                 }
             }
         };
 
-        executorService.submit(worker); // Submit the worker to the executor service
+        executorService.submit(worker);
+        taskMap.put(taskId, worker);
+        return taskId;
+    }
+
+    /**
+     * Completes the task with the given UUID.
+     *
+     * @param taskId The UUID of the task to complete.
+     */
+    public void completeTask(UUID taskId) {
+        SwingWorker<?, ?> worker = taskMap.remove(taskId);
+        if (worker != null) {
+            worker.cancel(true);
+            executorProgress.removeTask(taskId.toString());
+            Engine.LOGGER.info("Task completed: {}", taskId);
+        } else {
+            Engine.LOGGER.warn("No task found with ID: {}", taskId);
+        }
     }
 
     /**
@@ -178,7 +229,7 @@ public class ExecutorServiceProvider {
     protected void setRejectedExecutionHandler(RejectedExecutionHandler handler) {
         if (executorService instanceof ThreadPoolExecutor threadPoolExecutor) {
             threadPoolExecutor.setRejectedExecutionHandler(handler);
-            Engine.LOGGER.debug("RejectedExecutionHandler set for the ExecutorService");
+            Engine.LOGGER.info("RejectedExecutionHandler set for the ExecutorService");
         }
     }
 

@@ -32,4 +32,8 @@ public class Spinner extends JSpinner {
     public void setSpinnerListener(SpinnerListener spinnerListener) {
         this.spinnerListener = spinnerListener;
     }
+
+    public SpinnerListener getSpinnerListener() {
+        return spinnerListener;
+    }
 }

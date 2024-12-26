@@ -1,60 +1,43 @@
 package org.foxesworld.engine.service;
 
-class TaskProgress {
-    private final String name;
+public class TaskProgress {
+    private final String taskName;
     private int progress;
     private long memoryUsage;
-    private OnUpdateListener onUpdateListener;
+    private boolean isCompleted;
 
-    interface OnUpdateListener {
-        void onUpdate(int progress, long memoryUsage);
-    }
-
-    TaskProgress(String name) {
-        this.name = name;
+    public TaskProgress(String taskName) {
+        this.taskName = taskName;
         this.progress = 0;
         this.memoryUsage = 0;
+        this.isCompleted = false;
     }
 
-    public void setProgress(int progress) {
-        this.progress = progress;
-        notifyUpdate();
+    public String getTaskName() {
+        return taskName;
     }
 
     public int getProgress() {
         return progress;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setMemoryUsage(long memoryUsage) {
-        this.memoryUsage = memoryUsage;
-        notifyUpdate();
+    public void setProgress(int progress) {
+        this.progress = progress;
     }
 
     public long getMemoryUsage() {
         return memoryUsage;
     }
 
-    public boolean isComplete() {
-        return progress >= 100;
+    public void setMemoryUsage(long memoryUsage) {
+        this.memoryUsage = memoryUsage;
     }
 
-    public void setOnUpdateListener(OnUpdateListener listener) {
-        this.onUpdateListener = listener;
+    public boolean isCompleted() {
+        return isCompleted;
     }
 
-    private void notifyUpdate() {
-        if (onUpdateListener != null) {
-            onUpdateListener.onUpdate(progress, memoryUsage);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Task[name='%s', progress=%d%%, memoryUsage=%d bytes]",
-                name, progress, memoryUsage);
+    public void complete() {
+        this.isCompleted = true;
     }
 }

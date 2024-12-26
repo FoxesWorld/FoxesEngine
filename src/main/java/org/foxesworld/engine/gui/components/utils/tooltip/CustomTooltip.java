@@ -4,9 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 public class CustomTooltip extends JWindow {
     private static final List<WeakReference<CustomTooltip>> activeTooltips = new ArrayList<>();
@@ -19,17 +18,20 @@ public class CustomTooltip extends JWindow {
         setLayout(new BorderLayout());
         setBackground(new Color(0, 0, 0, 0));
 
+        // Панель с закругленными углами
         RoundedPanel panel = new RoundedPanel(borderRadius);
         panel.setBackground(backgroundColor);
         panel.setLayout(new BorderLayout());
         panel.setOpaque(false);
 
+        // Метка с текстом тултипа
         label = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentOpacity));
+                super.paintComponent(g2d);
                 g2d.dispose();
             }
         };
@@ -44,69 +46,62 @@ public class CustomTooltip extends JWindow {
     }
 
     public void attachToComponent(JComponent component, String tooltipText, int autoHideDelay) {
-            if (component.isEnabled()) {
-                label.setText(tooltipText);
-                setSize(Math.max(150, tooltipText.length() * 10), 50);
-                activeTooltips.add(new WeakReference<>(this));
+        if (component.isEnabled()) {
+            label.setText(tooltipText);
+            setSize(Math.max(150, tooltipText.length() * 10), 50);
+            activeTooltips.add(new WeakReference<>(this));
 
-                component.addMouseListener(new MouseAdapter() {
-                    private Timer hoverDelayTimer;
+            component.addMouseListener(new MouseAdapter() {
+                private javax.swing.Timer hoverDelayTimer;
 
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        hoverDelayTimer = new Timer();
-                        hoverDelayTimer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                SwingUtilities.invokeLater(() -> {
-                                    Point location = component.getLocationOnScreen();
-                                    setLocation(location.x, location.y + component.getHeight() + 5);
-                                    setVisible(true);
-                                    startAutoHideTimer(autoHideDelay);
-                                });
-                            }
-                        }, 500);
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        if (hoverDelayTimer != null) {
-                            hoverDelayTimer.cancel();
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    hoverDelayTimer = new javax.swing.Timer(500, evt -> {
+                        if (component.isShowing()) {
+                            Point location = component.getLocationOnScreen();
+                            setLocation(location.x, location.y + component.getHeight() + 5);
+                            setVisible(true);
+                            startAutoHideTimer(autoHideDelay);
                         }
-                        cancelAutoHideTimer();
-                        fadeOutTooltip();
+                    });
+                    hoverDelayTimer.setRepeats(false);
+                    hoverDelayTimer.start();
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if (hoverDelayTimer != null) {
+                        hoverDelayTimer.stop();
                     }
-                });
-            }
+                    cancelAutoHideTimer();
+                    fadeOutTooltip();
+                }
+            });
+        }
     }
 
     private void startAutoHideTimer(int delay) {
         cancelAutoHideTimer();
-        tooltipTimer = new Timer();
-        tooltipTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                fadeOutTooltip();
-            }
-        }, delay);
+        tooltipTimer = new javax.swing.Timer(delay, e -> fadeOutTooltip());
+        tooltipTimer.setRepeats(false);
+        tooltipTimer.start();
     }
 
     private void cancelAutoHideTimer() {
         if (tooltipTimer != null) {
-            tooltipTimer.cancel();
+            tooltipTimer.stop();
             tooltipTimer = null;
         }
     }
 
     private void fadeOutTooltip() {
         if (fadeOutTimer != null) {
-            fadeOutTimer.cancel();
+            fadeOutTimer.stop();
         }
 
-        fadeOutTimer = new Timer();
-        fadeOutTimer.scheduleAtFixedRate(new TimerTask() {
+        fadeOutTimer = new javax.swing.Timer(30, new ActionListener() {
             @Override
-            public void run() {
+            public void actionPerformed(ActionEvent e) {
                 if (currentOpacity > 0) {
                     currentOpacity -= 0.05f;
                     currentOpacity = Math.max(0.0f, currentOpacity);
@@ -115,10 +110,11 @@ public class CustomTooltip extends JWindow {
                     setVisible(false);
                     dispose();
                     activeTooltips.removeIf(ref -> ref.get() == CustomTooltip.this);
-                    fadeOutTimer.cancel();
+                    fadeOutTimer.stop();
                 }
             }
-        }, 0, 30);
+        });
+        fadeOutTimer.start();
     }
 
     public void clearAllTooltips() {

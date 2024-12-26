@@ -6,6 +6,7 @@ public class ServerAttributes {
     private int id, port;
     @SuppressWarnings("unused")
     private String serverName, serverVersion, jreVersion,  serverImage, serverDescription, client, host, ignoreDirs, modsInfo;
+    private boolean checkLib;
     //mainClass, forgeVersion, forgeGroup, mcpVersion
 
     @SuppressWarnings("unused")
@@ -56,6 +57,10 @@ public class ServerAttributes {
     @SuppressWarnings("unused")
     public String getIgnoreDirs() {
         return ignoreDirs;
+    }
+
+    public boolean isCheckLib() {
+        return checkLib;
     }
 
     public String getModsInfo() {

@@ -2,6 +2,7 @@ package org.foxesworld.engine.gui.components;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -14,6 +15,7 @@ public class ComponentAttributes extends Attributes {
     private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
     private  Object initialValue;
     private Map<String, String> styles;
+    private List<String> fileExtensions;
     private LayoutConfig layoutConfig;
     private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, type, style, id,background, thumbImage, trackImage, alignment, toolTip, showIcon, hideIcon;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius, stepSize;
@@ -96,6 +98,11 @@ public class ComponentAttributes extends Attributes {
     public int getDelay() {
         return delay;
     }
+
+    public List<String> getFileExtensions() {
+        return fileExtensions;
+    }
+
     public String getShowIcon() {
         return showIcon;
     }
