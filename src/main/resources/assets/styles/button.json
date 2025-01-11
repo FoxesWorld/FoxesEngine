@@ -8,7 +8,7 @@
         "width": 98,
         "height": 196,
         "borderRadius": 10,
-        "color": "#4c4946",
+        "color": "#763509",
         "hoverColor": "#fce4ab",
         "align": "CENTER",
         "texture": "assets/ui/components/button/newButton.png"

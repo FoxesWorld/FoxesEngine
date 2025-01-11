@@ -4,6 +4,7 @@ import org.foxesworld.engine.gui.components.ComponentFactory;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
+@Deprecated
 public class ServerBoxStyle {
     private  ComponentFactory componentFactory;
 
@@ -15,6 +16,7 @@ public class ServerBoxStyle {
         serverBox.setFont(componentFactory.getEngine().getFONTUTILS().getFont(componentFactory.getStyle().getFont(), componentFactory.getStyle().getFontSize()));
         serverBox.setBackground(hexToColor(componentFactory.getStyle().getColor()));
         serverBox.setForeground(hexToColor(componentFactory.getStyle().getColor()));
+        serverBox.setFont(componentFactory.getEngine().getFONTUTILS().getFont(componentFactory.getStyle().getFont(), componentFactory.getStyle().getFontSize()));
         serverBox.sb = this;
     }
 }

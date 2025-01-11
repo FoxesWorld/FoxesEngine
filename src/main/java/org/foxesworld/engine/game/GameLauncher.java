@@ -6,9 +6,11 @@ import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.game.argsReader.ArgsReader;
 import org.foxesworld.engine.server.ServerAttributes;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +24,7 @@ public abstract class GameLauncher {
     protected Logger logger;
     protected ArgsReader argsReader;
     protected Config config;
-    protected pathBuilders pathBuilders;
+    protected PathBuilders pathBuilders;
     protected int intVer;
     private final String[] toTest = {"_JAVA_OPTIONS", "_JAVA_OPTS", "JAVA_OPTS", "JAVA_OPTIONS"};
     protected URLClassLoader classLoader;
@@ -96,49 +98,68 @@ public abstract class GameLauncher {
         return  version;
     }
 
-    public static class pathBuilders {
-        private  GameLauncher gameLauncher;
-        public pathBuilders(GameLauncher gameLauncher){
+    public static class PathBuilders {
+        private final GameLauncher gameLauncher;
+        private final Path homeDir;
+
+        public PathBuilders(GameLauncher gameLauncher, String homeDir) {
             this.gameLauncher = gameLauncher;
-        }
-        public String buildGameDir() {
-            return Config.getFullPath();
+            this.homeDir = Paths.get(homeDir).toAbsolutePath();
         }
 
-        public String buildVersionDir() {
-            return buildGameDir() + "versions" + File.separator + this.gameLauncher.gameClient.getServerVersion();
-        }
-        public String getArgsFile() {
-            return this.buildVersionDir() + File.separator + this.gameLauncher.gameClient.getServerVersion() + ".json";
-        }
-        public String buildLibrariesPath() {
-            return buildGameDir() + "libraries";
-        }
-        public String buildNativesPath() {
-            return buildVersionDir() + File.separator + "natives";
+        public Path buildGameDir() {
+            return homeDir;
         }
 
-        public String buildAssetsPath() {
-            return buildGameDir() + "assets";
-        }
-        public String buildMinecraftJarPath() {
-            return buildVersionDir() + File.separator + this.gameLauncher.gameClient.getServerVersion() + ".jar";
-        }
-        public String buildClientDir() {
-            File clientDir = new File(buildGameDir() + "clients" + File.separator + this.gameLauncher.gameClient.getServerName());
-            if (!clientDir.isDirectory()) {
-                Engine.getLOGGER().debug("Creating " + this.gameLauncher.gameClient.getServerName() + " directory");
-                clientDir.mkdirs();
-            }
-            return clientDir.toString();
+        public Path buildVersionDir() {
+            return buildGameDir().resolve("versions").resolve(gameLauncher.gameClient.getServerVersion());
         }
 
-        public File buildRuntimeDir() {
-            File runtimeDir = new File(buildGameDir() + "runtime");
-            if (!runtimeDir.isDirectory()) {
-                runtimeDir.mkdirs();
-            }
+        public Path getArgsFile() {
+            return buildVersionDir().resolve(String.format("%s.json", gameLauncher.gameClient.getServerVersion()));
+        }
+
+        public Path buildLibrariesPath() {
+            return buildGameDir().resolve("libraries");
+        }
+
+        public Path buildNativesPath() {
+            return buildVersionDir().resolve("natives");
+        }
+
+        public Path buildAssetsPath() {
+            return buildGameDir().resolve("assets");
+        }
+
+        public Path buildMinecraftJarPath() {
+            return buildVersionDir().resolve(String.format("%s.jar", gameLauncher.gameClient.getServerVersion()));
+        }
+
+        public Path buildClientDir() {
+            Path clientDir = buildGameDir().resolve("clients").resolve(gameLauncher.gameClient.getServerName());
+            ensureDirectoryExists(clientDir, "client");
+            return clientDir;
+        }
+
+        public Path buildRuntimeDir() {
+            Path runtimeDir = buildGameDir().resolve("runtime");
+            ensureDirectoryExists(runtimeDir, "runtime");
             return runtimeDir;
+        }
+
+        /**
+         * Utility method to ensure a directory exists, creating it if necessary.
+         */
+        private void ensureDirectoryExists(Path dir, String type) {
+            if (!Files.isDirectory(dir)) {
+                try {
+                    Files.createDirectories(dir);
+                    Engine.getLOGGER().debug("Created {} directory at {}", type, dir);
+                } catch (Exception e) {
+                    Engine.getLOGGER().error("Failed to create {} directory at {}", type, dir, e);
+                    throw new RuntimeException("Could not create " + type + " directory at " + dir, e);
+                }
+            }
         }
     }
     public void setArgsReader(ArgsReader argsReader) {
@@ -148,7 +169,7 @@ public abstract class GameLauncher {
     public ArgsReader getArgsReader() {
         return argsReader;
     }
-    public GameLauncher.pathBuilders getPathBuilders() {
+    public PathBuilders getPathBuilders() {
         return pathBuilders;
     }
 

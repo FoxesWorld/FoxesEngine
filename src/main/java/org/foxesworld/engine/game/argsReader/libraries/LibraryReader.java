@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,7 +23,8 @@ import java.util.List;
 public class LibraryReader {
     private final boolean checkHash;
     private final RuleChecker ruleChecker;
-    private final String path, currentOS;
+    private final String currentOS;
+    private final Path path;
     private final GameLauncher gameLauncher;
     private List<Library> libraries = new ArrayList<>(); //Do not remove the initializer!11!!!1
     private long size;
@@ -37,7 +39,7 @@ public class LibraryReader {
     }
 
     private List<Library> readLibraries() {
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             String libraryFullPath;
             JsonObject jsonObject = new Gson().fromJson(reader, JsonObject.class);
             JsonArray librariesArray = jsonObject.getAsJsonArray("libraries");

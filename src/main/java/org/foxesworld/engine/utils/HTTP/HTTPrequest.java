@@ -11,56 +11,76 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SuppressWarnings("unused")
 public class HTTPrequest {
 
-    private static final int MAX_RETRIES = 3;
-    private static final int RETRY_DELAY_MS = 1000;  // Delay between retries in milliseconds
-
     private final String requestMethod;
     private final Engine engine;
+    private final ExecutorService executorService;
     private HttpURLConnection httpURLConnection;
 
     public HTTPrequest(Engine engine, String requestMethod) {
         this.engine = engine;
         this.requestMethod = requestMethod;
+        this.executorService = Executors.newCachedThreadPool();
         Engine.LOGGER.info("HTTP {} init", requestMethod);
     }
 
     public void sendAsync(Map<String, Object> parameters, OnSuccess onSuccess, OnFailure onFailure) {
-        engine.getExecutorServiceProvider().submitTask(() -> {
-            int attempt = 0;
-            while (attempt < MAX_RETRIES) {
-                try {
-                    URL url = new URL(engine.getEngineData().getBindUrl());
-                    httpURLConnection = (HttpURLConnection) url.openConnection();
-                    configureConnection(httpURLConnection);
-                    sendRequest(parameters);
-                    String response = getResponse();
-                    onSuccess.onSuccess(response);
-                    return;  // Exit if successful
-                } catch (SocketException e) {
-                    attempt++;
-                    Engine.LOGGER.warn("Socket closed unexpectedly on attempt {}: {}", attempt, e);
-                    if (attempt >= MAX_RETRIES && onFailure != null) {
-                        onFailure.onFailure(e);
-                    }
-                    waitBeforeRetry();
-                } catch (Exception e) {
-                    if (onFailure != null) {
-                        onFailure.onFailure(e);
-                    }
-                    Engine.LOGGER.error("Request failed {}", e);
-                    return;  // Exit on unexpected error
-                } finally {
-                    if (httpURLConnection != null) {
-                        httpURLConnection.disconnect();
-                    }
+        executorService.submit(() -> {
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(engine.getEngineData().getBindUrl());
+                connection = (HttpURLConnection) url.openConnection();
+                configureConnection(connection);
+
+                sendRequest(parameters, connection);
+                String response = getResponse(connection);
+
+                onSuccess.onSuccess(response);
+
+            } catch (SocketException e) {
+                Engine.LOGGER.warn("Socket closed unexpectedly {}", e);
+                if (onFailure != null) {
+                    onFailure.onFailure(e);
+                }
+            } catch (Exception e) {
+                if (onFailure != null) {
+                    onFailure.onFailure(e);
+                }
+                Engine.LOGGER.error("Request failed {}", e);
+            } finally {
+                // Закрытие соединения после завершения работы
+                if (connection != null) {
+                    connection.disconnect();
                 }
             }
-        }, "HTTP Request Task");
+        });
     }
+
+    private void sendRequest(Map<String, Object> parameters, HttpURLConnection connection) throws Exception {
+        try (OutputStream os = connection.getOutputStream()) {
+            String postData = formParams(parameters).toString();
+            os.write(postData.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private String getResponse(HttpURLConnection connection) throws Exception {
+        StringBuilder response = new StringBuilder();
+        try (InputStream is = connection.getInputStream();
+             BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+            }
+        }
+        return response.toString();
+    }
+
+
 
     private void configureConnection(HttpURLConnection connection) throws Exception {
         connection.setRequestMethod(this.requestMethod);
@@ -69,8 +89,6 @@ public class HTTPrequest {
         connection.setUseCaches(httpConf.isUseCaches());
         connection.setDoInput(httpConf.isDoInput());
         connection.setDoOutput(httpConf.isDoOutput());
-        connection.setConnectTimeout(5000);  // Connection timeout
-        connection.setReadTimeout(5000);     // Read timeout
         connection.connect();
     }
 
@@ -93,7 +111,7 @@ public class HTTPrequest {
         return response.toString();
     }
 
-    private StringBuilder formParams(Map<String, Object> parameters) {
+    private StringBuilder formParams(Map<String, Object> parameters) throws UnsupportedEncodingException {
         StringBuilder postData = new StringBuilder();
         for (Map.Entry<String, Object> param : parameters.entrySet()) {
             if (postData.length() != 0) {
@@ -125,15 +143,11 @@ public class HTTPrequest {
         return boundary.toString();
     }
 
-    private void waitBeforeRetry() {
-        try {
-            Thread.sleep(RETRY_DELAY_MS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
     public HttpURLConnection getHttpURLConnection() {
         return httpURLConnection;
+    }
+
+    public void shutdown() {
+        executorService.shutdown();
     }
 }

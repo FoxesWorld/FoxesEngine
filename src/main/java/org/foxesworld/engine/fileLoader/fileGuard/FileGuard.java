@@ -4,15 +4,18 @@ import org.apache.logging.log4j.Logger;
 import org.foxesworld.engine.game.GameLauncher;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class FileGuard {
     private FileGuardListener fileGuardListener;
-    private final List<String> checkList;
-    private final Set<String> ignoreList;
+    private final List<Path> checkList;
+    private final Set<Path> ignoreList;
     private final String[] basicIgnoreDirs = {"saves", "resourcepacks", "shaderpacks", "screenshots", "logs", "config"};
     private final GameLauncher gameLauncher;
     private final Logger logger;
@@ -20,13 +23,20 @@ public class FileGuard {
     private final AtomicInteger checkedFiles = new AtomicInteger(0);
     private final AtomicInteger filesDeleted = new AtomicInteger(0);
 
-    @SuppressWarnings("unused")
     public FileGuard(GameLauncher gameLauncher, List<String> checkList) {
         this.gameLauncher = gameLauncher;
-        this.checkList = new CopyOnWriteArrayList<>(checkList);
+        this.logger = this.gameLauncher.getLogger();
+        this.checkList = new CopyOnWriteArrayList<>(convertToPaths(checkList));
         this.ignoreList = new HashSet<>();
         buildBasicIgnoreList();
-        this.logger = this.gameLauncher.getLogger();
+    }
+
+    private List<Path> convertToPaths(List<String> paths) {
+        List<Path> result = new ArrayList<>();
+        for (String path : paths) {
+            result.add(Paths.get(path).normalize());
+        }
+        return result;
     }
 
     public void scanAndDeleteFilesInSubdirectories(Set<String> filesToKeep) {
@@ -37,12 +47,12 @@ public class FileGuard {
             logger.info("Ignoring the following directories:");
             ignoreList.forEach(dir -> logger.info("  - {}", dir));
 
-            for (String dir : checkList) {
+            for (Path dir : checkList) {
                 logger.debug("Checking Directory: {}", dir);
                 if (fileGuardListener != null) {
-                    fileGuardListener.onDirCheck(dir);
+                    fileGuardListener.onDirCheck(dir.toString());
                 }
-                scanAndDeleteFilesRecursively(new File(dir), filesToKeep);
+                scanAndDeleteFilesRecursively(dir, convertToPaths(new ArrayList<>(filesToKeep)));
             }
 
             if (fileGuardListener != null) {
@@ -58,109 +68,91 @@ public class FileGuard {
 
     private int countTotalFiles() {
         return checkList.stream()
-                .map(File::new)
-                .filter(File::exists)
+                .filter(Files::exists)
                 .mapToInt(this::countFilesInDirectory)
                 .sum();
     }
 
-    private int countFilesInDirectory(File directory) {
-        File[] files = Optional.ofNullable(directory.listFiles()).orElse(new File[0]);
-        return Arrays.stream(files)
-                .mapToInt(file -> file.isFile() ? 1 : countFilesInDirectory(file))
-                .sum();
-    }
-
-    public void removeEmptyFolders(String dir) {
-        File directory = new File(dir);
-        if (!directory.exists()) return;
-
-        String[] content = Optional.ofNullable(directory.list()).orElse(new String[0]);
-        boolean dirContainsFiles = Arrays.stream(content)
-                .map(object -> new File(directory, object))
-                .anyMatch(File::isFile);
-
-        if (!dirContainsFiles) {
-            boolean deleted = directory.delete();
-            if (deleted) {
-                logger.debug("Removed empty directory: {}", directory);
-            } else {
-                logger.warn("Failed to delete empty directory: {}", directory);
-            }
-        } else {
-            // Recursively check subdirectories
-            Arrays.stream(content)
-                    .map(object -> new File(directory, object))
-                    .filter(File::isDirectory)
-                    .forEach(subDir -> removeEmptyFolders(subDir.getPath()));
+    private int countFilesInDirectory(Path directory) {
+        try {
+            return (int) Files.walk(directory)
+                    .filter(Files::isRegularFile)
+                    .count();
+        } catch (Exception e) {
+            logger.error("Error counting files in directory: {}", directory, e);
+            return 0;
         }
     }
 
-    private void scanAndDeleteFilesRecursively(File directory, Set<String> filesToKeep) {
-        File[] files = Optional.ofNullable(directory.listFiles()).orElse(new File[0]);
+    public void removeEmptyFolders(Path dir) {
+        if (dir == null || !Files.exists(dir)) {
+            return;
+        }
 
-        Arrays.stream(files).forEach(file -> {
-            if (file.isFile()) {
-                checkAndDeleteFile(file, filesToKeep);
-            } else if (file.isDirectory()) {
-                scanAndDeleteFilesRecursively(file, filesToKeep);
-                // After checking files, remove empty folders
-                removeEmptyFolders(file.getPath());
+        try {
+            try (Stream<Path> subPaths = Files.list(dir)) {
+                subPaths.filter(Files::isDirectory).forEach(this::removeEmptyFolders);
             }
-        });
+
+            boolean isEmpty;
+            try (Stream<Path> dirContents = Files.list(dir)) {
+                isEmpty = dirContents.findAny().isEmpty();
+            }
+
+            if (isEmpty) {
+                Files.delete(dir);
+                logger.debug("Removed empty directory: {}", dir);
+            }
+        } catch (DirectoryNotEmptyException e) {
+            logger.debug("Directory is not empty (concurrent modification?): {}", dir);
+        } catch (IOException e) {
+            logger.error("Error while processing directory: {}", dir, e);
+        }
     }
 
-    private void checkAndDeleteFile(File file, Set<String> filesToKeep) {
+    private void scanAndDeleteFilesRecursively(Path directory, List<Path> filesToKeep) {
+        try {
+            if (isInIgnoreList(directory)) {
+                logger.info("Skipping directory (ignored): {}", directory);
+                return;
+            }
+
+            logger.debug("Scanning directory: {}", directory);
+
+            Files.list(directory).forEach(path -> {
+                if (Files.isRegularFile(path)) {
+                    checkAndDeleteFile(path, filesToKeep);
+                } else if (Files.isDirectory(path)) {
+                    scanAndDeleteFilesRecursively(path, filesToKeep);
+                    removeEmptyFolders(path);
+                }
+            });
+        } catch (Exception e) {
+            logger.error("Error scanning directory: {}", directory, e);
+        }
+    }
+
+
+    private void checkAndDeleteFile(Path file, List<Path> filesToKeep) {
         if (fileGuardListener != null) {
-            fileGuardListener.onFileCheck(file);
+            fileGuardListener.onFileCheck(file.toFile());
         }
-        String checkPath = getRelativePath(file);
-        if (!filesToKeep.contains(checkPath) && !isUserConfig(file) && !isInIgnoreList(file)) {
-            if (file.delete()) {
-                logger.debug("Deleted unlisted file: {}", checkPath);
+        String relativePath = getRelativePath(file);
+        if (!filesToKeep.contains(Paths.get(relativePath)) && !isUserConfig(file) && !isInIgnoreList(file)) {
+            try {
+                Files.delete(file);
+                logger.debug("Deleted unlisted file: {}", relativePath);
                 filesDeleted.incrementAndGet();
-            } else {
-                logger.error("Failed to delete file: {}", checkPath);
+            } catch (Exception e) {
+                logger.error("Failed to delete file: {}. Error: {}", relativePath, e.getMessage());
             }
         } else {
-            logger.debug("{} is checked", checkPath);
+            logger.debug("{} is checked", relativePath);
         }
         checkedFiles.incrementAndGet();
     }
 
-    private String getRelativePath(File file) {
-        return file.getPath()
-                .replace(gameLauncher.getPathBuilders().buildGameDir(), "")
-                .replace("\\", "/");
-    }
-
-    private boolean isInIgnoreList(File file) {
-        String filePath = getRelativePath(file);
-        return ignoreList.stream().anyMatch(filePath::startsWith);
-    }
-
-    private void buildBasicIgnoreList() {
-        Arrays.stream(basicIgnoreDirs).forEach(dir -> {
-            String ignoreDirPath = (gameLauncher.getPathBuilders().buildClientDir()
-                    .replace(gameLauncher.getPathBuilders().buildGameDir(), "")
-                    + "/" + dir).replace("\\", "/");
-            ignoreList.add(ignoreDirPath);
-        });
-    }
-
-
-    @SuppressWarnings("unused")
-    public void addIgnoreDirs(String dirs) {
-        if (dirs != null) {
-            Arrays.stream(dirs.split(","))
-                    .map(dir -> (gameLauncher.getPathBuilders().buildClientDir()
-                            .replace(gameLauncher.getPathBuilders().buildGameDir(), "")
-                            + "/" + dir).replace("\\", "/"))
-                    .forEach(ignoreList::add);
-        }
-    }
-
-    @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
+    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     public void recursiveDelete(File file) {
         if (!file.exists()) return;
 
@@ -175,9 +167,59 @@ public class FileGuard {
             logger.error("Failed to delete: {}", file);
         }
     }
+    private String getRelativePath(Path filePath) {
+        Path relativePath = gameLauncher.getPathBuilders().buildGameDir().relativize(filePath);
+        return relativePath.toString().replace("\\", "/");
+    }
 
-    private boolean isUserConfig(File file) {
-        return file.getName().endsWith(".txt");
+    private boolean isInIgnoreList(Path filePath) {
+        Path absolutePath = filePath.normalize().toAbsolutePath();
+        return ignoreList.stream()
+                .map(Path::toAbsolutePath)
+                .anyMatch(absolutePath::startsWith);
+    }
+
+
+    private void buildBasicIgnoreList() {
+        Arrays.stream(basicIgnoreDirs).forEach(dir -> {
+            try {
+                Path ignoreDirPath = gameLauncher.getPathBuilders()
+                        .buildClientDir()
+                        .resolve(dir)
+                        .normalize()
+                        .toAbsolutePath();
+
+                ignoreList.add(ignoreDirPath);
+                logger.debug("Added to ignore list: {}", ignoreDirPath);
+            } catch (Exception e) {
+                logger.error("Error building ignore list for directory: {}", dir, e);
+            }
+        });
+    }
+
+    public void addIgnoreDirs(String dirs) {
+        if (dirs != null) {
+            Arrays.stream(dirs.split(","))
+                    .map(dir -> {
+                        try {
+                            return gameLauncher.getPathBuilders()
+                                    .buildClientDir()
+                                    .resolve(dir)
+                                    .normalize()
+                                    .toAbsolutePath();
+                        } catch (Exception e) {
+                            logger.error("Error adding ignore directory: {}", dir, e);
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .forEach(ignoreList::add);
+        }
+    }
+
+
+    private boolean isUserConfig(Path file) {
+        return file.getFileName().toString().endsWith(".txt");
     }
 
     public void setFileGuardListener(FileGuardListener fileGuardListener) {

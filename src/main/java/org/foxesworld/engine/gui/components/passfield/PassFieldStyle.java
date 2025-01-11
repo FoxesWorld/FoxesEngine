@@ -15,7 +15,7 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 
 public class PassFieldStyle {
-    private ComponentFactory componentFactory;
+    private final ComponentFactory componentFactory;
     public String echoChar = "";
     public float fontSize = 1.0f;
 
@@ -62,4 +62,3 @@ public class PassFieldStyle {
         }
     }
 }
-

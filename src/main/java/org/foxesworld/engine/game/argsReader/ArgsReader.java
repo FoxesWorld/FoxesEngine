@@ -10,6 +10,7 @@ import org.foxesworld.engine.game.argsReader.libraries.LibraryReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ public class ArgsReader {
     private final  RuleChecker ruleChecker;
     private JsonArray jvmArguments, gameArguments;
     private LibraryReader libraryReader;
-    private final String path;
+    private final Path path;
     private final GameLauncher gameLauncher;
     private String mainClass, assets;
     private boolean authLib;
@@ -29,14 +30,14 @@ public class ArgsReader {
         this.gameLauncher = gameLauncher;
         this.path = gameLauncher.getPathBuilders().getArgsFile();
         this.ruleChecker = new RuleChecker();
-        if(new File(path).exists()) {
+        if(path.toFile().exists()) {
             this.libraryReader = new LibraryReader(this, checkHash);
             this.readArgs();
         }
     }
 
     private void readArgs() {
-        try (FileReader fileReader = new FileReader(path)) {
+        try (FileReader fileReader = new FileReader(path.toFile())) {
             JsonObject jsonObject = JsonParser.parseReader(fileReader).getAsJsonObject();
 
             mainClass = jsonObject.get("mainClass").getAsString();

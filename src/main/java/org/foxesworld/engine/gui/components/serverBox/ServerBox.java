@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+@Deprecated
 public class ServerBox extends JComponent {
     private static final long serialVersionUID = 1L;
 

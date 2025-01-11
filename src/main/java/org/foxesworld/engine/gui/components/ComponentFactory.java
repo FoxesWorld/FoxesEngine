@@ -189,8 +189,8 @@ public class ComponentFactory extends JComponent {
 
             checkbox.getActionMap().put(componentAttributes.getComponentId(), buttonAction);
             checkbox.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, componentAttributes.getComponentId());
-            checkbox.setEnabled(componentAttributes.isEnabled());
         }
+        checkbox.setEnabled(componentAttributes.isEnabled());
         return checkbox;
     }
 
@@ -274,6 +274,7 @@ public class ComponentFactory extends JComponent {
         serverBoxStyle.apply(serverBox);
         serverBox.setBackground(hexToColor(componentAttributes.getColor()));
         serverBox.setForeground(hexToColor(componentAttributes.getColor()));
+        serverBox.setBounds(componentAttributes.getBounds());
 
         return  serverBox;
     }
@@ -291,7 +292,8 @@ public class ComponentFactory extends JComponent {
     }
 
     private JComponent createFileSelector(ComponentAttributes componentAttributes) {
-        FileSelector fileSelector = new FileSelector(this);
+        FileSelector fileSelector = new FileSelector(this, FileSelector.SelectionMode.valueOf(componentAttributes.getSelectionMode()));
+        fileSelector.setValue((String) componentAttributes.getInitialValue());
         //fileSelector.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
         return fileSelector;
     }

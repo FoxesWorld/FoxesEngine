@@ -4,6 +4,7 @@ import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
+import org.foxesworld.engine.gui.components.fileSelector.FileSelector;
 import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.textfield.TextField;
@@ -31,6 +32,7 @@ public class ComponentsAccessor {
             Checkbox.class, c -> String.valueOf(((Checkbox) c).isSelected()),
             Slider.class, c -> String.valueOf(((Slider) c).getValue()),
             DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex()),
+            FileSelector.class, c -> ((FileSelector)c).getValue(),
             CompositeSlider.class, c -> String.valueOf(((CompositeSlider) c).getValue())
     );
 

@@ -35,11 +35,11 @@ public class FileLoader {
     private long totalSize = -1;
     private String fileExtension;
 
-    public FileLoader(ActionHandler actionHandler) {
+    public FileLoader(ActionHandler actionHandler, String homeDir) {
         this.engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
-        this.homeDir = Config.getFullPath();
+        this.homeDir = homeDir + File.separator;//Config.getFullPath();
         this.downloadUtils = new DownloadUtils(engine);
         this.loadingManager = engine.getLoadingManager();
         this.fileFetcher = new FileFetcher(engine);

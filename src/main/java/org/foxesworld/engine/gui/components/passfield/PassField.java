@@ -33,23 +33,18 @@ public class PassField extends JPasswordField {
 
             // Initialize the icon label
             iconLabel = new JLabel(showIcon);
-            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 0)); // Padding left for better spacing
+            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 0));
             iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             iconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     togglePasswordVisibility();
                 }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    togglePasswordVisibility();
-                }
             });
 
-            // Use layered layout to ensure proper positioning
+
             JPanel iconPanel = new JPanel(new BorderLayout());
-            iconPanel.setOpaque(false); // To ensure the texture is not blocked
+            iconPanel.setOpaque(false);
             iconPanel.add(iconLabel, BorderLayout.CENTER);
 
             setLayout(new BorderLayout());
@@ -115,7 +110,7 @@ public class PassField extends JPasswordField {
 
             // Draw the password characters
             char[] password = getPassword();
-            String maskedPassword = new String(password).replaceAll(".", "*");
+            String maskedPassword = new String(password).replaceAll("\\.", "*");
             int x = getInsets().left + paddingX;
             int y = g.getFontMetrics().getMaxAscent() + getInsets().top + paddingY;
 

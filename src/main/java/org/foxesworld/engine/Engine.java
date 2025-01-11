@@ -50,7 +50,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
     private final OperatingSystemMXBean osBean;
     public static String currentOS = "";
     protected LoadingManager loadingManager;
-    private final List<String> configFiles;
+    private final Map<String, Class<?>> configFiles;
     private final String appTitle;
     protected Sound SOUND;
     protected Config config;
@@ -72,7 +72,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
     private boolean init = false;
     private final EngineInfo engineInfo;
 
-    public Engine(int poolSize, List<String> configFiles) {
+    public Engine(int poolSize, Map<String, Class<?>> configFiles) {
         currentOS = OS.determineCurrentOS();
         osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
@@ -137,7 +137,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
     public void restartApplication(int xmx, String jvmDir) {
         System.gc();
         //Runtime.getRuntime().addShutdownHook(new Thread(this.guiBuilder.getComponentFactory().getCustomTooltip()::clearAllTooltips));
-        String path = Config.getFullPath();
+        String path = this.config.getFullPath();
         List<String> params = new LinkedList<>();
         params.add(path + "/runtime/"+ jvmDir + "/bin/java");
         params.add("-Xmx"+xmx+"M");
@@ -222,7 +222,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener {
         }
     }
 
-    public List<String> getConfigFiles() {
+    public Map<String, Class<?>> getConfigFiles() {
         return configFiles;
     }
     protected boolean isInit() {

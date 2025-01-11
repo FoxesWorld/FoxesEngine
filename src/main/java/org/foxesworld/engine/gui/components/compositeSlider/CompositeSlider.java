@@ -1,12 +1,14 @@
 package org.foxesworld.engine.gui.components.compositeSlider;
 
 import com.sun.management.OperatingSystemMXBean;
+import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.components.label.Label;
 import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
 import org.foxesworld.engine.gui.components.spinner.Spinner;
+import org.foxesworld.engine.utils.RamRangeCalculator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,12 +34,14 @@ public class CompositeSlider extends JComponent {
         addListeners();
     }
 
+
     private void initializeComponents() {
         int minValue, maxValue, initialValue;
         List<Integer> values;
 
         if (componentAttribute.getComponentId().contains("ram")) {
-            SliderRange sliderRange = getSliderRangeBasedOnRam();
+            RamRangeCalculator calculator = new RamRangeCalculator();
+            RamRangeCalculator.SliderRange sliderRange = calculator.calculateSliderRange();
             minValue = sliderRange.getMinValue();
             maxValue = sliderRange.getMaxValue();
             initialValue = getInitialValue(sliderRange.getInitialValue());
@@ -49,6 +53,13 @@ public class CompositeSlider extends JComponent {
             values = getValues(minValue, maxValue, componentAttribute.getStepSize());
         }
 
+        if (minValue >= maxValue) {
+            throw new IllegalArgumentException("Invalid range: minValue (" + minValue + ") must be less than maxValue (" + maxValue + ")");
+        }
+        if (initialValue < minValue || initialValue > maxValue) {
+            throw new IllegalArgumentException("Initial value (" + initialValue + ") must be within range: [" + minValue + ", " + maxValue + "]");
+        }
+
         label = new Label(componentFactory);
         configureLabel();
 
@@ -57,16 +68,29 @@ public class CompositeSlider extends JComponent {
 
         spinner = new Spinner(initialValue, minValue, maxValue, componentAttribute.getMinorSpacing());
     }
-
     private int getInitialValue(int defaultValue) {
-        return componentAttribute.getInitialValue() != null
-                ? Integer.parseInt((String) componentAttribute.getInitialValue())
-                : defaultValue;
+        try {
+            int initialValue = componentAttribute.getInitialValue() != null
+                    ? (int) Math.round(Double.parseDouble((String) componentAttribute.getInitialValue()))
+                    : defaultValue;
+
+            if (initialValue < componentAttribute.getMinValue() || initialValue > componentAttribute.getMaxValue()) {
+                Engine.LOGGER.warn("Initial value (" + initialValue + ") is out of range [" +
+                        componentAttribute.getMinValue() + ", " + componentAttribute.getMaxValue() +
+                        "]. Using default: " + defaultValue);
+                return defaultValue;
+            }
+            return initialValue;
+        } catch (NumberFormatException e) {
+            Engine.LOGGER.error("Invalid initial value format, using default: " + e.getMessage());
+            return defaultValue;
+        }
     }
 
+
+
     private void configureLabel() {
-        labelStyle = new LabelStyle(componentFactory.getEngine().getStyleProvider()
-                .getElementStyles().get("label").get(componentAttribute.getStyles().get("label")));
+        labelStyle = new LabelStyle(componentFactory.getEngine().getStyleProvider().getElementStyles().get("label").get(componentAttribute.getStyles().get("label")));
         labelStyle.apply(label);
         label.setFont(componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), componentAttribute.getFontSize()));
     }
@@ -153,6 +177,29 @@ public class CompositeSlider extends JComponent {
         return spinner;
     }
 
+    private int roundUpToPowerOfTwo(int value) {
+        return value <= 0 ? 1 : Integer.highestOneBit(value - 1) << 1;
+    }
+
+
+    private int roundDownToPowerOfTwo(int value) {
+        return value <= 0 ? 1 : Integer.highestOneBit(value);
+    }
+
+    private int roundToNearestPowerOfTwo(int value) {
+        int lower = roundDownToPowerOfTwo(value);
+        int upper = roundUpToPowerOfTwo(value);
+        return (value - lower < upper - value) ? lower : upper;
+    }
+
+    private List<Integer> getPowerOfTwoValues(int minValue, int maxValue) {
+        List<Integer> values = new ArrayList<>();
+        for (int value = minValue; value <= maxValue; value <<= 1) {
+            values.add(value);
+        }
+        return values;
+    }
+
     private SliderRange getSliderRangeBasedOnRam() {
         OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         long totalMemory = osBean.getTotalMemorySize();
@@ -160,15 +207,25 @@ public class CompositeSlider extends JComponent {
         int minValue = Math.max(1024, (int) (totalMemory * 0.10 / (1024 * 1024)));
         int maxValue = Math.min(64 * 1024, (int) (totalMemory * 0.75 / (1024 * 1024)));
 
+        minValue = roundUpToPowerOfTwo(minValue);
+        maxValue = roundDownToPowerOfTwo(maxValue);
+
+        Engine.LOGGER.info("Calculated RAM range: minValue=" + minValue + ", maxValue=" + maxValue);
+
         if (maxValue <= minValue) {
-            throw new IllegalArgumentException("Invalid range properties: maxValue must be greater than minValue");
+            throw new IllegalArgumentException("Invalid range properties: maxValue (" + maxValue + ") must be greater than minValue (" + minValue + ")");
         }
 
-        List<Integer> values = getValues(minValue, maxValue, componentAttribute.getStepSize());
-        int initialValue = Math.min(Math.max((int) (totalMemory * 0.25 / (1024 * 1024)), minValue), maxValue);
+        List<Integer> values = getPowerOfTwoValues(minValue, maxValue);
+
+        int initialValue = Math.min(Math.max(roundToNearestPowerOfTwo((int) (totalMemory * 0.25 / (1024 * 1024))), minValue), maxValue);
+
+        Engine.LOGGER.info("RAM-based initial value: " + initialValue);
 
         return new SliderRange(minValue, maxValue, initialValue, values);
     }
+
+
 
     public List<Integer> getValues(int minValue, int maxValue, int steps) {
         if (steps < 2) {

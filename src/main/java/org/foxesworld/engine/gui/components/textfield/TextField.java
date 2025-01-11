@@ -55,22 +55,17 @@ public class TextField extends JTextField {
 			}
 		});
 
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				startCaretBlinking();
-			}
-		});
-
+		// Enable caret movement by clicking
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				super.mousePressed(e);
 				selected = false;
-				setCaretPosition(viewToModel2D(e.getPoint()));
+				setCaretPosition(viewToModel(e.getPoint()));
 			}
 		});
 
+		// Track selection of text
 		addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
@@ -78,6 +73,27 @@ public class TextField extends JTextField {
 				selected = true;
 			}
 		});
+
+		// Add key listener for arrow key handling (move caret left and right)
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// Move caret left
+				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					if (getCaretPosition() > 0) {
+						setCaretPosition(getCaretPosition() - 1);
+					}
+				}
+				// Move caret right
+				else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					if (getCaretPosition() < getText().length()) {
+						setCaretPosition(getCaretPosition() + 1);
+					}
+				}
+			}
+		});
+
+		// Set up text field UI and custom caret painting
 		this.setUI(new BasicTextFieldUI());
 	}
 
@@ -109,7 +125,13 @@ public class TextField extends JTextField {
 	protected void paintComponent(Graphics maing) {
 		Graphics2D g = (Graphics2D) maing.create();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.drawImage(texture, 0, 0, getWidth(), getHeight(), null);
+
+		// Draw background texture if exists
+		if (texture != null) {
+			g.drawImage(texture, 0, 0, getWidth(), getHeight(), null);
+		}
+
+		// Draw the text
 		g.setColor(getForeground());
 		int x = paddingX;
 		int y = paddingY + g.getFontMetrics().getAscent();
@@ -134,7 +156,7 @@ public class TextField extends JTextField {
 			int end = Math.max(getSelectionStart(), getSelectionEnd());
 			g.setColor(selectionColor);
 
-			// Добавленная проверка на null
+			// Ensure that selected text exists before drawing
 			String selectedText = getSelectedText();
 			if (selectedText != null) {
 				int selStart = x + g.getFontMetrics().stringWidth(getText().substring(0, start));
@@ -201,9 +223,15 @@ public class TextField extends JTextField {
 	public Color getSelectedTextColor() {
 		return selectedTextColor;
 	}
+
 	public void resetText() {
 		setText(placeholder);
 		repaint();
 		revalidate();
+	}
+
+	// Helper method to view mouse click position and adjust caret
+	public int viewToModel(Point pt) {
+		return viewToModel2D(pt);
 	}
 }
