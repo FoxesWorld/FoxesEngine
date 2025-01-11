@@ -11,6 +11,7 @@ import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.GuiBuilderListener;
 import org.foxesworld.engine.gui.FileProperties;
+import org.foxesworld.engine.gui.components.frame.FocusStatusListener;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.engine.gui.components.panel.PanelVisibility;
@@ -44,7 +45,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
-public abstract class Engine implements ActionListener, GuiBuilderListener {
+public abstract class Engine implements ActionListener, GuiBuilderListener, FocusStatusListener {
     private final ExecutorServiceProvider executorServiceProvider;
     private final FileProperties fileProperties;
     private final OperatingSystemMXBean osBean;

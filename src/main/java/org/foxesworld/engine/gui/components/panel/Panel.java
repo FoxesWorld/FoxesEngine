@@ -1,7 +1,5 @@
 package org.foxesworld.engine.gui.components.panel;
 
-import com.formdev.flatlaf.ui.FlatDesktopPaneUI;
-import com.formdev.flatlaf.ui.FlatRootPaneUI;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.Bounds;
 import org.foxesworld.engine.gui.components.frame.FrameAttributes;
@@ -21,6 +19,7 @@ public class Panel extends JPanel {
     private FrameAttributes frameAttributes;
     private JPanel groupPanel;
     private final FrameConstructor frameConstructor;
+    private BufferedImage texture; // Текущая текстура панели
 
     public Panel(FrameConstructor frameConstructor) {
         this.frameConstructor = frameConstructor;
@@ -28,16 +27,32 @@ public class Panel extends JPanel {
 
     public JPanel setRootPanel(FrameAttributes frameAttributes) {
         this.frameAttributes = frameAttributes;
+
         JPanel rootPanel = new JPanel(null, true) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                drawDarkenedBackground(g);
+                if (texture != null) {
+                    g.drawImage(texture, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    drawDarkenedBackground(g);
+                }
             }
         };
+
         rootPanel.setOpaque(false);
         rootPanel.setName("rootPanel");
         return rootPanel;
+    }
+
+    /**
+     * Устанавливает текстуру для панели.
+     *
+     * @param newTexture изображение текстуры.
+     */
+    public void setTexture(BufferedImage newTexture) {
+        this.texture = newTexture;
+        repaint(); // Перерисовываем панель с новой текстурой
     }
 
     private void drawDarkenedBackground(Graphics g) {
@@ -90,7 +105,9 @@ public class Panel extends JPanel {
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                if (panelOptions.getBackgroundImage() != null) {
+                if (texture != null) {
+                    g.drawImage(texture, 0, 0, getWidth(), getHeight(), this);
+                } else if (panelOptions.getBackgroundImage() != null) {
                     BufferedImage backgroundImage = frameConstructor.getAppFrame()
                             .getImageUtils()
                             .getLocalImage(panelOptions.getBackgroundImage());

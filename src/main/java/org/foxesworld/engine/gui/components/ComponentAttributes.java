@@ -12,7 +12,7 @@ public class ComponentAttributes extends Attributes {
         this.childComponents = new ArrayList<>();
     }
     private int rowNum, colNum, imgCount, fontSize, selectedIndex =0;
-    private boolean enabled, opaque, revealButton, repeat, lineWrap, visible;
+    private boolean enabled, opaque, revealButton, repeat, lineWrap, visible, editable;
     private  Object initialValue;
     private Map<String, String> styles;
     private List<String> fileExtensions;
@@ -140,6 +140,11 @@ public class ComponentAttributes extends Attributes {
     public boolean isRepeat() {
         return repeat;
     }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
     public String getTooltipStyle() {
         return tooltipStyle;
     }
@@ -149,7 +154,6 @@ public class ComponentAttributes extends Attributes {
     public int getStepSize() {
         return stepSize;
     }
-
     public String getSelectionMode() {
         return selectionMode;
     }

@@ -25,7 +25,34 @@ public class TextArea extends JTextArea {
                     Integer.parseInt(borders.getItem(2)),
                     Integer.parseInt(borders.getItem(3))));
         }
+        if (!componentFactory.getComponentAttribute().isEditable()) {
+            setEditable(false);
+            disableTextSelection();
+        }
+
+        if(componentFactory.getComponentAttribute().isLineWrap()){
+            setLineWrap(true);
+            setWrapStyleWord(true);
+        }
+
     }
+
+
+    private void disableTextSelection() {
+        setFocusable(false);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                getCaret().setVisible(false);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("COPY"), "none");
+        getInputMap().put(KeyStroke.getKeyStroke("CUT"), "none");
+        getInputMap().put(KeyStroke.getKeyStroke("PASTE"), "none");
+        getInputMap().put(KeyStroke.getKeyStroke("SELECT_ALL"), "none");
+    }
+
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
