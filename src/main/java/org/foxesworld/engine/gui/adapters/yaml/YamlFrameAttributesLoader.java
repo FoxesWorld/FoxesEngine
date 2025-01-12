@@ -1,5 +1,5 @@
 package org.foxesworld.engine.gui.adapters.yaml;
-
+/*
 import com.google.gson.internal.Primitives;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.adapters.FrameAttributesLoader;
@@ -36,3 +36,4 @@ public class YamlFrameAttributesLoader implements FrameAttributesLoader {
         return Primitives.wrap(classOfT).cast(object);
     }
 }
+*/

@@ -71,7 +71,9 @@ public abstract class LoadingManager extends JWindow implements AnimationStats {
     }
 
     public void animateLoadingWindow(boolean isEntry) {
-        animationManager.animate(isEntry);
+        this.engine.getExecutorServiceProvider().submitTask(() -> {
+            animationManager.animate(isEntry);
+        }, "animation"+isEntry);
     }
 
     public void setLoadingText(String loadingText, String loadingTitle) {

@@ -7,76 +7,105 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import org.foxesworld.engine.Engine;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class StyleProvider {
+
+    private static final String DEFAULT_STYLE_PATH = "assets/styles/";
     private final Map<String, Map<String, StyleAttributes>> elementStyles = new HashMap<>();
+    private final String stylePath;
+    private final Gson gson;
 
     public StyleProvider(String[] styles) {
-        Engine.LOGGER.info("Loading styles...");
+        this(styles, DEFAULT_STYLE_PATH);
+    }
+
+    public StyleProvider(String[] styles, String stylePath) {
+        this.stylePath = stylePath;
+        this.gson = new Gson();
+        Engine.LOGGER.info("Initializing StyleProvider with path: " + stylePath);
+        loadStyles(styles);
+    }
+
+    private void loadStyles(String[] styles) {
         for (String style : styles) {
-            loadStyle(style);
+            try {
+                loadStyle(style);
+            } catch (StyleLoadingException e) {
+                Engine.getLOGGER().error("Failed to load style: " + style, e);
+            }
         }
     }
 
-    private void loadStyle(String component) {
+    private void loadStyle(String component) throws StyleLoadingException {
         if (elementStyles.containsKey(component)) {
             return;
         }
 
-        String stylePath = "assets/styles/" + component + ".json";
-        try {
-            Gson gson = new Gson();
-            InputStreamReader reader = new InputStreamReader(
-                    Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream(stylePath)),
-                    StandardCharsets.UTF_8
-            );
-            Engine.getLOGGER().debug("Loading " + component + " style from " + stylePath);
+        String fullPath = stylePath + component + ".json";
+        JsonObject jsonRoot = loadJson(fullPath);
 
-            JsonObject jsonRoot = gson.fromJson(reader, JsonObject.class);
-            JsonObject stylesObject = jsonRoot.getAsJsonObject("styles");
+        JsonObject stylesObject = jsonRoot.getAsJsonObject("styles");
+        if (stylesObject == null) {
+            throw new StyleLoadingException("Missing 'styles' section in " + fullPath);
+        }
 
-            Map<String, StyleAttributes> styleMap = new HashMap<>();
+        JsonObject componentStyles = stylesObject.getAsJsonObject(component);
+        if (componentStyles == null) {
+            throw new StyleLoadingException("Missing component styles for " + component + " in " + fullPath);
+        }
 
-            JsonObject componentStyles = stylesObject.getAsJsonObject(component);
-            for (Map.Entry<String, JsonElement> entry : componentStyles.entrySet()) {
-                String styleName = entry.getKey();
-                JsonElement styleData = entry.getValue();
+        Map<String, StyleAttributes> styleMap = parseComponentStyles(componentStyles);
+        elementStyles.put(component, styleMap);
+    }
 
-                if (styleData.isJsonObject()) {
-                    // Если это объект, обрабатываем как единичный стиль
-                    StyleAttributes styleAttributes = gson.fromJson(styleData, StyleAttributes.class);
-                    styleMap.put(styleName, styleAttributes);
-                } else if (styleData.isJsonArray()) {
-                    // Если это массив, обрабатываем каждый элемент как отдельный стиль
-                    int index = 0;
-                    for (JsonElement element : styleData.getAsJsonArray()) {
-                        if (element.isJsonObject()) {
-                            StyleAttributes styleAttributes = gson.fromJson(element, StyleAttributes.class);
-                            styleMap.put(styleName + "_" + index, styleAttributes);
-                            index++;
-                        } else {
-                            Engine.getLOGGER().warn("Unexpected non-object element in style array for " + styleName);
-                        }
-                    }
-                } else {
-                    Engine.getLOGGER().warn("Unexpected JSON type for style: " + styleName);
-                }
+    private JsonObject loadJson(String path) throws StyleLoadingException {
+        try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path)) {
+            if (stream == null) {
+                throw new StyleLoadingException("Style file not found: " + path);
             }
-
-            elementStyles.put(component, styleMap);
-
+            InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+            return gson.fromJson(reader, JsonObject.class);
         } catch (JsonSyntaxException e) {
-            Engine.getLOGGER().error("Failed to parse styles for component: " + component, e);
+            throw new StyleLoadingException("Invalid JSON format in " + path, e);
         } catch (Exception e) {
-            Engine.getLOGGER().error("Unexpected error while loading styles for component: " + component, e);
+            throw new StyleLoadingException("Error reading JSON file: " + path, e);
         }
     }
 
+    private Map<String, StyleAttributes> parseComponentStyles(JsonObject componentStyles) {
+        Map<String, StyleAttributes> styleMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> entry : componentStyles.entrySet()) {
+            String styleName = entry.getKey();
+            JsonElement styleData = entry.getValue();
+
+            if (styleData.isJsonObject()) {
+                styleMap.put(styleName, gson.fromJson(styleData, StyleAttributes.class));
+            } else if (styleData.isJsonArray()) {
+                parseStyleArray(styleName, styleData.getAsJsonArray(), styleMap);
+            } else {
+                Engine.getLOGGER().warn("Unexpected JSON type for style: " + styleName);
+            }
+        }
+        return styleMap;
+    }
+
+    private void parseStyleArray(String styleName, JsonArray styleArray, Map<String, StyleAttributes> styleMap) {
+        int index = 0;
+        for (JsonElement element : styleArray) {
+            if (element.isJsonObject()) {
+                styleMap.put(styleName + "_" + index, gson.fromJson(element, StyleAttributes.class));
+                index++;
+            } else {
+                Engine.getLOGGER().warn("Non-object element in array for style: " + styleName);
+            }
+        }
+    }
 
     public Map<String, Map<String, StyleAttributes>> getElementStyles() {
         return elementStyles;

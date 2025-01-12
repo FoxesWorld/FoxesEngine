@@ -40,9 +40,12 @@ public class GuiBuilder {
     }
 
     public void buildGui(String framePath, JPanel parent) {
+
         Attributes frameAttributes = loadFrameAttributes(framePath);
         buildPanels(frameAttributes.getGroups(), parent);
+
     }
+
 
     private Attributes loadFrameAttributes(String framePath) {
         String fileType = getFileType(framePath);
@@ -73,6 +76,7 @@ public class GuiBuilder {
 
     private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
         if (panels != null) {
+
             panels.forEach((componentGroup, optionGroups) -> {
                 JPanel thisPanel = createPanel(optionGroups, componentGroup);
                 processChildComponents(optionGroups.getChildComponents(), thisPanel);
@@ -80,12 +84,12 @@ public class GuiBuilder {
                 buildPanels(optionGroups.getGroups(), thisPanel);
                 updateChildParentMap(parentPanel, thisPanel);
             });
+
         }
     }
 
     private JPanel createPanel(OptionGroups optionGroups, String componentGroup) {
-        JPanel panel = frameConstructor.getPanel().createGroupPanel(
-                optionGroups.getPanelOptions(), componentGroup, frameConstructor);
+        JPanel panel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup, frameConstructor);
         panel.setName(componentGroup);
         panel.setVisible(optionGroups.getPanelOptions().isVisible());
         return panel;

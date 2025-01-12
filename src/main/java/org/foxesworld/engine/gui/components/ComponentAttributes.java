@@ -17,6 +17,7 @@ public class ComponentAttributes extends Attributes {
     private Map<String, String> styles;
     private List<String> fileExtensions;
     private LayoutConfig layoutConfig;
+    private Gradient gradient;
     private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, type, style, id,background, thumbImage, trackImage, alignment, toolTip, showIcon, hideIcon, selectionMode;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius, stepSize;
     private Bounds bounds;
@@ -158,6 +159,10 @@ public class ComponentAttributes extends Attributes {
         return selectionMode;
     }
 
+    public Gradient getGradient() {
+        return gradient;
+    }
+
     public LayoutConfig getLayoutConfig() {
         return layoutConfig;
     }
@@ -216,6 +221,23 @@ public class ComponentAttributes extends Attributes {
 
         public void setHeight(int height) {
             this.height = height;
+        }
+    }
+
+    public static  class Gradient {
+        private String startColor, endColor;
+        private boolean vertical;
+
+        public String getStartColor() {
+            return startColor;
+        }
+
+        public String getEndColor() {
+            return endColor;
+        }
+
+        public boolean isVertical() {
+            return vertical;
         }
     }
 

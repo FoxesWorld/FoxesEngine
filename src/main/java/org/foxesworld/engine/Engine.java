@@ -73,7 +73,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     private boolean init = false;
     private final EngineInfo engineInfo;
 
-    public Engine(int poolSize, Map<String, Class<?>> configFiles) {
+    public Engine(int poolSize, String worker, Map<String, Class<?>> configFiles) {
         currentOS = OS.determineCurrentOS();
         osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
@@ -95,18 +95,13 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         this.FONTUTILS = new FontUtils(this);
         setLogLevel(Level.valueOf(engineData.getLogLevel()));
         LOGGER.info("Engine version " + this.getEngineInfo().engineVersion + this.getEngineInfo().engineBrand);
-        executorServiceProvider = new ExecutorServiceProvider(poolSize, "foxWorker-");
+        executorServiceProvider = new ExecutorServiceProvider(poolSize, worker);
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
         this.imageUtils = new ImageUtils(this);
         FlatIntelliJLaf.setup();
     }
 
-    /**
-     * Устанавливает уровень логирования для текущего логгера.
-     *
-     * @param level уровень логирования
-     */
     public void setLogLevel(Level level) {
         Configurator.setLevel(LOGGER.getName(), level);
         LOGGER.info("Log level set to " + level);

@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public abstract class Config {
-
+    private Map<String, Class<?>> configFiles;
+    private Logger logger;
     protected final Map<String, Object> config = new HashMap<>();
     protected final ReentrantReadWriteLock configLock = new ReentrantReadWriteLock();
     protected CfgProvider cfgProvider;
@@ -27,29 +28,61 @@ public abstract class Config {
     protected String defaultConfFilesDir = "config/";
 
     public Config(Map<String, Class<?>> configFiles, Logger logger) {
+        this.configFiles = configFiles;
+        this.logger = logger;
+
+    }
+
+    public void processConfig(){
         configFiles.forEach((cfgName, clazz) -> {
             this.cfgProvider = new CfgProvider(logger);
             this.initConfig(cfgName, clazz);
         });
     }
 
-    private void initConfig(String cfgName, Class<?> clazz) {
+    public void initConfig(String cfgName, Class<?> clazz) {
         String cfgFileName = cfgName + cfgFileExtension;
-        this.cfgProvider.setCfgExportDirName(cfgExportDir);
-        this.cfgProvider.setBaseDirPathIndex(dirIndex);
-        this.cfgProvider.setCfgFileExtension(cfgFileExtension);
+        cfgProvider.setCfgExportDirName(cfgExportDir);
+        cfgProvider.setBaseDirPathIndex(dirIndex);
+        cfgProvider.setCfgFileExtension(cfgFileExtension);
         cfgProvider.setDefaultConfFilesDir(defaultConfFilesDir);
 
         try {
             cfgProvider.processFile(cfgFileName);
             this.config.clear();
             this.config.putAll(Optional.ofNullable(cfgProvider.getCfgMap(cfgName)).orElseGet(HashMap::new));
+            syncWithTemplate(cfgProvider.getThisTemplate());
             assignConfigValues(clazz);
         } catch (Exception e) {
-            Engine.LOGGER.error("Ошибка инициализации конфигурации для файла: " + cfgFileName, e);
+            logger.error("Config init error: " + cfgFileName, e);
             this.config.clear();
         }
     }
+
+    public void syncWithTemplate(Map<String, Object> template) {
+        configLock.writeLock().lock();
+        try {
+            boolean isUpdated = false;
+
+            for (Map.Entry<String, Object> entry : template.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (!config.containsKey(key)) {
+                    config.put(key, value);
+                    logger.info("Added missing config entry: " + key + " -> " + value);
+                    isUpdated = true;
+                }
+            }
+
+            if (isUpdated) {
+                writeCurrentConfig();
+            }
+        } finally {
+            configLock.writeLock().unlock();
+        }
+    }
+
 
     public abstract void addToConfig(Map<String, Object> inputData, List<?> values);
 
@@ -60,7 +93,7 @@ public abstract class Config {
     public abstract void clearConfigData(String dataToClear, boolean write);
 
     public void assignConfigValues(Class<?> clazz) {
-        configLock.readLock().lock();  // Блокируем на чтение, чтобы другие потоки не могли изменять конфиг
+        configLock.readLock().lock();
         try {
             config.forEach((key, value) -> {
                 try {
@@ -68,21 +101,26 @@ public abstract class Config {
                     field.setAccessible(true);
                     processConfigField(field, key);
                 } catch (NoSuchFieldException ignored) {
-                    Engine.LOGGER.warn("Поле '" + key + "' отсутствует в классе " + clazz.getSimpleName());
+                    Engine.LOGGER.warn("Field '" + key + "' not found in " + clazz.getSimpleName());
                 }
             });
         } finally {
-            configLock.readLock().unlock(); // Освобождаем блокировку
+            configLock.readLock().unlock();
         }
     }
 
     public void writeCurrentConfig() {
-        File configFile = new File(getFullPath() + "config/config.json");
-        try (FileWriter writer = new FileWriter(configFile)) {
-            writer.write(configToJSON());
-            Engine.LOGGER.info("Конфигурация успешно сохранена: " + configFile.getPath());
-        } catch (IOException e) {
-            Engine.LOGGER.error("Ошибка записи конфигурации в файл: " + configFile.getPath(), e);
+        configLock.writeLock().lock();
+        try {
+            File configFile = new File(getFullPath() + "config/config.json");
+            try (FileWriter writer = new FileWriter(configFile)) {
+                writer.write(configToJSON());
+                Engine.LOGGER.info("Config saved: " + configFile.getPath());
+            } catch (IOException e) {
+                Engine.LOGGER.error("Error saving config: " + configFile.getPath(), e);
+            }
+        } finally {
+            configLock.writeLock().unlock();
         }
     }
 
@@ -94,27 +132,26 @@ public abstract class Config {
     protected void processConfigField(Field field, String fieldName) {
         try {
             Object value = config.get(fieldName);
-            field.setAccessible(true);
 
             if (value instanceof String) {
                 value = resolvePlaceholders((String) value);
+                config.put(fieldName, value);
             }
-
-            // Приведение типов
             Object castedValue = castValue(field.getType(), value);
+
             if (isValidValue(field.getType(), castedValue)) {
                 field.set(this, castedValue);
             } else {
                 handleInvalidValue(field, fieldName);
             }
-
-            this.config.put(fieldName, value);
         } catch (IllegalAccessException e) {
             Engine.LOGGER.error("Ошибка доступа к полю " + fieldName, e);
         }
     }
 
     private String resolvePlaceholders(String input) {
+        if (input == null) return null;
+
         Matcher matcher = Pattern.compile("SysVal\\{([^}]+)}").matcher(input);
         StringBuilder result = new StringBuilder();
         int lastEnd = 0;
@@ -123,13 +160,16 @@ public abstract class Config {
             result.append(input, lastEnd, matcher.start());
             String placeholder = matcher.group(1);
             String resolvedValue = resolveSysVal(placeholder);
+
+            Engine.LOGGER.debug("Replacing SysVal: " + placeholder + " -> " + resolvedValue);
+
             result.append(resolvedValue != null ? resolvedValue : matcher.group(0));
             lastEnd = matcher.end();
         }
-
         result.append(input, lastEnd, input.length());
         return result.toString();
     }
+
 
     private String resolveSysVal(String placeholder) {
         return Optional.ofNullable(System.getProperty(placeholder))
@@ -161,7 +201,6 @@ public abstract class Config {
 
     private Object castValue(Class<?> fieldType, Object value) {
         if (value == null) return null;
-
         return switch (fieldType.getName()) {
             case "boolean", "java.lang.Boolean" -> Boolean.parseBoolean(value.toString());
             case "int", "java.lang.Integer" -> Integer.parseInt(value.toString());
@@ -178,6 +217,11 @@ public abstract class Config {
     }
 
     public Map<String, Object> getConfig() {
-        return config;
+        configLock.readLock().lock();
+        try {
+            return Collections.unmodifiableMap(config);
+        } finally {
+            configLock.readLock().unlock();
+        }
     }
 }

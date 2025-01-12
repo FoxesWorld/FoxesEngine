@@ -3,8 +3,6 @@ package org.foxesworld.engine.gui.adapters;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.adapters.json.JsonFrameAttributesLoader;
 import org.foxesworld.engine.gui.adapters.json5.Json5FrameAttributesLoader;
-import org.foxesworld.engine.gui.adapters.xml.XmlFrameAttributesLoader;
-import org.foxesworld.engine.gui.adapters.yaml.YamlFrameAttributesLoader;
 
 import java.util.HashMap;
 import java.util.Map;

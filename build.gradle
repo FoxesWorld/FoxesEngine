@@ -65,7 +65,7 @@ run {
 }
 
 dependencies {
-    implementation files('lib/foxesworld/cfgProvider-2.2.3-STABLE.jar')
+    implementation files('lib/foxesworld/cfgProvider-2.2.4-STABLE.jar')
     implementation files('lib/java-discord-rpc-2.0.2-all.jar')
     implementation files('lib/FoxNotifications-1.0.4.jar')
     implementation files('lib/flatLaf/flatlaf-3.4.1.jar')
@@ -79,7 +79,6 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.3'
 }
 
 

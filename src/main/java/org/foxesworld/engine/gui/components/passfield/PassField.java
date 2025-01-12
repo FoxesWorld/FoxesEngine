@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components.passfield;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,27 +29,25 @@ public class PassField extends JPasswordField {
         this.setOpaque(false);
 
         if (componentFactory.getComponentAttribute().isrevealButton()) {
-            this.showIcon = componentFactory.getIconUtils().getVectorIcon(componentFactory.getComponentAttribute().getShowIcon(), 16, 16);
-            this.hideIcon = componentFactory.getIconUtils().getVectorIcon(componentFactory.getComponentAttribute().getHideIcon(), 16, 16);
-
+            this.showIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/show.svg", 16, 16);
+            this.hideIcon = componentFactory.getIconUtils().getVectorIcon("assets/ui/icons/hide.svg", 16, 16);
             // Initialize the icon label
             iconLabel = new JLabel(showIcon);
-            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 0));
+            iconLabel.setBorder(new EmptyBorder(0, 0, 0, 10));
             iconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             iconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     togglePasswordVisibility();
                 }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    togglePasswordVisibility();
+                }
             });
-
-
-            JPanel iconPanel = new JPanel(new BorderLayout());
-            iconPanel.setOpaque(false);
-            iconPanel.add(iconLabel, BorderLayout.CENTER);
-
             setLayout(new BorderLayout());
-            add(iconPanel, BorderLayout.EAST);
+            add(iconLabel, BorderLayout.EAST);
         }
 
         this.addFocusListener(new FocusAdapter() {
@@ -65,7 +64,6 @@ public class PassField extends JPasswordField {
             }
         });
     }
-
 
     private void startCaretBlinking() {
         if (caretTimer == null || !caretTimer.isRunning()) {
@@ -110,7 +108,7 @@ public class PassField extends JPasswordField {
 
             // Draw the password characters
             char[] password = getPassword();
-            String maskedPassword = new String(password).replaceAll("\\.", "*");
+            String maskedPassword = new String(password).replaceAll(".", "*");
             int x = getInsets().left + paddingX;
             int y = g.getFontMetrics().getMaxAscent() + getInsets().top + paddingY;
 

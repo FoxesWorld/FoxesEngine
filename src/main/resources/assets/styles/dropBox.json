@@ -6,7 +6,7 @@
         "font": "mcfont",
         "fontSize": 12,
         "borderRadius": 5,
-        "color": "#807159",
+        "color": "#b0976b",
         "hoverColor": "#efa532",
         "texture": "assets/ui/components/dropBox/dropBox.png"
       }

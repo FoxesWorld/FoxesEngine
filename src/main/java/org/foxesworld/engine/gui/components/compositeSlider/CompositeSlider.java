@@ -41,7 +41,7 @@ public class CompositeSlider extends JComponent {
 
         if (componentAttribute.getComponentId().contains("ram")) {
             RamRangeCalculator calculator = new RamRangeCalculator();
-            RamRangeCalculator.SliderRange sliderRange = calculator.calculateSliderRange();
+            RamRangeCalculator.SliderRange sliderRange = calculator.calculateSliderRange(componentAttribute.getStepSize());
             minValue = sliderRange.getMinValue();
             maxValue = sliderRange.getMaxValue();
             initialValue = getInitialValue(sliderRange.getInitialValue());
@@ -90,7 +90,8 @@ public class CompositeSlider extends JComponent {
 
 
     private void configureLabel() {
-        labelStyle = new LabelStyle(componentFactory.getEngine().getStyleProvider().getElementStyles().get("label").get(componentAttribute.getStyles().get("label")));
+        labelStyle = new LabelStyle(componentFactory);
+        labelStyle.setStyle(componentFactory.getEngine().getStyleProvider().getElementStyles().get("label").get(componentAttribute.getStyles().get("label")));
         labelStyle.apply(label);
         label.setFont(componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), componentAttribute.getFontSize()));
     }

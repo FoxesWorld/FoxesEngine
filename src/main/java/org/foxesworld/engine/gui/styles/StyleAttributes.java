@@ -1,5 +1,7 @@
 package org.foxesworld.engine.gui.styles;
 
+import java.util.Objects;
+
 public class StyleAttributes {
     private String name,backgroundImage,background,color,hoverColor,caretColor,align,borderColor,trackImage, thumbImage,texture,font,selectionColor;
     private int width,height,paddingX,paddingY,fontSize, borderRadius;
@@ -83,5 +85,47 @@ public class StyleAttributes {
 
     public String getThumbImage() {
         return thumbImage;
+    }
+
+    public boolean hasTransparentBackground() {
+        return "transparent".equalsIgnoreCase(background);
+    }
+
+    public boolean hasBackgroundImage() {
+        return backgroundImage != null && !backgroundImage.isEmpty();
+    }
+
+    public boolean isValidCSSColor(String color) {
+        return color != null && color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^[a-zA-Z]+$");
+    }
+
+    @Override
+    public String toString() {
+        return "StyleAttributes{" +
+                "name='" + name + '\'' +
+                ", background='" + background + '\'' +
+                ", color='" + color + '\'' +
+                ", width=" + width +
+                ", height=" + height +
+                ", opaque=" + opaque +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StyleAttributes that = (StyleAttributes) o;
+        return width == that.width &&
+                height == that.height &&
+                opaque == that.opaque &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(background, that.background) &&
+                Objects.equals(color, that.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, background, color, width, height, opaque);
     }
 }

@@ -1,8 +1,6 @@
 package org.foxesworld.engine.utils;
 
 import com.sun.management.OperatingSystemMXBean;
-import org.foxesworld.engine.Engine;
-
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,39 +37,46 @@ public class RamRangeCalculator {
         }
     }
 
-    /**
-     * Рассчитывает диапазон для RAM на основе общей памяти системы.
-     *
-     * @return SliderRange объект, содержащий значения для слайдера.
-     */
-    public SliderRange calculateSliderRange() {
+    public SliderRange calculateSliderRange(int numberOfSteps) {
         OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         long totalMemory = osBean.getTotalMemorySize();
 
-        int minValue = Math.max(1024, toMB(totalMemory * 0.10));
-        int maxValue = Math.min(64 * 1024, toMB(totalMemory * 0.75));
+        // Конвертируем байты в мегабайты (делим на 1024 * 1024)
+        int totalMemoryMB = (int) (totalMemory / (1024 * 1024));
 
-        minValue = roundUpToPowerOfTwo(minValue);
-        maxValue = roundDownToPowerOfTwo(maxValue);
+        // Вычисляем минимальное и максимальное значение для слайдера
+        int minValue = Math.max(1024, totalMemoryMB / 10);  // минимум 1024 МБ или 10% от общей памяти
+        int maxValue = Math.min(64 * 1024, totalMemoryMB * 3 / 4); // максимум 64 ГБ или 75% от общей памяти
 
+        // Убедимся, что maxValue больше minValue
         if (maxValue <= minValue) {
-            throw new IllegalArgumentException("Invalid range properties: maxValue (" + maxValue + ") must be greater than minValue (" + minValue + ")");
+            maxValue = minValue + 1; // Если maxValue <= minValue, корректируем maxValue
         }
-        List<Integer> values = fillSliderValues(minValue, maxValue);
-        int initialValue = Math.min(Math.max(roundToNearestPowerOfTwo(toMB(totalMemory * 0.25)), minValue), maxValue);
+
+        // Вычисляем stepSize на основе диапазона
+        int stepSize = calculateStepSize(minValue, maxValue, numberOfSteps);
+
+        // Генерируем значения для слайдера
+        List<Integer> values = fillSliderValues(minValue, maxValue, stepSize);
+
+        // Начальное значение слайдера
+        int initialValue = Math.min(Math.max(roundToNearestPowerOfTwo(totalMemoryMB / 4), minValue), maxValue);
+
         return new SliderRange(minValue, maxValue, initialValue, values);
     }
 
-    private int toMB(double bytes) {
-        return (int) (bytes / (1024 * 1024));
+
+
+    private int calculateStepSize(int minValue, int maxValue, int numberOfSteps) {
+        return Math.max(1, (maxValue - minValue) / numberOfSteps);
     }
 
-    private int roundUpToPowerOfTwo(int value) {
-        return value <= 0 ? 1 : Integer.highestOneBit(value - 1) << 1;
-    }
-
-    private int roundDownToPowerOfTwo(int value) {
-        return value <= 0 ? 1 : Integer.highestOneBit(value);
+    private List<Integer> fillSliderValues(int minValue, int maxValue, int stepSize) {
+        List<Integer> values = new ArrayList<>();
+        for (int value = minValue; value <= maxValue; value += stepSize) {
+            values.add(value);
+        }
+        return values;
     }
 
     private int roundToNearestPowerOfTwo(int value) {
@@ -80,22 +85,11 @@ public class RamRangeCalculator {
         return (value - lower < upper - value) ? lower : upper;
     }
 
-    private List<Integer> fillSliderValues(int minValue, int maxValue) {
-        List<Integer> values = new ArrayList<>();
-        int step = (maxValue - minValue) / 9;
-        for (int value = minValue; value <= maxValue; value += step) {
-            values.add(value);
-        }
+    private int roundUpToPowerOfTwo(int value) {
+        return value <= 0 ? 1 : Integer.highestOneBit(value - 1) << 1;
+    }
 
-        int power = minValue;
-        while (power <= maxValue) {
-            if (!values.contains(power)) {
-                values.add(power);
-            }
-            power <<= 1;
-        }
-
-        values.sort(Integer::compareTo);
-        return values;
+    private int roundDownToPowerOfTwo(int value) {
+        return value <= 0 ? 1 : Integer.highestOneBit(value);
     }
 }

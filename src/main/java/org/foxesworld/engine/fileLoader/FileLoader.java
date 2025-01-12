@@ -22,6 +22,7 @@ public class FileLoader {
     private boolean forceUpdate = false;
     private final LoadingManager loadingManager;
     private final Set<String> filesToKeep = new HashSet<>();
+    private Set<FileAttributes> fileAttributes = new HashSet<>();
     private final String homeDir;
     private final String client;
     private final String version;
@@ -30,7 +31,7 @@ public class FileLoader {
     private final FileFetcher fileFetcher;
     private final FileValidator fileValidator;
     private FileLoaderListener fileLoaderListener;
-    private List<FileAttributes> fileAttributes = new ArrayList<>();
+
     private FileAttributes currentFile;
     private long totalSize = -1;
     private String fileExtension;
@@ -72,19 +73,25 @@ public class FileLoader {
         Engine.LOGGER.info("Keeping {} files", filesToKeep.size());
         loadingManager.setLoadingText("file.listBuilt-desc", "file.listBuilt-title");
 
-        this.fileAttributes = forceUpdate ?
-                Arrays.asList(fileAttributes) :
-                filterFileAttributes(fileAttributes);
+        if (forceUpdate) {
+            // Прямое добавление всех файлов в HashSet
+            this.fileAttributes = new HashSet<>(Arrays.asList(fileAttributes));
+        } else {
+            // Фильтрация перед добавлением в HashSet
+            this.fileAttributes = filterFileAttributes(fileAttributes);
+        }
 
         fileLoaderListener.onFilesRead();
     }
 
-    private List<FileAttributes> filterFileAttributes(FileAttributes[] fileAttributes) {
+
+    private HashSet<FileAttributes> filterFileAttributes(FileAttributes[] fileAttributes) {
         return Arrays.stream(fileAttributes)
                 .filter(file -> !filesToKeep.contains(file.getFilename()))
                 .filter(this::shouldDownloadFile)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(HashSet::new));
     }
+
 
     public boolean shouldDownloadFile(FileAttributes fileAttributes) {
         String localPath = fileAttributes.getFilename().replace(fileAttributes.getReplaceMask(), "");
@@ -208,6 +215,10 @@ public class FileLoader {
 
     public void addFileToDownload(FileAttributes fileAttributes) {
         this.fileAttributes.add(fileAttributes);
+    }
+
+    public Set<FileAttributes> getFileAttributes() {
+        return fileAttributes;
     }
 
     public void setLoaderListener(FileLoaderListener fileLoaderListener) {

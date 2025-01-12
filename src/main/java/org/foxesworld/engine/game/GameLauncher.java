@@ -128,7 +128,7 @@ public abstract class GameLauncher {
         }
 
         public Path buildAssetsPath() {
-            return buildGameDir().resolve("assets");
+            return buildVersionDir().resolve("assets");
         }
 
         public Path buildMinecraftJarPath() {

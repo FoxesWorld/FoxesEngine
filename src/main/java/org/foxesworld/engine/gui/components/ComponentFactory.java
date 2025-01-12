@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.gui.ComponentValue;
 import org.foxesworld.engine.gui.components.button.*;
 import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.checkbox.*;
@@ -19,8 +18,6 @@ import org.foxesworld.engine.gui.components.multiButton.MultiButtonStyle;
 import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.passfield.PassFieldStyle;
 import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
-import org.foxesworld.engine.gui.components.serverBox.ServerBox;
-import org.foxesworld.engine.gui.components.serverBox.ServerBoxStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.spinner.Spinner;
 import org.foxesworld.engine.gui.components.sprite.SpriteAnimation;
@@ -42,13 +39,14 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class ComponentFactory extends JComponent {
 
     private final Engine engine;
-    private ComponentValue componentValue;
     private final LanguageProvider LANG;
     private final IconUtils iconUtils;
     private final Map<String, Map<String, StyleAttributes>> componentStyles = new HashMap<>();
@@ -62,14 +60,6 @@ public class ComponentFactory extends JComponent {
         this.engine = engine;
         this.iconUtils = new IconUtils(engine);
         this.LANG = engine.getLANG();
-    }
-
-    public void createComponentAsync(ComponentAttributes componentAttributes, ComponentCreationCallback callback) {
-        engine.getExecutorServiceProvider().submitDynamicTaskWithCallback(() -> createComponent(componentAttributes), "create" + componentAttributes.getComponentType(), component -> {
-            if (component instanceof JComponent) {
-                SwingUtilities.invokeLater(() -> callback.onComponentCreated(component));
-            }
-        });
     }
 
     public JComponent createComponent(ComponentAttributes componentAttributes) {
@@ -121,13 +111,12 @@ public class ComponentFactory extends JComponent {
             case "textArea" -> component = createTextArea(componentAttributes);
             case "checkBox" -> component = createCheckbox(componentAttributes);
             case "textField" -> component = createTextField(componentAttributes);
-            case "spriteImage" -> component = createSpriteImage(componentAttributes);
+            case "spriteImage" -> component = createSpriteImage();
             case "passField" -> component = createPassField(componentAttributes);
             case "spinner" -> component = createSpinner(componentAttributes);
             case "button" -> component = createButton(componentAttributes);
             case "multiButton" -> component = createMultiButton(componentAttributes);
             case "dropBox" -> component = createDropBox(componentAttributes);
-            case "serverBox" -> component = createServerBox(componentAttributes);
             case "slider" -> component = createSlider(componentAttributes);
             case "compositeSlider" -> component = createCompositeSlider(componentAttributes);
             case "fileSelector"-> component = createFileSelector(componentAttributes);
@@ -152,7 +141,9 @@ public class ComponentFactory extends JComponent {
         label.setIcon(iconUtils.getIcon(componentAttributes));
         String initial = (componentAttributes.getInitialValue() != null) ? String.valueOf(componentAttributes.getInitialValue()) : "";
         label.setText(LANG.getString(componentAttributes.getLocaleKey()) + " " + initial);
-        label.setForeground(hexToColor(componentAttributes.getColor()));
+        if(!label.isGradientText()) {
+            label.setForeground(hexToColor(componentAttributes.getColor()));
+        }
         label.setFont(engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
         return label;
     }
@@ -203,7 +194,7 @@ public class ComponentFactory extends JComponent {
         return textField;
     }
 
-    private JComponent createSpriteImage(ComponentAttributes componentAttributes) {
+    private JComponent createSpriteImage() {
         return new SpriteAnimation(this);
     }
 
@@ -267,18 +258,6 @@ public class ComponentFactory extends JComponent {
         return dropBox;
     }
 
-    private JComponent createServerBox(ComponentAttributes componentAttributes) {
-        ServerBoxStyle serverBoxStyle = new ServerBoxStyle(this);
-        ServerBox serverBox = new ServerBox();
-        serverBox.updateBox(componentAttributes.getComponentId(), this.engine.getImageUtils().getLocalImage(style.getTexture()).getSubimage(16, 0, 16, 16));
-        serverBoxStyle.apply(serverBox);
-        serverBox.setBackground(hexToColor(componentAttributes.getColor()));
-        serverBox.setForeground(hexToColor(componentAttributes.getColor()));
-        serverBox.setBounds(componentAttributes.getBounds());
-
-        return  serverBox;
-    }
-
     private JComponent createSlider(ComponentAttributes componentAttributes) {
         Slider slider = new Slider(this);
         slider.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
@@ -294,7 +273,6 @@ public class ComponentFactory extends JComponent {
     private JComponent createFileSelector(ComponentAttributes componentAttributes) {
         FileSelector fileSelector = new FileSelector(this, FileSelector.SelectionMode.valueOf(componentAttributes.getSelectionMode()));
         fileSelector.setValue((String) componentAttributes.getInitialValue());
-        //fileSelector.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
         return fileSelector;
     }
 
