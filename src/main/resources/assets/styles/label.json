@@ -5,7 +5,7 @@
         "opaque": false,
         "float": "right",
         "name": "Pumpkin Power",
-        "font": "FSElliotPro-Heavy",
+        "font": "mcfont",
         "color": "#ffffff"
       },
 	  "arcJet": {

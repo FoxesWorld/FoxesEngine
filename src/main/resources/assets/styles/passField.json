@@ -3,20 +3,6 @@
     "passField": {
       "textFieldMain": {
         "name": "Pumpkin Power",
-        "font": "FSElliotPro-Heavy",
-        "fontSize": 12,
-        "width": 262,
-        "height": 45,
-        "paddingX": 15,
-        "paddingY": 15,
-        "borderRadius": 5,
-        "color": "#e2e7ec",
-        "caretColor": "#9ca2a8",
-        "background": "#ffffff",
-        "texture": "assets/ui/components/input/textField.png"
-      },
-      "textFieldAlt": {
-        "name": "Pumpkin Power",
         "font": "mcfont",
         "fontSize": 12,
         "width": 203,
@@ -28,21 +14,7 @@
         "caretColor": "#ff0000",
         "background": "#ffffff",
         "selectionColor": "#2dc5bb",
-        "texture": "assets/ui/components/input/textField2.png"
-      },
-      "textField3": {
-        "name": "Foxes Power",
-        "font": "FSElliotPro-Heavy",
-        "fontSize": 12,
-        "width": 176,
-        "height": 34,
-        "paddingX": 10,
-        "paddingY": 15,
-        "borderRadius": 0,
-        "color": "#e2e7ec",
-        "caretColor": "#9ca2a8",
-        "background": "#ffffff",
-        "texture": "assets/ui/components/input/textField3.png"
+        "texture": "assets/ui/components/input/textField.png"
       }
     }
   }
