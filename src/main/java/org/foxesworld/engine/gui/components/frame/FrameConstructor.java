@@ -24,7 +24,7 @@ public class FrameConstructor extends JFrame {
     private boolean hasFocus;
 
     public FrameConstructor(Engine engine) {
-        engine.getLOGGER().info("FrameConstructor initialization");
+        Engine.getLOGGER().info("FrameConstructor initialization");
         this.engine = engine;
         this.LANG = engine.getLANG();
         this.hasFocus = false;
@@ -122,4 +122,6 @@ public class FrameConstructor extends JFrame {
     public void setFocusStatusListener(FocusStatusListener focusStatusListener) {
         this.focusStatusListener = focusStatusListener;
     }
+
+
 }

@@ -2,13 +2,32 @@
   "styles": {
     "checkBox": {
       "solid": {
-        "opaque": false,
-        "name": "Pumpkin Power",
-        "font": "mcfont",
-        "fontSize": 12,
-        "color": "#ffffff",
-        "background": "#ffffff",
+        "opaque": false ,
+        "name": "Pumpkin Power" ,
+        "font": "mcfont" ,
+        "fontSize": 12 ,
+        "width": 123,
+        "height": 32,
+        "iconWidth": 32,
+        "iconHeight": 32,
+        "color": "#ffffff" ,
+        "background": "#ffffff" ,
+        "hoverColor": "#fce4ab",
         "texture": "assets/ui/components/checkbox/checkbox.png"
+      } ,
+      "solid1": {
+        "opaque": false ,
+        "width": 126,
+        "height": 29,
+        "iconWidth": 16,
+        "iconHeight": 16,
+        "name": "Pumpkin Power" ,
+        "font": "mcfont" ,
+        "fontSize": 12 ,
+        "color": "#ffffff" ,
+        "background": "#ffffff" ,
+        "hoverColor": "#fce4ab",
+        "texture": "assets/ui/components/checkbox/checkbox1.png"
       }
     }
   }

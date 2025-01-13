@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class StyleAttributes {
     private String name,backgroundImage,background,color,hoverColor,caretColor,align,borderColor,trackImage, thumbImage,texture,font,selectionColor;
-    private int width,height,paddingX,paddingY,fontSize, borderRadius;
+    private int width,height,paddingX,paddingY,fontSize, borderRadius, iconWidth, iconHeight;
     private boolean opaque;
 
     public String getName() {
@@ -97,6 +97,14 @@ public class StyleAttributes {
 
     public boolean isValidCSSColor(String color) {
         return color != null && color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^[a-zA-Z]+$");
+    }
+
+    public int getIconWidth() {
+        return iconWidth;
+    }
+
+    public int getIconHeight() {
+        return iconHeight;
     }
 
     @Override
