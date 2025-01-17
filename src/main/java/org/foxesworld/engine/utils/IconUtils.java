@@ -8,7 +8,7 @@ import javax.swing.*;
 
 public class IconUtils {
 
-    private Engine engine;
+    private final Engine engine;
 
     public IconUtils(Engine engine) {
         this.engine = engine;

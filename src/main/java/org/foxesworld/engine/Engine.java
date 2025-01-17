@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
@@ -78,7 +79,11 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
         this.configFiles = configFiles;
-        InputStreamReader reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json"), StandardCharsets.UTF_8);
+
+        InputStreamReader reader = new InputStreamReader(
+                Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json")),
+                StandardCharsets.UTF_8
+        );
         this.engineInfo = new Gson().fromJson(reader, EngineInfo.class);
         setEngineData(engineData.initEngineValues("engine.json"));
         fileProperties = new FileProperties(this);
@@ -90,17 +95,26 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         Runtime.getRuntime().addShutdownHook(new Thread(AnsiConsole::systemUninstall));
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
-        LOGGER.info(appTitle + " started...");
+
+        LOGGER.info("===== Engine Initialization =====");
+        LOGGER.info(this.engineInfo.getEngineBrand());
+        LOGGER.info("Engine Version: {}", this.engineInfo.getEngineVersion());
+        LOGGER.info("Application Title: {}", appTitle);
+        LOGGER.info("Operating System: {}", currentOS);
+        LOGGER.info("Available Processors: {}", osBean.getAvailableProcessors());
+        LOGGER.info("System Load Average: {}", osBean.getSystemLoadAverage());
+        LOGGER.info("Log Level: {}", engineData.getLogLevel());
+        LOGGER.info("Configuration Files: {}", configFiles.keySet());
 
         this.FONTUTILS = new FontUtils(this);
         setLogLevel(Level.valueOf(engineData.getLogLevel()));
-        LOGGER.info("Engine version " + this.getEngineInfo().engineVersion + this.getEngineInfo().engineBrand);
         executorServiceProvider = new ExecutorServiceProvider(poolSize, worker);
         this.GETrequest = new HTTPrequest(this, "GET");
         this.POSTrequest = new HTTPrequest(this, "POST");
         this.imageUtils = new ImageUtils(this);
         FlatIntelliJLaf.setup();
     }
+
 
     public void setLogLevel(Level level) {
         Configurator.setLevel(LOGGER.getName(), level);

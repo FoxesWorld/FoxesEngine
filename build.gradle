@@ -65,7 +65,7 @@ run {
 }
 
 dependencies {
-    implementation files('lib/foxesworld/cfgProvider-2.2.4-STABLE.jar')
+    implementation files('lib/foxesworld/cfgProvider-2.3.0-STABLE.jar')
     implementation files('lib/java-discord-rpc-2.0.2-all.jar')
     implementation files('lib/FoxNotifications-1.0.4.jar')
     implementation files('lib/flatLaf/flatlaf-3.4.1.jar')

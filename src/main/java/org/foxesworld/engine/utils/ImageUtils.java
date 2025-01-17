@@ -25,7 +25,7 @@ import static org.foxesworld.engine.utils.HashUtils.sha1String;
 @SuppressWarnings("unused")
 public class ImageUtils {
     private static final Map<String, BufferedImage> imgCache = new HashMap<>();
-    private Engine engine;
+    private final Engine engine;
 
     public  ImageUtils(Engine engine) {
         this.engine = engine;

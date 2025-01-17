@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public abstract class Config {
-    private Map<String, Class<?>> configFiles;
-    private Logger logger;
+    private final Map<String, Class<?>> configFiles;
+    private final Logger logger;
     protected final Map<String, Object> config = new HashMap<>();
     protected final ReentrantReadWriteLock configLock = new ReentrantReadWriteLock();
     protected CfgProvider cfgProvider;

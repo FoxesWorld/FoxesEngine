@@ -28,7 +28,7 @@ public class CheckboxStyle {
         this.color = componentFactory.getStyle().getColor();
         this.texture = this.componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getStyle().getTexture());
 
-        validateTextureSize(this.texture);
+        //validateTextureSize(this.texture);
     }
 
     private void validateTextureSize(BufferedImage texture) {

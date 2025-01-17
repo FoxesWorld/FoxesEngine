@@ -22,12 +22,12 @@ public class FontUtils {
                 Font font = null;
                 try {
                     font = Font.createFont(0, this.getClass().getResourceAsStream("/assets/fonts/" + name + ".ttf"));
-                    this.engine.getLOGGER().info("Created font - "+name);
+                    Engine.getLOGGER().info("Created font - "+name);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
                         font = Font.createFont(0, this.getClass().getResourceAsStream("/assets/fonts/" + name + ".otf"));
-                        this.engine.getLOGGER().info("Created font - "+name);
+                        Engine.getLOGGER().info("Created font - "+name);
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     }
@@ -36,7 +36,7 @@ public class FontUtils {
                 return font.deriveFont(size);
             } catch (Exception e) {
                 e.printStackTrace();
-                this.engine.getLOGGER().error("Failed to create font!");
+                Engine.getLOGGER().error("Failed to create font!");
                 return null;
             }
         }

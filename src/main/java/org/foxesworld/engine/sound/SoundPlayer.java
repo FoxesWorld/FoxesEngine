@@ -161,6 +161,17 @@ public class SoundPlayer implements LineListener {
             }
         }).start();
     }
+
+    public void onAllSoundsFinished(Runnable callback) {
+        synchronized (clipListeners) {
+            if (activeClipCount == 0) {
+                callback.run();
+            } else {
+                stopAllSoundsCallback = callback;
+            }
+        }
+    }
+
     @Override
     public void update(LineEvent event) {
         Clip clip = (Clip) event.getLine();
