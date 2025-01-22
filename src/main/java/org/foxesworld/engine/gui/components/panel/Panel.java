@@ -19,7 +19,7 @@ public class Panel extends JPanel {
     private FrameAttributes frameAttributes;
     private JPanel groupPanel;
     private final FrameConstructor frameConstructor;
-    private BufferedImage texture; // Текущая текстура панели
+    private BufferedImage texture;
 
     public Panel(FrameConstructor frameConstructor) {
         this.frameConstructor = frameConstructor;

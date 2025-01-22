@@ -14,19 +14,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unused")
 public class GuiBuilder {
     private final FrameLoaderAdapters frameLoaderAdapters;
     private final FrameConstructor frameConstructor;
     private final ComponentFactory componentFactory;
-    private final Engine engine;
-    private final Map<String, JPanel> panelsMap = new HashMap<>();
-    private final Map<String, List<JComponent>> componentsMap = new HashMap<>();
-    private final Map<String, List<String>> childParentMap = new HashMap<>();
-    private final Map<String, JPanel> loadPanels = new HashMap<>();
-    private GuiBuilderListener guiBuilderListener;
     private final Notification notification;
+    private final Engine engine;
+    private final Map<String, JPanel> panelsMap = new ConcurrentHashMap<>();
+    private final Map<String, List<JComponent>> componentsMap = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> childParentMap = new ConcurrentHashMap<>();
+    private final Map<String, JPanel> loadPanels = new ConcurrentHashMap<>();
+    private GuiBuilderListener guiBuilderListener;
+
     private boolean additionalPanelsBuilt = false;
 
     public GuiBuilder(Engine engine) {
@@ -40,10 +42,8 @@ public class GuiBuilder {
     }
 
     public void buildGui(String framePath, JPanel parent) {
-
         Attributes frameAttributes = loadFrameAttributes(framePath);
         buildPanels(frameAttributes.getGroups(), parent);
-
     }
 
 
@@ -76,7 +76,6 @@ public class GuiBuilder {
 
     private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
         if (panels != null) {
-
             panels.forEach((componentGroup, optionGroups) -> {
                 JPanel thisPanel = createPanel(optionGroups, componentGroup);
                 processChildComponents(optionGroups.getChildComponents(), thisPanel);
@@ -84,7 +83,6 @@ public class GuiBuilder {
                 buildPanels(optionGroups.getGroups(), thisPanel);
                 updateChildParentMap(parentPanel, thisPanel);
             });
-
         }
     }
 
@@ -96,6 +94,9 @@ public class GuiBuilder {
     }
 
     private void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
+
+
+
         for (ComponentAttributes componentAttributes : childComponents) {
             if (componentAttributes.getComponentType() != null) {
                 addComponentToParent(componentAttributes, parentPanel);
@@ -107,6 +108,7 @@ public class GuiBuilder {
                 loadPanels.put(componentAttributes.getLoadPanel(), parentPanel);
             }
         }
+
     }
 
     private void addComponentToParent(ComponentAttributes componentAttributes, JPanel parentPanel) {

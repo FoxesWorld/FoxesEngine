@@ -9,16 +9,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class LanguageProvider {
     private final Map<String, Map<String, String>> localizationData = new HashMap<>();
     private final Engine engine;
-    private String langFilePath;
+    private final String langFilePath;
     private final Set<String> sectionsSet = new HashSet<>();
     private final Set<String> localesSet = new HashSet<>();
     private int localeIndex = 0;
@@ -33,7 +30,7 @@ public class LanguageProvider {
     private void loadLocalizationData(Engine engine, String langFilePath) {
         try {
             Gson gson = new Gson();
-            InputStreamReader reader = new InputStreamReader(engine.getClass().getClassLoader().getResourceAsStream(langFilePath), StandardCharsets.UTF_8);
+            InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(engine.getClass().getClassLoader().getResourceAsStream(langFilePath)), StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(reader);
             StringBuilder jsonStringBuilder = new StringBuilder();
             String line;

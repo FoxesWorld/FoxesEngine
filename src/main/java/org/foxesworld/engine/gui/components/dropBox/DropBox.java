@@ -14,6 +14,7 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 @SuppressWarnings("unused")
 public class DropBox extends JComponent implements MouseListener, MouseMotionListener {
     private Color color, hoverColor;
+    private BufferedImage[] icons;
     private volatile boolean loaded = false;
     private final ComponentFactory componentFactory;
     private final Engine engine;
@@ -63,7 +64,6 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     protected void paintComponent(Graphics gmain) {
         Graphics2D g = (Graphics2D) gmain;
         int width = getWidth();
-        g.setColor(hexToColor(componentFactory.getStyle().getColor()));
 
         // Optimize state handling by using a method to handle the drawing
         switch (state) {
@@ -82,6 +82,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
                 loaded = true;
             }, "dropBoxPaint");
         }
+        g.setColor(hexToColor(componentFactory.getStyle().getColor()));
     }
 
 
@@ -99,6 +100,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
                 g.drawImage(point, 205, panelTX.getHeight() * i + 10, this);
             }
         }
+        g.setColor(color);
         g.drawString(values[selected], 10, height * (values.length + 1) - g.getFontMetrics().getHeight() / 2 - 5);
     }
 
@@ -122,8 +124,21 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     private void drawPanel(Graphics2D g, int index) {
         BufferedImage currentPanel = (hover == index) ? selectedTX : panelTX;
         g.drawImage(currentPanel, 0, panelTX.getHeight() * index, this);
-        g.drawString(values[index], 5, selectedTX.getHeight() * (index + 1) - g.getFontMetrics().getHeight() / 2 - 5);
+
+        String text = values[index];
+        FontMetrics metrics = g.getFontMetrics();
+        int textX = 10;
+        int textY = selectedTX.getHeight() * (index + 1) - metrics.getHeight() / 2 - 5;
+        g.setColor(color);
+        g.drawString(text, textX, textY);
+
+        if (icons != null && index < icons.length && icons[index] != null) {
+            int iconX = textX + metrics.stringWidth(text) + 10;
+            int iconY = panelTX.getHeight() * index + (panelTX.getHeight() - 24) / 2;
+            g.drawImage(icons[index], iconX, iconY, 24, 24, this);
+        }
     }
+
 
     private void updateComponentSizeAndLocation(int y, int height) {
         if (getY() != y || getHeight() != height) {
@@ -142,6 +157,9 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
             repaint();
         } finally {
             lock.unlock();
+        }
+        if(state == State.OPENED) {
+            this.engine.getSOUND().playSound("dropBox", "dropBoxClose");
         }
     }
 
@@ -162,9 +180,6 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
             if (state == State.OPENED) {
                 dropBoxListener.onScrollBoxOpen(this);
                 this.engine.getSOUND().playSound("dropBox", "dropBoxOpen");
-            } else {
-                dropBoxListener.onScrollBoxClose(this);
-                this.engine.getSOUND().playSound("dropBox", "dropBoxClose");
             }
 
             state = (state == State.OPENED) ? State.CLOSED : State.OPENED;
@@ -196,12 +211,10 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // No action needed, handled in mouseClicked
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        // Currently unused, can be removed if unnecessary
     }
 
     @Override
@@ -209,9 +222,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
         int newY = e.getY();
         int newHover = (state == State.OPENED) ? (newY / openedTX.getHeight()) : (newY / defaultTX.getHeight());
 
-        // Ensure hover changes only if it is within bounds and not the same as the previous hover index
         if (values.length > 1) {
-            // Multiple values, handle as usual
             if (newHover >= 0 && newHover < values.length && newHover != hover) {
                 hover = newHover;
                 // Trigger hover event processing if state is OPENED
@@ -257,6 +268,12 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
             getParent().setComponentZOrder(this, 0);
         }
     }
+
+    public void setIcons(BufferedImage[] icons) {
+        this.icons = icons;
+        repaint();
+    }
+
 
     public boolean isOpened() {
         return state == State.OPENED;

@@ -29,7 +29,6 @@ public class FrameConstructor extends JFrame {
         this.LANG = engine.getLANG();
         this.hasFocus = false;
         buildFrame("assets/frames/frame.json");
-        setupFocusListeners();
     }
 
     private void buildFrame(String path) {
@@ -121,6 +120,7 @@ public class FrameConstructor extends JFrame {
 
     public void setFocusStatusListener(FocusStatusListener focusStatusListener) {
         this.focusStatusListener = focusStatusListener;
+        setupFocusListeners();
     }
 
 

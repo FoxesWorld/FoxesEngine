@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("unused")
 public abstract class Engine implements ActionListener, GuiBuilderListener, FocusStatusListener {
@@ -71,7 +72,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     private EngineData engineData;
     private final HTTPrequest GETrequest, POSTrequest;
     public ActionHandler actionHandler;
-    private boolean init = false;
+    protected final AtomicBoolean initialized = new AtomicBoolean(false);
     private final EngineInfo engineInfo;
 
     public Engine(int poolSize, String worker, Map<String, Class<?>> configFiles) {
@@ -132,7 +133,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     public abstract void actionPerformed(ActionEvent e);
     protected void loadMainPanel(String path) {
         this.guiBuilder.buildGui(path, this.getFrame().getRootPanel());
-        if (!init) {
+        if (!initialized.get()) {
             this.postInit();
         }
     }
@@ -236,7 +237,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         return configFiles;
     }
     protected boolean isInit() {
-        return init;
+        return initialized.get();
     }
     public FrameConstructor getFrame() {
         return this.frameConstructor;
@@ -293,7 +294,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         this.guiBuilder = guiBuilder;
     }
     public void setInit(boolean init) {
-        this.init = init;
+        this.initialized.set(init);
     }
     public FileProperties getFileProperties() {
         return fileProperties;
