@@ -1,33 +1,33 @@
 package org.foxesworld.engine.utils.animation;
 
 
-import org.foxesworld.engine.gui.loadingManager.LoadingManager;
+import org.foxesworld.engine.gui.FloatingWindow;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 
 public class AnimationManager {
-    private final LoadingManager loadingManager;
+    private final FloatingWindow floatingWindow;
     private AnimationStats animationStats;
     private final int animationDuration;
     private final int animationSpeed;
 
-    public AnimationManager(LoadingManager loadingManager, int animationDuration, int animationSpeed) {
-        this.loadingManager = loadingManager;
+    public AnimationManager(FloatingWindow floatingWindow, int animationDuration, int animationSpeed) {
+        this.floatingWindow = floatingWindow;
         this.animationDuration = animationDuration;
         this.animationSpeed = animationSpeed;
     }
 
     public void animate(boolean isEntry) {
-        if (!loadingManager.isAnimating()) {
-            loadingManager.setAnimating(true);
+        if (!floatingWindow.isAnimating()) {
+            floatingWindow.setAnimating(true);
             animationStats.animationStarted();
 
-            Point mainFrameCenter = loadingManager.getCenterPoint(loadingManager.getEngine().getFrame());
-            int startX = mainFrameCenter.x - loadingManager.getWidth() / 2;
-            int startY = isEntry ? loadingManager.getEngine().getFrame().getY() - loadingManager.getHeight() : loadingManager.getY();
-            int targetY = mainFrameCenter.y - loadingManager.getHeight() / 2;
-            int endX = isEntry ? startX : loadingManager.getEngine().getFrame().getWidth();
+            Point mainFrameCenter = floatingWindow.getCenterPoint(floatingWindow.getEngine().getFrame());
+            int startX = mainFrameCenter.x - floatingWindow.getWidth() / 2;
+            int startY = isEntry ? floatingWindow.getEngine().getFrame().getY() - floatingWindow.getHeight() : floatingWindow.getY();
+            int targetY = mainFrameCenter.y - floatingWindow.getHeight() / 2;
+            int endX = isEntry ? startX : floatingWindow.getEngine().getFrame().getWidth();
             float startOpacity = isEntry ? 0.0f : 1.0f;
             float targetOpacity = isEntry ? 1.0f : 0.0f;
 
@@ -40,8 +40,8 @@ public class AnimationManager {
 
             BezierCurve bezierCurve = new BezierCurve(controlPoints);
 
-            KeyframeAnimation animation = new KeyframeAnimation(loadingManager, animationDuration / animationSpeed, () -> {
-                loadingManager.setAnimating(false);
+            KeyframeAnimation animation = new KeyframeAnimation(floatingWindow, animationDuration / animationSpeed, () -> {
+                floatingWindow.setAnimating(false);
                 if (!isEntry) {
                     animationStats.animationFinished();
                 }

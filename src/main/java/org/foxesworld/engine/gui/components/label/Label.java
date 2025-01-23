@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components.label;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.gui.styles.StyleAttributes;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,12 +17,13 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 public class Label extends JLabel {
 	@Serial
 	private static final long serialVersionUID = 1L;
-
 	private Color startColor, endColor;
 	private boolean isGradientText = false;
 	private boolean isVerticalGradient = false;
+	private ComponentFactory componentFactory;
 
 	public Label(ComponentFactory componentFactory) {
+		this.componentFactory = componentFactory;
 		String localeKey = componentFactory.getComponentAttribute().getLocaleKey();
 		if (localeKey != null) {
 			setText(componentFactory.getEngine().getLANG().getString(localeKey));
@@ -136,4 +138,5 @@ public class Label extends JLabel {
 	public boolean isGradientText() {
 		return isGradientText;
 	}
+
 }

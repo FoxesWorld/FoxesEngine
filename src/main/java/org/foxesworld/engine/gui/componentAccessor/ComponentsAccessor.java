@@ -10,7 +10,6 @@ import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -28,7 +27,7 @@ public class ComponentsAccessor {
 
     private final Map<Class<?>, Function<JComponent, String>> valueExtractors = Map.of(
             TextField.class, c -> ((TextField) c).getText(),
-            PassField.class, c -> ((PassField) c).getText(),
+            PassField.class, c -> new String(((PassField) c).getPassword()),
             Checkbox.class, c -> String.valueOf(((Checkbox) c).isSelected()),
             Slider.class, c -> String.valueOf(((Slider) c).getValue()),
             DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex()),

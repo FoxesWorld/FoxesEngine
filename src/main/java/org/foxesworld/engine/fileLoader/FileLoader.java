@@ -1,7 +1,6 @@
 package org.foxesworld.engine.fileLoader;
 
 import org.foxesworld.engine.Engine;
-import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.gui.ActionHandler;
 import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.utils.Download.DownloadUtils;
@@ -54,7 +53,7 @@ public class FileLoader {
             return;
         }
 
-        this.loadingManager.toggleLoader();
+        this.loadingManager.toggleVisibility();
         loadingManager.setLoadingText("file.gettingFiles-desc", "file.gettingFiles-title");
 
         fileFetcher.fetchDownloadList(client, version, getPlatformNumber())

@@ -13,11 +13,9 @@ import java.security.NoSuchAlgorithmException;
 public class CryptUtils {
 
     private final CryptHelper cryptHelper;
-    private final Engine engine;
 
-    public CryptUtils(Engine engine) {
+    public CryptUtils() {
         this.cryptHelper = new CryptHelper();
-        this.engine = engine;
     }
 
     public String decrypt(String input, String key) {

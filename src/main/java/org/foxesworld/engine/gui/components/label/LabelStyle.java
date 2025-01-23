@@ -1,5 +1,6 @@
 package org.foxesworld.engine.gui.components.label;
 
+import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 
@@ -8,7 +9,7 @@ import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
 public class LabelStyle {
 	private StyleAttributes style;
-	private final ComponentFactory componentFactory;
+	private ComponentFactory componentFactory;
 	private String fontName;
 	private float fontSize;
 	private Color idleColor;
@@ -29,6 +30,14 @@ public class LabelStyle {
 			this.activeColor = idleColor;
 			this.isGradient = false;
 		}
+	}
+
+	public LabelStyle(StyleAttributes styleAttributes){
+		style = styleAttributes;
+			this.idleColor = hexToColor(style.getColor());
+			this.activeColor = idleColor;
+			this.isGradient = false;
+
 	}
 
 	public void apply(Label label) {
