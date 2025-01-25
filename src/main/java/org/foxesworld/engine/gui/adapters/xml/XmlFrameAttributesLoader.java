@@ -3,12 +3,9 @@ package org.foxesworld.engine.gui.adapters.xml;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.adapters.FrameAttributesLoader;
 import org.foxesworld.engine.gui.components.Attributes;
+import org.foxesworld.engine.gui.components.Bounds;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -17,9 +14,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public class XmlFrameAttributesLoader implements FrameAttributesLoader {
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -33,8 +30,9 @@ public class XmlFrameAttributesLoader implements FrameAttributesLoader {
             }
 
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new InputStreamReader(inputStream)));
+            Document document = builder.parse(inputStream);
 
+            // Парсим XML-документ и возвращаем компонент
             return parseDocument(document, ComponentAttributes.class);
 
         } catch (IOException | ParserConfigurationException | SAXException e) {
@@ -48,7 +46,18 @@ public class XmlFrameAttributesLoader implements FrameAttributesLoader {
             Element root = document.getDocumentElement();
 
             if (root != null) {
-                populateFields(root, instance);
+                // Парсим атрибуты компонента
+                populateAttributes(root, instance);
+
+                // Если есть вложенные компоненты, парсим их тоже
+                NodeList components = root.getElementsByTagName("component");
+                for (int i = 0; i < components.getLength(); i++) {
+                    Element componentElement = (Element) components.item(i);
+                    ComponentAttributes component = parseComponentAttributes(componentElement);
+                    if (instance instanceof ComponentAttributes) {
+                        ((ComponentAttributes) instance).addChild(component);
+                    }
+                }
             }
 
             return instance;
@@ -57,26 +66,57 @@ public class XmlFrameAttributesLoader implements FrameAttributesLoader {
         }
     }
 
-    private <T> void populateFields(Element element, T instance) throws IllegalAccessException {
-        NodeList childNodes = element.getChildNodes();
+    private <T> void populateAttributes(Element element, T instance) throws IllegalAccessException {
+        // Чтение атрибутов элемента
+        for (int i = 0; i < element.getAttributes().getLength(); i++) {
+            Attr attribute = (Attr) element.getAttributes().item(i);
+            String attributeName = attribute.getName();
+            String attributeValue = attribute.getValue();
 
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element childElement = (Element) node;
-                String fieldName = childElement.getTagName();
-                String fieldValue = childElement.getTextContent();
-
-                try {
-                    Field field = instance.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true);
-                    field.set(instance, convertValue(field.getType(), fieldValue));
-                } catch (NoSuchFieldException e) {
-                    // Field not found in the class, ignoring.
-                }
+            // Попытка найти поле с таким именем
+            try {
+                Field field = instance.getClass().getDeclaredField(attributeName);
+                field.setAccessible(true);
+                field.set(instance, convertValue(field.getType(), attributeValue));
+            } catch (NoSuchFieldException e) {
             }
         }
+    }
+
+    private ComponentAttributes parseComponentAttributes(Element componentElement) {
+        ComponentAttributes component = new ComponentAttributes();
+        try {
+            // Заполнение атрибутов для компонента
+            populateAttributes(componentElement, component);
+
+            // Разбираем вложенные элементы (например, panelOptions)
+            NodeList panelOptionsList = componentElement.getElementsByTagName("panelOptions");
+            if (panelOptionsList.getLength() > 0) {
+                Element panelOptionsElement = (Element) panelOptionsList.item(0);
+                populateAttributes(panelOptionsElement, component); // Заполнение panelOptions
+            }
+
+            // Разбираем bounds
+            NodeList boundsList = componentElement.getElementsByTagName("bounds");
+            if (boundsList.getLength() > 0) {
+                Element boundsElement = (Element) boundsList.item(0);
+                populateBounds(boundsElement, component);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse component", e);
+        }
+        return component;
+    }
+
+    private void populateBounds(Element boundsElement, ComponentAttributes component) {
+        // Пример извлечения атрибутов для bounds
+        String x = boundsElement.getAttribute("x");
+        String y = boundsElement.getAttribute("y");
+        String width = boundsElement.getAttribute("width");
+        String height = boundsElement.getAttribute("height");
+
+        component.setBounds(Integer.parseInt(x), Integer.parseInt(y), Integer.parseInt(width), Integer.parseInt(height));
     }
 
     private Object convertValue(Class<?> type, String value) {

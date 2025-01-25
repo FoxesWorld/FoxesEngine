@@ -128,12 +128,12 @@ public abstract class FloatingWindow extends JWindow implements AnimationStats {
     }
 
     @Override
-    public void animationStarted() {
+    public void fadeIn() {
         this.setVisible(true);
     }
 
     @Override
-    public void animationFinished() {
+    public void fadeOut() {
         this.setVisible(false);
     }
 }

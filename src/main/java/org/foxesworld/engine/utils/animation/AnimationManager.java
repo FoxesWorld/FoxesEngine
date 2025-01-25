@@ -21,7 +21,7 @@ public class AnimationManager {
     public void animate(boolean isEntry) {
         if (!floatingWindow.isAnimating()) {
             floatingWindow.setAnimating(true);
-            animationStats.animationStarted();
+            animationStats.fadeIn();
 
             Point mainFrameCenter = floatingWindow.getCenterPoint(floatingWindow.getEngine().getFrame());
             int startX = mainFrameCenter.x - floatingWindow.getWidth() / 2;
@@ -43,7 +43,7 @@ public class AnimationManager {
             KeyframeAnimation animation = new KeyframeAnimation(floatingWindow, animationDuration / animationSpeed, () -> {
                 floatingWindow.setAnimating(false);
                 if (!isEntry) {
-                    animationStats.animationFinished();
+                    animationStats.fadeOut();
                 }
             });
 

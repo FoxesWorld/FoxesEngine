@@ -25,6 +25,7 @@ import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.gui.ActionHandler;
+import org.foxesworld.engine.utils.hook.BiHookSet;
 import org.fusesource.jansi.AnsiConsole;
 
 import javax.swing.*;
@@ -74,6 +75,10 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     public ActionHandler actionHandler;
     protected final AtomicBoolean initialized = new AtomicBoolean(false);
     private final EngineInfo engineInfo;
+    private final BiHookSet<Void, Void> preInitHooks = new BiHookSet<>();
+    private final BiHookSet<Void, Void> postInitHooks = new BiHookSet<>();
+    private final BiHookSet<String, Object> customHooks = new BiHookSet<>();
+
 
     public Engine(int poolSize, String worker, Map<String, Class<?>> configFiles) {
         currentOS = OS.determineCurrentOS();
@@ -325,5 +330,18 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     }
     public ExecutorServiceProvider getExecutorServiceProvider() {
         return executorServiceProvider;
+    }
+
+
+    public BiHookSet<Void, Void> getPreInitHooks() {
+        return preInitHooks;
+    }
+
+    public BiHookSet<Void, Void> getPostInitHooks() {
+        return postInitHooks;
+    }
+
+    public BiHookSet<String, Object> getCustomHooks() {
+        return customHooks;
     }
 }

@@ -18,13 +18,11 @@ public class CustomTooltip extends JWindow {
         setLayout(new BorderLayout());
         setBackground(new Color(0, 0, 0, 0));
 
-        // Панель с закругленными углами
         RoundedPanel panel = new RoundedPanel(borderRadius);
         panel.setBackground(backgroundColor);
         panel.setLayout(new BorderLayout());
         panel.setOpaque(false);
 
-        // Метка с текстом тултипа
         label = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -45,7 +43,7 @@ public class CustomTooltip extends JWindow {
         setFocusableWindowState(false);
     }
 
-    public void attachToComponent(JComponent component, String tooltipText, int autoHideDelay) {
+    public void attachToComponent(Component component, String tooltipText, int autoHideDelay) {
         if (component.isEnabled()) {
             label.setText(tooltipText);
             setSize(Math.max(150, tooltipText.length() * 10), 50);
@@ -99,19 +97,16 @@ public class CustomTooltip extends JWindow {
             fadeOutTimer.stop();
         }
 
-        fadeOutTimer = new javax.swing.Timer(30, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (currentOpacity > 0) {
-                    currentOpacity -= 0.05f;
-                    currentOpacity = Math.max(0.0f, currentOpacity);
-                    repaint();
-                } else {
-                    setVisible(false);
-                    dispose();
-                    activeTooltips.removeIf(ref -> ref.get() == CustomTooltip.this);
-                    fadeOutTimer.stop();
-                }
+        fadeOutTimer = new javax.swing.Timer(30, e -> {
+            if (currentOpacity > 0) {
+                currentOpacity -= 0.05f;
+                currentOpacity = Math.max(0.0f, currentOpacity);
+                repaint();
+            } else {
+                setVisible(false);
+                dispose();
+                activeTooltips.removeIf(ref -> ref.get() == CustomTooltip.this);
+                fadeOutTimer.stop();
             }
         });
         fadeOutTimer.start();

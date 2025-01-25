@@ -1,3 +1,4 @@
 rootProject.name = 'FoxesEngine'
 include 'Downloader'
+include 'Game'
 

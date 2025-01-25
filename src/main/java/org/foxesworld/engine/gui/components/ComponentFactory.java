@@ -55,14 +55,13 @@ public class ComponentFactory extends JComponent {
     private StyleAttributes style;
     private ComponentAttributes componentAttribute;
     private ComponentFactoryListener componentFactoryListener;
-    private java.awt.Rectangle bounds;
+    private Rectangle bounds;
 
     public ComponentFactory(Engine engine) {
         this.engine = engine;
         this.langProvider = engine.getLANG();
         this.iconUtils = new IconUtils(engine);
 
-        // Register all components
         registerComponent("label", this::createLabel);
         registerComponent("progressBar", this::createProgressBar);
         registerComponent("button", this::createButton);
@@ -81,7 +80,7 @@ public class ComponentFactory extends JComponent {
 
     public void registerComponent(String type, Function<ComponentAttributes, JComponent> creator) {
         componentRegistry.put(type, creator);
-        Engine.LOGGER.info("Registered component: {}", type);
+        Engine.LOGGER.info("    - Registered component: {}", type);
     }
 
     public CompletableFuture<JComponent> createComponentAsync(ComponentAttributes attributes) {

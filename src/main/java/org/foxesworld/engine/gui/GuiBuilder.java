@@ -61,8 +61,8 @@ public class GuiBuilder {
         }
         else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
             return "yaml";
-        } else if (framePath.endsWith(".xml")) {
-            return "xml";
+        } else if (framePath.endsWith(".fxml")) {
+            return "fxml";
         }
         return "json";
     }
@@ -94,9 +94,6 @@ public class GuiBuilder {
     }
 
     private void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
-
-
-
         for (ComponentAttributes componentAttributes : childComponents) {
             if (componentAttributes.getComponentType() != null) {
                 addComponentToParent(componentAttributes, parentPanel);

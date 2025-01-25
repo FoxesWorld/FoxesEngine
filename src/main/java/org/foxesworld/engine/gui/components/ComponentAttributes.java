@@ -108,6 +108,9 @@ public class ComponentAttributes extends Attributes {
     public String getHideIcon() {
         return hideIcon;
     }
+    public Bounds setBounds(int x, int y, int width, int height){
+        return new Bounds(x, y, width, height);
+    }
     public Rectangle getBounds() {
         return new Rectangle(bounds.getX(), bounds.getY(), bounds.getSize().getWidth(), bounds.getSize().getHeight());
     }

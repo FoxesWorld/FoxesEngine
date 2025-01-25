@@ -1,10 +1,17 @@
 package org.foxesworld.engine.gui.components;
 
+import java.awt.*;
+
 public class Bounds {
     private int x, y;
     private Size size;
 
-    public Bounds() {}
+    public Bounds(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.size.width = width;
+        this.size.height = height;
+    }
 
     public int getX() {
         return x;
@@ -50,5 +57,9 @@ public class Bounds {
         public void setHeight(int height) {
             this.height = height;
         }
+    }
+
+    public Rectangle getBounds(){
+        return new Rectangle(this.x, this.y, this.getSize().width, this.getSize().height);
     }
 }

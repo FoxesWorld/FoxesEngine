@@ -63,6 +63,13 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
     @Override
     protected void paintComponent(Graphics gmain) {
         Graphics2D g = (Graphics2D) gmain;
+        if (!isEnabled()) {
+            Composite originalComposite = g.getComposite();
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+            drawDefaultState(g, getWidth());
+            g.setComposite(originalComposite);
+            return;
+        }
         int width = getWidth();
 
         // Optimize state handling by using a method to handle the drawing
@@ -165,7 +172,7 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getButton() != MouseEvent.BUTTON1) {
+        if (!isEnabled() || e.getButton() != MouseEvent.BUTTON1) {
             return;
         }
         bringToFront();
@@ -194,12 +201,14 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        if (state != State.OPENED) {
-            componentFactory.getEngine().getSOUND().playSound("button", "hover");
+        if(isEnabled()) {
+            if (state != State.OPENED) {
+                componentFactory.getEngine().getSOUND().playSound("button", "hover");
+            }
+            state = State.ROLLOVER;
+            hover = -1;
+            repaint();
         }
-        state = State.ROLLOVER;
-        hover = -1;
-        repaint();
     }
 
     @Override
@@ -222,6 +231,9 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        if (!isEnabled() || state != State.OPENED) {
+            return;
+        }
         int newY = e.getY();
         int newHover = (state == State.OPENED) ? (newY / openedTX.getHeight()) : (newY / defaultTX.getHeight());
 
@@ -332,5 +344,11 @@ public class DropBox extends JComponent implements MouseListener, MouseMotionLis
 
     public State getState() {
         return state;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        repaint();
     }
 }

@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-
-@SuppressWarnings("ResultOfMethodCallIgnored")
 public abstract class GameLauncher {
     protected GameListener gameListener;
     protected ServerAttributes gameClient;
