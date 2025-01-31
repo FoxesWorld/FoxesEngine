@@ -1,8 +1,8 @@
 package org.foxesworld.engine.utils;
 
 import org.foxesworld.engine.utils.helper.IOHelper;
-import org.foxesworld.launcher.hasher.io.HInput;
-import org.foxesworld.launcher.hasher.io.HOutput;
+import org.foxesworld.engine.utils.io.HInput;
+import org.foxesworld.engine.utils.io.HOutput;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

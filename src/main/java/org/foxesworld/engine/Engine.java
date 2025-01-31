@@ -29,6 +29,7 @@ import org.foxesworld.engine.utils.hook.BiHookSet;
 import org.fusesource.jansi.AnsiConsole;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -133,7 +134,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     @Override
     public abstract void onPanelsBuilt();
     @Override
-    public abstract void onPanelBuild(Map<String, OptionGroups> panels, String componentGroup, JPanel parentPanel);
+    public abstract void onPanelBuild(Map<String, OptionGroups> panels, String componentGroup, Container parentPanel);
     @Override
     public abstract void actionPerformed(ActionEvent e);
     protected void loadMainPanel(String path) {

@@ -164,7 +164,7 @@ public final class JVMHelper {
         }
     }
 
-    private static int getCorrectOSArch() {
+    public static int getCorrectOSArch() {
         if (OS_TYPE == OS.WIN)
             return System.getenv("ProgramFiles(x86)") == null ? 32 : 64;
 
