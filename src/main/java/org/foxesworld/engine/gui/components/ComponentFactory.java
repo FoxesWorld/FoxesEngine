@@ -178,7 +178,8 @@ public class ComponentFactory extends JComponent {
     }
     private JComponent createButton(ComponentAttributes componentAttributes) {
         ButtonStyle buttonStyle = new ButtonStyle(this);
-        Button button = (componentAttributes.getImageIcon() != null) ? new Button(this, iconUtils.getIcon(componentAttributes)) : new Button(this, this.getEngine().getLANG().getString(componentAttributes.getLocaleKey()));
+        String buttonText = this.getEngine().getLANG().getString(componentAttributes.getLocaleKey());
+        Button button = (componentAttributes.getImageIcon() != null) ? new Button(this, iconUtils.getIcon(componentAttributes), buttonText) : new Button(this, buttonText);
         buttonStyle.apply(button);
         button.setBounds(bounds);
         button.setActionCommand(componentAttributes.getComponentId());

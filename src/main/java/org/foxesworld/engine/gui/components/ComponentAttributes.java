@@ -18,7 +18,7 @@ public class ComponentAttributes extends Attributes {
     private List<String> fileExtensions;
     private LayoutConfig layoutConfig;
     private Gradient gradient;
-    private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, type, style, id,background, thumbImage, trackImage, alignment, toolTip, showIcon, hideIcon, selectionMode;
+    private String keyCode, tooltipStyle, border, color, localeKey, imageIcon, readFrom, loadPanel, type, style, id,background, thumbImage, trackImage, alignment, toolTip, showIcon, hideIcon,  iconFloat, selectionMode;
     private int iconWidth, iconHeight, totalFrames, delay, minValue, minorSpacing, majorSpacing, maxValue, borderRadius, stepSize;
     private Bounds bounds;
     public void setInitialValue(Object initialValue) {
@@ -36,6 +36,11 @@ public class ComponentAttributes extends Attributes {
     public String getComponentType() {
         return type;
     }
+
+    public String getIconFloat() {
+        return iconFloat;
+    }
+
     public String getComponentStyle() {
         return style;
     }

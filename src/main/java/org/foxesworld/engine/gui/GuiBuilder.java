@@ -46,7 +46,6 @@ public class GuiBuilder {
         buildPanels(frameAttributes.getGroups(), parent);
     }
 
-
     private Attributes loadFrameAttributes(String framePath) {
         String fileType = getFileType(framePath);
         FrameAttributesLoader loader = this.frameLoaderAdapters.getLoader(fileType);
@@ -56,10 +55,9 @@ public class GuiBuilder {
     private String getFileType(String framePath) {
         if (framePath.endsWith(".json")) {
             return "json";
-        } else if(framePath.endsWith(".json5")) {
+        } else if (framePath.endsWith(".json5")) {
             return "json5";
-        }
-        else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
+        } else if (framePath.endsWith(".yaml") || framePath.endsWith(".yml")) {
             return "yaml";
         } else if (framePath.endsWith(".fxml")) {
             return "fxml";
@@ -84,6 +82,7 @@ public class GuiBuilder {
                 updateChildParentMap(parentPanel, thisPanel);
             });
         }
+        notifyPanelsBuilt();
     }
 
     private JPanel createPanel(OptionGroups optionGroups, String componentGroup) {
@@ -105,7 +104,6 @@ public class GuiBuilder {
                 loadPanels.put(componentAttributes.getLoadPanel(), parentPanel);
             }
         }
-
     }
 
     private void addComponentToParent(ComponentAttributes componentAttributes, JPanel parentPanel) {
@@ -131,9 +129,7 @@ public class GuiBuilder {
     private void addChildPanelIfNeeded(Map<String, OptionGroups> panels, JPanel parentPanel, JPanel childPanel, String componentGroup) {
         if (!panelsMap.containsKey(componentGroup)) {
             addPanelGroup(parentPanel, childPanel);
-            if (guiBuilderListener != null) {
-                guiBuilderListener.onPanelBuild(panels, componentGroup, parentPanel);
-            }
+            notifyPanelBuild(panels, componentGroup, parentPanel);
         }
     }
 
@@ -143,12 +139,9 @@ public class GuiBuilder {
 
     public void buildAdditionalPanels() {
         if (!additionalPanelsBuilt) {
-            if (guiBuilderListener != null) {
-                guiBuilderListener.onPanelsBuilt();
-            }
             Engine.LOGGER.debug(" == BUILDING ADDITIONAL PANELS ==");
             loadPanels.forEach((key, value) -> {
-                guiBuilderListener.onAdditionalPanelBuild(value);
+                notifyAdditionalPanelBuild(value);
                 Engine.LOGGER.debug("Processing {}", key);
                 JPanel loadingPanel = panelsMap.get(key);
                 if (loadingPanel != null) {
@@ -165,6 +158,24 @@ public class GuiBuilder {
         parent.add(child);
         panelsMap.put(child.getName(), child);
         updateChildParentMap(parent, child);
+    }
+
+    private void notifyPanelsBuilt() {
+        if (guiBuilderListener != null) {
+            guiBuilderListener.onPanelsBuilt();
+        }
+    }
+
+    private void notifyPanelBuild(Map<String, OptionGroups> panels, String componentGroup, JPanel parentPanel) {
+        if (guiBuilderListener != null) {
+            guiBuilderListener.onPanelBuild(panels, componentGroup, parentPanel);
+        }
+    }
+
+    private void notifyAdditionalPanelBuild(JPanel panel) {
+        if (guiBuilderListener != null) {
+            guiBuilderListener.onAdditionalPanelBuild(panel);
+        }
     }
 
     public Map<String, List<JComponent>> getComponentsMap() {

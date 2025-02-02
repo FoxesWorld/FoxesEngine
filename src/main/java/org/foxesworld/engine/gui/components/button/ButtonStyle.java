@@ -34,7 +34,7 @@ public class ButtonStyle {
 		button.setVisible(visible);
 		button.setHorizontalAlignment(align == Align.LEFT ? SwingConstants.LEFT : align == Align.CENTER ? SwingConstants.CENTER : SwingConstants.RIGHT);
 		button.setFont(componentFactory.getEngine().getFONTUTILS().getFont(font, fontSize));
-		button.setHoverColor(hexToColor(this.componentFactory.getStyle().getHoverColor()));
+		button.setHoverColor(hexToColor(this.componentFactory.getStyle().getHoverColor()).brighter());
 		button.setForeground(hexToColor(color));
 		int i = texture.getHeight() / 4;
 		button.defaultTX = this.imageUtils.getTexture(texture, componentFactory.getStyle().getBorderRadius(), 0, 0, texture.getWidth(), i);

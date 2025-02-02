@@ -39,7 +39,6 @@ public class HTTPrequest {
 
                 sendRequest(parameters, connection);
                 String response = getResponse(connection);
-
                 onSuccess.onSuccess(response);
 
             } catch (SocketException e) {
@@ -61,7 +60,7 @@ public class HTTPrequest {
         });
     }
 
-    private void sendRequest(Map<String, Object> parameters, HttpURLConnection connection) throws Exception {
+    public void sendRequest(Map<String, Object> parameters, HttpURLConnection connection) throws Exception {
         try (OutputStream os = connection.getOutputStream()) {
             String postData = formParams(parameters).toString();
             os.write(postData.getBytes(StandardCharsets.UTF_8));
@@ -79,8 +78,6 @@ public class HTTPrequest {
         }
         return response.toString();
     }
-
-
 
     private void configureConnection(HttpURLConnection connection) throws Exception {
         connection.setRequestMethod(this.requestMethod);
@@ -111,7 +108,7 @@ public class HTTPrequest {
         return response.toString();
     }
 
-    private StringBuilder formParams(Map<String, Object> parameters) throws UnsupportedEncodingException {
+    private StringBuilder formParams(Map<String, Object> parameters) {
         StringBuilder postData = new StringBuilder();
         for (Map.Entry<String, Object> param : parameters.entrySet()) {
             if (postData.length() != 0) {
