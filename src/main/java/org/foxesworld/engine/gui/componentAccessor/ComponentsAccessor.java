@@ -10,6 +10,7 @@ import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.textfield.TextField;
 
 import javax.swing.*;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -25,6 +26,15 @@ public class ComponentsAccessor {
     private final Map<String, List<JComponent>> panelComponentMap = new HashMap<>();
     private final Map<String, Object> formCredentials = new HashMap<>();
 
+    public ComponentsAccessor(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
+        this.guiBuilder = Objects.requireNonNull(guiBuilder, "guiBuilder must not be null");
+        this.panelId = Objects.requireNonNull(panelId, "panelId must not be null");
+        this.componentTypes = Objects.requireNonNull(componentTypes, "componentTypes must not be null");
+        collectComponents(panelId);
+        this.initComponents();
+    }
+
+
     private final Map<Class<?>, Function<JComponent, String>> valueExtractors = Map.of(
             TextField.class, c -> ((TextField) c).getText(),
             PassField.class, c -> new String(((PassField) c).getPassword()),
@@ -35,11 +45,36 @@ public class ComponentsAccessor {
             CompositeSlider.class, c -> String.valueOf(((CompositeSlider) c).getValue())
     );
 
-    public ComponentsAccessor(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
-        this.guiBuilder = Objects.requireNonNull(guiBuilder, "guiBuilder must not be null");
-        this.panelId = Objects.requireNonNull(panelId, "panelId must not be null");
-        this.componentTypes = Objects.requireNonNull(componentTypes, "componentTypes must not be null");
-        collectComponents(panelId);
+    protected void initComponents() {
+        Class<?> clazz = this.getClass();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.isAnnotationPresent(Component.class)) {
+                Component annotation = field.getAnnotation(Component.class);
+                String componentId = annotation.value().isEmpty()
+                        ? field.getName()
+                        : annotation.value();
+
+                JComponent component = componentMap.get(componentId);
+                if (component != null) {
+                    try {
+                        boolean wasAccessible = field.isAccessible();
+                        field.setAccessible(true);
+                        field.set(this, component);
+                        field.setAccessible(wasAccessible);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(
+                                "Error injecting component '" + componentId + "' into field "
+                                        + field.getName(), e
+                        );
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            "Component with ID '" + componentId + "' not found for field "
+                                    + field.getName()
+                    );
+                }
+            }
+        }
     }
 
     public JPanel getPanel(){

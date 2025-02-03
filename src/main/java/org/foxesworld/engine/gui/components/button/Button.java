@@ -101,9 +101,9 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
             imageToDraw = rolloverTX;
         }
 
-        // Отрисовка фонового изображения
         g.drawImage(imageToDraw, 0, shiftY, w, h, null);
-        if (isEnabled()) {
+
+        //if (isEnabled()) {
             shiftY = entered ? 1 : 0; // Анимация смещения по Y при наведении
             Color textColor = interpolateColor(getForeground(), getForeground().brighter(), hoverProgress);
             String text = getText();
@@ -127,7 +127,6 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
 
                 switch (iconFloat) {
                     case LEFT -> {
-                        // Сдвигаем всю группу влево на leftOffset
                         groupX = leftOffset;
                         iconX = groupX;
                         iconY = (h - icon.getIconHeight()) / 2 + shiftY;
@@ -168,10 +167,7 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
                         g.drawString(text, textX, textY);
                         drawScaledIcon(g2d, icon, iconX, iconY, scaleFactor);
                     }
-                    default -> {
-                        // Если положение иконки не установлено – можно вывести предупреждение
-                        System.err.println("Button icon float is not set!");
-                    }
+                    default -> System.err.println("Button icon float is not set!");
                 }
             } else if (text != null && !text.isEmpty()) {
                 // Если задан только текст – центрируем его по горизонтали
@@ -187,7 +183,7 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
                 int iconY = (h - icon.getIconHeight()) / 2 + shiftY;
                 icon.paintIcon(this, g, iconX, iconY);
             }
-        }
+        //}
         repaint();
     }
 
@@ -213,12 +209,12 @@ public class Button extends JButton implements MouseListener, MouseMotionListene
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        entered = true;
-        startAnimation();
         if (isEnabled()) {
+            entered = true;
+            startAnimation();
             componentFactory.getEngine().getSOUND().playSound("button", "hover");
+            repaint();
         }
-        repaint();
     }
 
     @Override
