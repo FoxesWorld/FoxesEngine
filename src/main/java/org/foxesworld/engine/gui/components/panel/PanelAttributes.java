@@ -5,7 +5,7 @@ import org.foxesworld.engine.gui.components.Bounds;
 @SuppressWarnings("unused")
 public class PanelAttributes {
     private boolean opaque = false, visible,focusable, doubleBuffered = true;
-    private int cornerRadius;
+    private int cornerRadius, zIndex = 0;
     private String border = "", listener = "",background = "",backgroundImage, layout;
     private Bounds bounds;
 
@@ -42,6 +42,11 @@ public class PanelAttributes {
     public Bounds getBounds() {
         return bounds;
     }
+
+    public int getzIndex() {
+        return zIndex;
+    }
+
     public void setOpaque(boolean opaque) {
         this.opaque = opaque;
     }

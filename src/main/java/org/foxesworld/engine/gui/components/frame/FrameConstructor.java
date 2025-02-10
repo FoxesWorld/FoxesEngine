@@ -28,6 +28,7 @@ public class FrameConstructor extends JFrame {
         this.engine = engine;
         this.LANG = engine.getLANG();
         this.hasFocus = false;
+        this.focusStatusListener = engine;
         buildFrame("assets/frames/frame.json");
     }
 
@@ -87,6 +88,7 @@ public class FrameConstructor extends JFrame {
 
     private void onFrameFocusGained() {
         hasFocus = true;
+        System.out.println(hasFocus);
         focusStatusListener.updateFocus(hasFocus);
     }
 

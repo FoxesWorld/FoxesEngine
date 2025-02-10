@@ -89,6 +89,12 @@ public class GuiBuilder {
         JPanel panel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup, frameConstructor);
         panel.setName(componentGroup);
         panel.setVisible(optionGroups.getPanelOptions().isVisible());
+        Container panelParent = panel.getParent();
+        if(panelParent != null) {
+            panelParent.setComponentZOrder(panelParent, optionGroups.getPanelOptions().getzIndex());
+        } else {
+         Engine.LOGGER.warn("Parent for {} is null!",panel.getName());
+        }
         return panel;
     }
 

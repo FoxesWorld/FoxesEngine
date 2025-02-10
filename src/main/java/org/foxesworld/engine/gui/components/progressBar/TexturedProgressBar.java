@@ -38,4 +38,4 @@ class TexturedProgressBar extends BasicProgressBarUI {
         g2d.drawImage(texture, 0, 0, progressWidth, barHeight, null);
         g2d.dispose();
     }
-}
+}  

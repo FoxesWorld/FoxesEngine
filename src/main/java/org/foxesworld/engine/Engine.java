@@ -224,6 +224,8 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    public abstract void updateFocus(boolean hasFocus);
+
     public void shutdownExecutorService(){
         executorServiceProvider.shutdown();
         try {

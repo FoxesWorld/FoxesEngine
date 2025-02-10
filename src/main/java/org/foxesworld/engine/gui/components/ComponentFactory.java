@@ -18,6 +18,7 @@ import org.foxesworld.engine.gui.components.multiButton.MultiButton;
 import org.foxesworld.engine.gui.components.multiButton.MultiButtonStyle;
 import org.foxesworld.engine.gui.components.passfield.PassField;
 import org.foxesworld.engine.gui.components.passfield.PassFieldStyle;
+import org.foxesworld.engine.gui.components.progressBar.HearthstoneProgressBar;
 import org.foxesworld.engine.gui.components.progressBar.ProgressBarStyle;
 import org.foxesworld.engine.gui.components.slider.Slider;
 import org.foxesworld.engine.gui.components.spinner.Spinner;
@@ -76,6 +77,8 @@ public class ComponentFactory extends JComponent {
         registerComponent("slider", this::createSlider);
         registerComponent("compositeSlider", this::createCompositeSlider);
         registerComponent("fileSelector", this::createFileSelector);
+        registerComponent("testPB", this::createTestPB);
+
     }
 
     public void registerComponent(String type, Function<ComponentAttributes, JComponent> creator) {
@@ -283,6 +286,9 @@ public class ComponentFactory extends JComponent {
         return multiButton;
     }
 
+    private JComponent createTestPB(ComponentAttributes componentAttributes){
+        return new HearthstoneProgressBar();
+    }
     private JComponent createDropBox(ComponentAttributes componentAttributes) {
         DropBoxStyle dropBoxStyle = new DropBoxStyle(this);
         DropBox dropBox = new DropBox(this, componentAttributes.getBounds().y);
