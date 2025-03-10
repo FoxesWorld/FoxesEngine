@@ -1,18 +1,20 @@
 package org.foxesworld.engine.server;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("unused")
-public abstract class ServerParser {
+public abstract class ServerParser extends HTTPrequest {
     protected Engine engine;
     protected   int serversNum = 0;
     protected List<ServerAttributes> serverList = new ArrayList<>();
-    protected Map<String, Object> request = new HashMap<>();
+
+    public ServerParser(Engine engine, String requestMethod) {
+        super(engine, requestMethod);
+    }
     public  abstract List<ServerAttributes> parseServers(String login);
     public int getServersNum() {
         return serversNum;

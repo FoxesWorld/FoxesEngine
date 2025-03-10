@@ -5,9 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@SuppressWarnings("unused")
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-@SuppressWarnings("unused")
 @interface HttpHeader {
-    String key();
+    String key() default "";
 }

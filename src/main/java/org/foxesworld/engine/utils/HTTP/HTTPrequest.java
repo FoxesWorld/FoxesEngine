@@ -122,7 +122,8 @@ public class HTTPrequest {
                 try {
                     Object value = field.get(this);
                     if (value != null) {
-                        String key = field.getAnnotation(HttpParam.class).key();
+                        HttpParam httpParam = field.getAnnotation(HttpParam.class);
+                        String key = httpParam.value().isEmpty() ? field.getName() : httpParam.value();
                         params.put(key, value);
                     }
                 } catch (IllegalAccessException e) {
@@ -164,7 +165,10 @@ public class HTTPrequest {
             if (field.isAnnotationPresent(HttpHeader.class)) {
                 field.setAccessible(true);
                 try {
-                    String key = field.getAnnotation(HttpHeader.class).key();
+                    HttpParam httpParam = field.getAnnotation(HttpParam.class);
+                    String key = httpParam.value().isEmpty()
+                            ? field.getName()
+                            : httpParam.value();
                     String value = (String) field.get(this);
                     if (value != null) {
                         connection.setRequestProperty(key, value);
