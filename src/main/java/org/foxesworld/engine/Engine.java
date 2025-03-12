@@ -22,7 +22,6 @@ import org.foxesworld.engine.service.ExecutorServiceProvider;
 import org.foxesworld.engine.sound.Sound;
 import org.foxesworld.engine.utils.*;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
-import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 import org.foxesworld.engine.gui.loadingManager.LoadingManager;
 import org.foxesworld.engine.gui.ActionHandler;
 import org.foxesworld.engine.utils.hook.BiHookSet;
@@ -72,7 +71,6 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
     private EngineData engineData;
-    private final HTTPrequest GETrequest, POSTrequest;
     public ActionHandler actionHandler;
     protected final AtomicBoolean initialized = new AtomicBoolean(false);
     private final EngineInfo engineInfo;
@@ -116,8 +114,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         this.FONTUTILS = new FontUtils(this);
         setLogLevel(Level.valueOf(engineData.getLogLevel()));
         executorServiceProvider = new ExecutorServiceProvider(poolSize, worker);
-        this.GETrequest = new HTTPrequest(this, "GET");
-        this.POSTrequest = new HTTPrequest(this, "POST");
+
         this.imageUtils = new ImageUtils(this);
         FlatIntelliJLaf.setup();
     }
@@ -138,14 +135,14 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     @Override
     public abstract void actionPerformed(ActionEvent e);
     protected void loadMainPanel(String path) {
-        this.guiBuilder.buildGui(path, this.getFrame().getRootPanel());
+        this.guiBuilder.buildGuiAsync(path, this.getFrame().getRootPanel());
         if (!initialized.get()) {
             this.postInit();
         }
     }
     public String appPath() {
         try {
-            return URLDecoder.decode(this.POSTrequest.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
+            return URLDecoder.decode(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
         } catch (java.net.URISyntaxException e) {
             return null;
         }
@@ -253,12 +250,6 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     public GuiBuilder getGuiBuilder() {
         return guiBuilder;
     }
-    public HTTPrequest getGETrequest() {
-        return GETrequest;
-    }
-    public HTTPrequest getPOSTrequest() {
-        return POSTrequest;
-    }
     public static Logger getLOGGER() {
         return LOGGER;
     }
@@ -334,7 +325,6 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     public ExecutorServiceProvider getExecutorServiceProvider() {
         return executorServiceProvider;
     }
-
 
     public BiHookSet<Void, Void> getPreInitHooks() {
         return preInitHooks;

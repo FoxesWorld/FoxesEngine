@@ -15,7 +15,7 @@ public class EngineData {
     private String logLevel,bindUrl,launcherBrand,launcherVersion,launcherBuild,appId,accessToken,programRuntime,groupDomain,vkAPIversion;
     private String[] styles,loadAdapters;
     private DownloadManager downloadManager;
-    private LoadManagerAttributes loadManager[];
+    private LoadManagerAttributes[] loadManager;
     private HTTPconf httpConf;
     private String[] tweakClasses;
     private Map<String, Object> files;

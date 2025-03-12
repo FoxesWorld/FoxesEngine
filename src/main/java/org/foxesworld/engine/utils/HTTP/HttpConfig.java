@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@SuppressWarnings("unused")
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @interface HttpConfig {

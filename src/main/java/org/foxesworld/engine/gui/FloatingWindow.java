@@ -6,7 +6,6 @@ import org.foxesworld.engine.utils.animation.AnimationStats;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 

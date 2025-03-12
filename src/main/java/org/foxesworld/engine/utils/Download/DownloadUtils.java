@@ -2,6 +2,7 @@ package org.foxesworld.engine.utils.Download;
 
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.button.Button;
+import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 
 import javax.swing.*;
 import java.io.*;
@@ -14,7 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 @SuppressWarnings("unused")
-public class DownloadUtils {
+public class DownloadUtils extends HTTPrequest {
     private final Engine engine;
     private JLabel progressLabel;
     private JProgressBar progressBar;
@@ -22,6 +23,7 @@ public class DownloadUtils {
     private int percent;
     private long downloaded = 0;
     public DownloadUtils(Engine engine) {
+        super(engine, "GET");
         this.engine = engine;
     }
 
@@ -41,7 +43,7 @@ public class DownloadUtils {
             HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             httpConnection.setDoOutput(false);
             httpConnection.setRequestMethod("GET");
-            engine.getGETrequest().setRequestProperties(httpConnection, engine.getEngineData().getHttPconf().getRequestProperties());
+            this.setRequestProperties(httpConnection, engine.getEngineData().getHttPconf().getRequestProperties());
             long fileSize = httpConnection.getContentLength();
             long chunkSize = fileSize / 100;
 
