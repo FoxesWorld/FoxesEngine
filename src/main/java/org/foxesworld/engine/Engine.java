@@ -8,9 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.discord.Discord;
-import org.foxesworld.engine.gui.GuiBuilder;
-import org.foxesworld.engine.gui.GuiBuilderListener;
-import org.foxesworld.engine.gui.FileProperties;
+import org.foxesworld.engine.gui.*;
 import org.foxesworld.engine.gui.components.frame.FocusStatusListener;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
@@ -23,7 +21,6 @@ import org.foxesworld.engine.sound.Sound;
 import org.foxesworld.engine.utils.*;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.gui.loadingManager.LoadingManager;
-import org.foxesworld.engine.gui.ActionHandler;
 import org.foxesworld.engine.utils.hook.BiHookSet;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -65,6 +62,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     public static Logger LOGGER;
     protected Discord discord;
     private final FontUtils FONTUTILS;
+    private IconUtils iconUtils;
     protected CryptUtils CRYPTO;
     protected FrameConstructor frameConstructor;
     private final PanelVisibility panelVisibility;
@@ -336,5 +334,9 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
 
     public BiHookSet<String, Object> getCustomHooks() {
         return customHooks;
+    }
+
+    public IconUtils getIconUtils() {
+        return iconUtils;
     }
 }

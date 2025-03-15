@@ -88,7 +88,6 @@ public class FrameConstructor extends JFrame {
 
     private void onFrameFocusGained() {
         hasFocus = true;
-        System.out.println(hasFocus);
         focusStatusListener.updateFocus(hasFocus);
     }
 

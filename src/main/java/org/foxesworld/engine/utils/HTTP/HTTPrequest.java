@@ -21,17 +21,40 @@ public class HTTPrequest {
     private final String requestMethod;
     private final Engine engine;
     private final ExecutorService executorService;
+
+    // Поле для отслеживания статуса запроса
+    private volatile RequestState requestState;
+
     private HttpURLConnection httpURLConnection;
 
     public HTTPrequest(Engine engine, String requestMethod) {
         this.engine = engine;
         this.requestMethod = requestMethod;
         this.executorService = Executors.newCachedThreadPool();
+        this.requestState = RequestState.PENDING;
         Engine.LOGGER.info("HTTP {} initialized", requestMethod);
     }
 
+    /**
+     * Метод для получения текущего статуса запроса.
+     *
+     * @return текущий статус (PENDING, SUCCESS или FAILED)
+     */
+    public RequestState getRequestState() {
+        return requestState;
+    }
+
+    /**
+     * Асинхронная отправка HTTP-запроса с объединением параметров.
+     *
+     * @param extraParams дополнительные параметры запроса
+     * @param onSuccess   callback при успешном выполнении запроса
+     * @param onFailure   callback при ошибке выполнения запроса
+     */
     public void sendAsync(Map<String, Object> extraParams, OnSuccess onSuccess, OnFailure onFailure) {
         executorService.submit(() -> {
+            // Устанавливаем статус запроса как ожидающий
+            requestState = RequestState.PENDING;
             HttpURLConnection connection = null;
             try {
                 URL url = new URL(engine.getEngineData().getBindUrl());
@@ -43,9 +66,14 @@ public class HTTPrequest {
 
                 sendRequest(allParams, connection);
                 String response = getResponse(connection);
+
+                // Обновляем статус запроса на успешный и вызываем callback
+                requestState = RequestState.SUCCESS;
                 onSuccess.onSuccess(response);
 
             } catch (Exception e) {
+                // При возникновении ошибки обновляем статус запроса
+                requestState = RequestState.FAILED;
                 if (onFailure != null) {
                     onFailure.onFailure(e);
                 }
@@ -57,7 +85,6 @@ public class HTTPrequest {
             }
         });
     }
-
 
     private void sendRequest(Map<String, Object> parameters, HttpURLConnection connection) throws IOException {
         try (OutputStream os = connection.getOutputStream()) {
@@ -112,7 +139,6 @@ public class HTTPrequest {
         }
     }
 
-
     private Map<String, Object> collectParams() {
         Map<String, Object> params = new HashMap<>();
 
@@ -134,6 +160,7 @@ public class HTTPrequest {
 
         return params;
     }
+
     private String getBoundary(int length, int radix) {
         StringBuilder boundary = new StringBuilder();
         Random random = new Random();
@@ -180,5 +207,4 @@ public class HTTPrequest {
             }
         }
     }
-
 }
