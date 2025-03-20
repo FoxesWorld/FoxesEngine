@@ -12,6 +12,7 @@ import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
 import org.foxesworld.engine.gui.components.dropBox.DropBoxStyle;
 import org.foxesworld.engine.gui.components.fileSelector.FileSelector;
+import org.foxesworld.engine.gui.components.fileSelector.SelectionMode;
 import org.foxesworld.engine.gui.components.label.Label;
 import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.components.multiButton.MultiButton;
@@ -308,7 +309,7 @@ public class ComponentFactory extends JComponent {
     }
 
     private JComponent createFileSelector(ComponentAttributes componentAttributes) {
-        FileSelector fileSelector = new FileSelector(this, FileSelector.SelectionMode.valueOf(componentAttributes.getSelectionMode()));
+        FileSelector fileSelector = new FileSelector(this, SelectionMode.valueOf(componentAttributes.getSelectionMode()));
         fileSelector.setValue((String) componentAttributes.getInitialValue());
         return fileSelector;
     }
@@ -335,6 +336,10 @@ public class ComponentFactory extends JComponent {
 
     public StyleAttributes getStyle() {
         return style;
+    }
+
+    public void setStyle(StyleAttributes style) {
+        this.style = style;
     }
 
     public ComponentAttributes getComponentAttribute() {

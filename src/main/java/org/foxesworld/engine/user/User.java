@@ -22,6 +22,7 @@ public abstract class User extends ComponentsAccessor {
 
     protected abstract void setUserSpace();
 
+    /*
     protected void getUserHeadAsync(String login, OnSuccess<String> onSuccess, OnFailure onFailure) {
         if (login == null || login.isEmpty()) {
             Engine.getLOGGER().warn("Login is null or empty in getUserHead");
@@ -52,5 +53,5 @@ public abstract class User extends ComponentsAccessor {
                 onFailure.onFailure(e);
             }
         });
-    }
+    } */
 }

@@ -39,7 +39,7 @@ public class FileLoader {
         this.engine = actionHandler.getEngine();
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
-        this.homeDir = homeDir + File.separator;//Config.getFullPath();
+        this.homeDir = homeDir + File.separator;
         this.downloadUtils = new DownloadUtils(engine);
         this.loadingManager = engine.getLoadingManager();
         this.fileFetcher = new FileFetcher(engine);

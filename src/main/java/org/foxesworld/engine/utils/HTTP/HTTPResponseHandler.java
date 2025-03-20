@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+@Deprecated
 public class HTTPResponseHandler implements AutoCloseable, Flushable {
 
     private final HttpURLConnection connection;

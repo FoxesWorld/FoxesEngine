@@ -1,6 +1,5 @@
 package org.foxesworld.engine.gui.components.textfield;
 
-import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 
 import javax.swing.*;

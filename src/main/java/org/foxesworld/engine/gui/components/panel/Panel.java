@@ -21,21 +21,49 @@ public class Panel extends JPanel {
     private final FrameConstructor frameConstructor;
     private BufferedImage texture;
 
+    // Поле прозрачности: 1.0 - полностью непрозрачно, 0.0 - полностью прозрачно.
+    private float alpha = 1.0f;
+
     public Panel(FrameConstructor frameConstructor) {
         this.frameConstructor = frameConstructor;
+        // Устанавливаем режим непрозрачности в зависимости от alpha
+        this.setOpaque(alpha >= 1.0f);
+    }
+
+    // Геттер прозрачности
+    public float getAlpha() {
+        return alpha;
+    }
+    public void setAlpha(float alpha) {
+        if (alpha < 0f) {
+            alpha = 0f;
+        } else if (alpha > 1f) {
+            alpha = 1f;
+        }
+        this.alpha = alpha;
+        this.setOpaque(alpha >= 1.0f);
+        repaint();
     }
 
     public JPanel setRootPanel(FrameAttributes frameAttributes) {
         this.frameAttributes = frameAttributes;
 
+        // Пример корневой панели, в которой используется прозрачность из поля alpha
         JPanel rootPanel = new JPanel(null, true) {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                if (texture != null) {
-                    g.drawImage(texture, 0, 0, getWidth(), getHeight(), this);
-                } else {
-                    drawDarkenedBackground(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                try {
+                    // Применяем прозрачность, заданную в поле alpha
+                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, Panel.this.alpha));
+                    super.paintComponent(g2d);
+                    if (texture != null) {
+                        g2d.drawImage(texture, 0, 0, getWidth(), getHeight(), this);
+                    } else {
+                        drawDarkenedBackground(g2d);
+                    }
+                } finally {
+                    g2d.dispose();
                 }
             }
         };
@@ -86,7 +114,7 @@ public class Panel extends JPanel {
         gAlpha.fillRect(0, 0, width, height);
 
         gAlpha.setColor(darkeningColor);
-        gAlpha.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+        gAlpha.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
         gAlpha.fillRect(0, 0, width, height);
 
         g2d.drawImage(alphaImage, 0, 0, null);
@@ -101,17 +129,19 @@ public class Panel extends JPanel {
         groupPanel = new JPanel(null, panelOptions.isDoubleBuffered()) {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // Применяем прозрачность панели
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, Panel.this.alpha));
+                super.paintComponent(g2d);
 
                 if (texture != null) {
-                    g.drawImage(texture, 0, 0, getWidth(), getHeight(), this);
+                    g2d.drawImage(texture, 0, 0, getWidth(), getHeight(), this);
                 } else if (panelOptions.getBackgroundImage() != null) {
                     BufferedImage backgroundImage = frameConstructor.getAppFrame()
                             .getImageUtils()
                             .getLocalImage(panelOptions.getBackgroundImage());
-                    g.drawImage(applyDarkening(backgroundImage, hexToColor(panelOptions.getBackground())), 0, 0, null);
+                    g2d.drawImage(applyDarkening(backgroundImage, hexToColor(panelOptions.getBackground())), 0, 0, null);
                 }
 
                 if (panelOptions.getCornerRadius() != 0) {
@@ -121,8 +151,8 @@ public class Panel extends JPanel {
                     g2d.fill(roundedRectangle);
                     g2d.setColor(getForeground());
                     g2d.draw(roundedRectangle);
-                    g2d.dispose();
                 }
+                g2d.dispose();
             }
 
             @Override

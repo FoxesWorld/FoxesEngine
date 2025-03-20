@@ -87,6 +87,7 @@ public class ImageUtils {
         }
     }
 
+    @Deprecated
     public BufferedImage getCachedUrlImg(String imageUrl, String cachePath, BufferedImage ifNotFound) {
         try {
             String cacheKey = sha1String(imageUrl);

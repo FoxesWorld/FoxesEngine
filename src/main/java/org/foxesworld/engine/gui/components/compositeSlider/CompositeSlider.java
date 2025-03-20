@@ -4,6 +4,7 @@ import com.sun.management.OperatingSystemMXBean;
 import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.gui.components.CompositeComponent;
 import org.foxesworld.engine.gui.components.label.Label;
 import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.components.slider.TexturedSliderUI;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-public class CompositeSlider extends JComponent {
+public class CompositeSlider extends CompositeComponent {
     private LabelStyle labelStyle;
     private final ComponentFactory componentFactory;
     private final ComponentAttributes componentAttribute;
@@ -27,13 +28,14 @@ public class CompositeSlider extends JComponent {
     private SliderListener sliderListener;
 
     public CompositeSlider(ComponentFactory componentFactory) {
+        super();
         this.componentFactory = componentFactory;
         this.componentAttribute = componentFactory.getComponentAttribute();
         initializeComponents();
         configureLayout();
         addListeners();
+        setOpaque(componentFactory.isOpaque());
     }
-
 
     private void initializeComponents() {
         int minValue, maxValue, initialValue;
@@ -68,6 +70,7 @@ public class CompositeSlider extends JComponent {
 
         spinner = new Spinner(initialValue, minValue, maxValue, componentAttribute.getMinorSpacing());
     }
+
     private int getInitialValue(int defaultValue) {
         try {
             int initialValue = componentAttribute.getInitialValue() != null
@@ -87,8 +90,6 @@ public class CompositeSlider extends JComponent {
         }
     }
 
-
-
     private void configureLabel() {
         labelStyle = new LabelStyle(componentFactory);
         labelStyle.setStyle(componentFactory.getEngine().getStyleProvider().getElementStyles().get("label").get(componentAttribute.getStyles().get("label")));
@@ -103,35 +104,52 @@ public class CompositeSlider extends JComponent {
         slider.setMajorTickSpacing((values.get(values.size() - 1) - values.get(0)) / 9);
         slider.setMinorTickSpacing((values.get(1) - values.get(0)) / 2);
         slider.setOpaque(false);
-        slider.setUI(new TexturedSliderUI(componentFactory, slider, componentFactory.getEngine().getStyleProvider()
-                .getElementStyles().get("slider").get(componentAttribute.getStyles().get("slider"))));
+        slider.setUI(new TexturedSliderUI(componentFactory, slider,
+                componentFactory.getEngine().getStyleProvider().getElementStyles().get("slider")
+                        .get(componentAttribute.getStyles().get("slider"))));
 
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
         for (int value : values) {
             JLabel tableLabel = new JLabel(String.valueOf(value));
-            tableLabel.setFont(this.componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), this.componentAttribute.getFontSize() - 3f));
+            tableLabel.setFont(componentFactory.getEngine().getFONTUTILS().getFont(labelStyle.getFontName(), componentAttribute.getFontSize() - 3f));
             tableLabel.setForeground(labelStyle.getActiveColor());
             labelTable.put(value, tableLabel);
         }
         slider.setLabelTable(labelTable);
     }
 
-
+    /**
+     * Создаем контейнер с абсолютным позиционированием для расположения метки, слайдера и спиннера,
+     * затем добавляем его в наш CompositeComponent.
+     */
     private void configureLayout() {
-        setLayout(null);
-        ComponentAttributes.LayoutConfig config = this.componentAttribute.getLayoutConfig();
-            ComponentAttributes.ComponentConfig labelConfig = config.getLabel();
-            label.setBounds(labelConfig.getX(), labelConfig.getY(), labelConfig.getWidth(), labelConfig.getHeight());
-            add(label);
+        // Создаем контейнер с null layout для абсолютного позиционирования
+        JPanel container = new JPanel(null);
+        // Задаем предпочтительный размер контейнера, можно использовать размеры из конфигурации
+        container.setPreferredSize(new Dimension(
+                componentAttribute.getBounds().width,
+                componentAttribute.getBounds().height
+        ));
 
-            ComponentAttributes.ComponentConfig sliderConfig = config.getSlider();
-            slider.setBounds(sliderConfig.getX(), sliderConfig.getY(), sliderConfig.getWidth(), sliderConfig.getHeight());
-            add(slider);
+        ComponentAttributes.LayoutConfig config = componentAttribute.getLayoutConfig();
 
-            ComponentAttributes.ComponentConfig spinnerConfig = config.getSpinner();
-            spinner.setBounds(spinnerConfig.getX(), spinnerConfig.getY(), spinnerConfig.getWidth(), spinnerConfig.getHeight());
-            add(spinner);
+        // Конфигурация метки
+        ComponentAttributes.ComponentConfig labelConfig = config.getLabel();
+        label.setBounds(labelConfig.getX(), labelConfig.getY(), labelConfig.getWidth(), labelConfig.getHeight());
+        container.add(label);
 
+        // Конфигурация слайдера
+        ComponentAttributes.ComponentConfig sliderConfig = config.getSlider();
+        slider.setBounds(sliderConfig.getX(), sliderConfig.getY(), sliderConfig.getWidth(), sliderConfig.getHeight());
+        container.add(slider);
+
+        // Конфигурация спиннера
+        ComponentAttributes.ComponentConfig spinnerConfig = config.getSpinner();
+        spinner.setBounds(spinnerConfig.getX(), spinnerConfig.getY(), spinnerConfig.getWidth(), spinnerConfig.getHeight());
+        container.add(spinner);
+        container.setOpaque(false);
+
+        addSubComponent(container);
     }
 
     private void addListeners() {
@@ -182,7 +200,6 @@ public class CompositeSlider extends JComponent {
         return value <= 0 ? 1 : Integer.highestOneBit(value - 1) << 1;
     }
 
-
     private int roundDownToPowerOfTwo(int value) {
         return value <= 0 ? 1 : Integer.highestOneBit(value);
     }
@@ -226,8 +243,6 @@ public class CompositeSlider extends JComponent {
         return new SliderRange(minValue, maxValue, initialValue, values);
     }
 
-
-
     public List<Integer> getValues(int minValue, int maxValue, int steps) {
         if (steps < 2) {
             throw new IllegalArgumentException("Steps must be at least 2 to create a range.");
@@ -244,7 +259,7 @@ public class CompositeSlider extends JComponent {
         return values;
     }
 
-    public void setValue(int value){
+    public void setValue(int value) {
         this.slider.setValue(value);
     }
 }

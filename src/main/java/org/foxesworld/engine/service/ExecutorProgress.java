@@ -165,7 +165,6 @@ public class ExecutorProgress {
         taskTable.getTableHeader().setBorder(new EmptyBorder(5, 5, 5, 5));
         JScrollPane tableScrollPane = new JScrollPane(taskTable);
 
-        // Инициализация прогресс-бара загрузки памяти
         memoryProgressBar = new JProgressBar(0, 100);
         memoryProgressBar.setStringPainted(true);
 

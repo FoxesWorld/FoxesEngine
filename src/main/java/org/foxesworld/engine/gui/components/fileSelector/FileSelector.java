@@ -1,119 +1,60 @@
 package org.foxesworld.engine.gui.components.fileSelector;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.components.CompositeComponent;
 import org.foxesworld.engine.gui.components.ComponentFactory;
+import org.foxesworld.engine.gui.components.button.Button;
+import org.foxesworld.engine.gui.components.button.ButtonStyle;
+import org.foxesworld.engine.gui.components.textfield.TextField;
+import org.foxesworld.engine.gui.components.textfield.TextFieldStyle;
+import org.foxesworld.engine.gui.styles.StyleAttributes;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
-public class FileSelector extends JComponent {
-
-    public enum SelectionMode {
-        FILES_ONLY,
-        DIRECTORIES_ONLY
-    }
-
+public class FileSelector extends CompositeComponent {
     private final ComponentFactory componentFactory;
     private final JTextField filePathField;
-    private final JButton browseButton;
-    private JFileChooser fileChooser;
+    private final Button browseButton;
+    private final JFileChooser fileChooser;
 
     public FileSelector(ComponentFactory componentFactory, SelectionMode selectionMode) {
         this.componentFactory = componentFactory;
         List<String> fileExtensions = componentFactory.getComponentAttribute().getFileExtensions();
+        Map<String, String> styles = componentFactory.getComponentAttribute().getStyles();
 
-        setLayout(new BorderLayout());
-        filePathField = createStyledTextFieldWithTexture();
-        filePathField.setEditable(false);
-        browseButton = new JButton("...");
+        filePathField = createStyledTextFieldWithTexture(styles.get("textField"));
+        browseButton = new Button(componentFactory, "...");
+        StyleAttributes attributes = componentFactory.getEngine().getStyleProvider().getElementStyles().get("button").get(styles.get("button"));
+        componentFactory.setStyle(attributes);
+        ButtonStyle buttonStyle = new ButtonStyle(componentFactory);
+        buttonStyle.apply(browseButton);
+
         browseButton.addActionListener(new BrowseButtonListener());
-
         fileChooser = new JFileChooser();
         configureFileChooser(fileExtensions, selectionMode);
 
-        add(filePathField, BorderLayout.CENTER);
-        add(browseButton, BorderLayout.EAST);
+        JPanel container = new JPanel(new BorderLayout());
+        container.add(filePathField, BorderLayout.CENTER);
+        container.add(browseButton, BorderLayout.EAST);
+        addSubComponent(container);
     }
 
-    /**
-     * Создает JTextField с текстурой фона.
-     */
-    private JTextField createStyledTextFieldWithTexture() {
-        BufferedImage image = componentFactory.getEngine().getImageUtils().getLocalImage(componentFactory.getComponentAttribute().getBackground());
-        return new JTextField() {
-            private final Image backgroundImage = image;
-
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-
-                // Рисуем текстуру
-                if (backgroundImage != null) {
-                    g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
-                }
-
-                // Рисуем текст поверх текстуры
-                g2d.setComposite(AlphaComposite.SrcOver);
-                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-                g2d.setColor(getForeground());
-                g2d.setFont(getFont());
-                FontMetrics fm = g2d.getFontMetrics();
-                int textX = getInsets().left;
-                int textY = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
-                g2d.drawString(getText(), textX, textY);
-            }
-
-            @Override
-            protected void paintBorder(Graphics g) {
-                super.paintBorder(g);
-            }
-
-            @Override
-            public void setOpaque(boolean isOpaque) {
-                super.setOpaque(false);
-            }
-
-
-            @Override
-            public void setFocusable(boolean isFocusable) {
-                super.setFocusable(false);
-            }
-
-            @Override
-            public void setEditable(boolean isEditable) {
-                super.setEditable(false);
-            }
-
-            @Override
-            public void setSelectionColor(Color c) {
-                super.setSelectionColor(getBackground());
-            }
-
-            @Override
-            public void setSelectionStart(int selectionStart) {
-            }
-
-            @Override
-            public void setSelectionEnd(int selectionEnd) {
-            }
-
-            @Override
-            public void select(int selectionStart, int selectionEnd) {
-            }
-
-        };
+    private TextField createStyledTextFieldWithTexture(String style) {
+        StyleAttributes attributes = componentFactory.getEngine().getStyleProvider().getElementStyles().get("textField").get(style);
+        this.componentFactory.setStyle(attributes);
+        TextFieldStyle textFieldStyle = new TextFieldStyle(this.componentFactory);
+        TextField textField = new TextField(this.componentFactory);
+        textFieldStyle.apply(textField);
+        return textField;
     }
 
-
-    /**
-     * Возвращает выбранный путь к файлу или директории.
-     */
     public String getValue() {
         return filePathField.getText();
     }
@@ -155,7 +96,6 @@ public class FileSelector extends JComponent {
         }
     }
 
-
     /**
      * Настраивает JFileChooser для работы с файлами или директориями.
      */
@@ -172,9 +112,6 @@ public class FileSelector extends JComponent {
         }
     }
 
-    /**
-     * Обработчик кнопки "Browse".
-     */
     private class BrowseButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -196,24 +133,5 @@ public class FileSelector extends JComponent {
                 filePathField.setText(selectedFile.getAbsolutePath());
             }
         }
-    }
-
-    //public void setChosen(String file) {
-    //    this.fileChooser.setSelectedFile(new File(file));
-    //}
-
-    /**
-     * Геттеры для дочерних компонентов.
-     */
-    public JTextField getFilePathField() {
-        return filePathField;
-    }
-
-    public JButton getBrowseButton() {
-        return browseButton;
-    }
-
-    public JFileChooser getFileChooser() {
-        return fileChooser;
     }
 }
