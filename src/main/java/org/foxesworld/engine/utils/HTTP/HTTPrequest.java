@@ -325,6 +325,63 @@ public class HTTPrequest {
         }
     }
 
+    /**
+     * Measures the connection speed to the server by performing a GET request,
+     * reading the response, and calculating the transfer rate.
+     * <p>
+     * The speed is computed as the total number of bytes read divided by the elapsed time.
+     * High-precision time measurement (nanoseconds) is used to increase accuracy.
+     * </p>
+     *
+     * @return the measured connection speed in bytes per second.
+     * @throws Exception if an error occurs during the connection or data transfer.
+     */
+    public double measureConnectionSpeed() throws Exception {
+        URL url = new URL(engine.getEngineData().getBindUrl());
+        HttpURLConnection speedConnection = (HttpURLConnection) url.openConnection();
+        speedConnection.setRequestMethod("GET");
+        speedConnection.setDoInput(true);
+        speedConnection.setConnectTimeout(5000);
+        speedConnection.setReadTimeout(5000);
+        long startTime = System.nanoTime();
+        int totalBytes = 0;
+        try (InputStream is = speedConnection.getInputStream()) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                totalBytes += bytesRead;
+            }
+        } finally {
+            speedConnection.disconnect();
+        }
+        long endTime = System.nanoTime();
+        double elapsedTimeSec = (endTime - startTime) / 1_000_000_000.0;
+        // Вычисление скорости (байт/сек)
+        return totalBytes / elapsedTimeSec;
+    }
+
+    /**
+     * Форматирует скорость соединения в человекочитаемый вид.
+     *
+     * @return строка с отформатированным значением и соответствующей единицей измерения.
+     */
+    public String getFormatedSpeed() {
+        double speedBytesPerSec = 0;
+        try {
+            speedBytesPerSec = this.measureConnectionSpeed();
+
+        if (speedBytesPerSec < 1024) {
+            return String.format("%.2f B/s", speedBytesPerSec);
+        } else if (speedBytesPerSec < 1024 * 1024) {
+            return String.format("%.2f KB/s", speedBytesPerSec / 1024);
+        } else {
+            return String.format("%.2f MB/s", speedBytesPerSec / (1024 * 1024));
+        }
+        } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
+    }
+
     public Engine getEngine() {
         return engine;
     }

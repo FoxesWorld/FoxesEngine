@@ -1,7 +1,6 @@
 package org.foxesworld.engine.gui.components.slider;
 
 import org.foxesworld.engine.gui.components.ComponentFactory;
-import org.foxesworld.engine.gui.components.label.LabelStyle;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 import org.foxesworld.engine.utils.ImageUtils;
 
@@ -140,4 +139,4 @@ public class TexturedSliderUI extends BasicSliderUI {
             currentThumbImage = thumbImageNormal;
         }
     }
-}  
+}

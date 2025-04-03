@@ -1,6 +1,6 @@
 package org.foxesworld.engine.gui.styles;
 
-public class StyleLoadingException extends Exception {
+public final class StyleLoadingException extends Exception {
     public StyleLoadingException(String message) {
         super(message);
     }

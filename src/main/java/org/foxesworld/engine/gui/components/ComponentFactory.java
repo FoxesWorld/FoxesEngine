@@ -40,9 +40,11 @@ import java.awt.event.ActionEvent;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
@@ -78,8 +80,7 @@ public class ComponentFactory extends JComponent {
         registerComponent("slider", this::createSlider);
         registerComponent("compositeSlider", this::createCompositeSlider);
         registerComponent("fileSelector", this::createFileSelector);
-        registerComponent("testPB", this::createTestPB);
-
+        registerComponent("compositeComponent", this::createCompositeComponent);
     }
 
     public void registerComponent(String type, Function<ComponentAttributes, JComponent> creator) {
@@ -98,12 +99,51 @@ public class ComponentFactory extends JComponent {
         });
     }
 
+    public JComponent createCompositeComponent(ComponentAttributes componentAttributes) {
+        Engine.LOGGER.warn("Using experimental CompositeComponent {} !", componentAttributes.getComponentId());
+        CompositeComponent compositeComponent = new CompositeComponent();
+
+        compositeComponent.setVisible(componentAttributes.isVisible());
+        compositeComponent.setOpaque(componentAttributes.isOpaque());
+
+        List<ComponentAttributes> children = componentAttributes.getChildComponents();
+        Engine.LOGGER.info("    - Number of child components: {}", children.size());
+
+        for (ComponentAttributes comp : children) {
+            if(comp.getInitialValue() == null) {
+                comp.setInitialValue(componentAttributes.getInitialValue());
+            }
+            Engine.LOGGER.info("Creating child component: {}", comp.getComponentType());
+
+            JComponent child;
+            try {
+                child = this.createComponentAsync(comp).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (child == null) {
+                Engine.LOGGER.error("Error: createComponent returned null!");
+            } else {
+                Engine.LOGGER.info("Adding child component: {}", child.getClass().getSimpleName());
+                compositeComponent.addSubComponent(child);
+            }
+        }
+
+        Engine.LOGGER.info("CompositeComponent creation completed.");
+        return compositeComponent;
+    }
+
+
+
     public JComponent createComponent(ComponentAttributes attributes) {
         this.componentAttribute = attributes;
         this.bounds = attributes.getBounds().getBounds();
         loadStyle(attributes);
         String componentType = attributes.getComponentType();
-        componentFactoryListener.onComponentCreation(attributes);
+        if(componentFactoryListener!= null) {
+            componentFactoryListener.onComponentCreation(attributes);
+        }
         Function<ComponentAttributes, JComponent> creator = componentRegistry.get(componentType);
 
         if (creator == null) {
@@ -302,12 +342,14 @@ public class ComponentFactory extends JComponent {
         slider.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
         return slider;
     }
+    @Deprecated
     private JComponent createCompositeSlider(ComponentAttributes componentAttributes) {
         CompositeSlider compositeSlider = new CompositeSlider(this);
         compositeSlider.setValue(Integer.parseInt((String) componentAttributes.getInitialValue()));
         return compositeSlider;
     }
 
+    @Deprecated
     private JComponent createFileSelector(ComponentAttributes componentAttributes) {
         FileSelector fileSelector = new FileSelector(this, SelectionMode.valueOf(componentAttributes.getSelectionMode()));
         fileSelector.setValue((String) componentAttributes.getInitialValue());

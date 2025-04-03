@@ -162,14 +162,14 @@ public class FileLoader {
         //executorService.shutdownNow();
         fileLoaderListener.onCancel();
     }
-
     public long getTotalSize() {
         if (totalSize == -1) {
             totalSize = fileAttributes.stream()
                     .mapToLong(file -> {
                         String localPath = file.getFilename().replace(file.getReplaceMask(), "");
                         File localFile = new File(homeDir, localPath);
-                        return (localFile.exists() && localFile.length() == file.getSize()) ? 0 : file.getSize();
+                        return (localFile.exists() && !fileValidator.isInvalidFile(localFile, file.getHash(), file.getSize()))
+                                ? 0 : file.getSize();
                     })
                     .sum();
         }

@@ -20,7 +20,6 @@ import java.util.List;
 
 public class CompositeSlider extends CompositeComponent {
     private LabelStyle labelStyle;
-    private final ComponentFactory componentFactory;
     private final ComponentAttributes componentAttribute;
     private Label label;
     private JSlider slider;
@@ -28,7 +27,6 @@ public class CompositeSlider extends CompositeComponent {
     private SliderListener sliderListener;
 
     public CompositeSlider(ComponentFactory componentFactory) {
-        super();
         this.componentFactory = componentFactory;
         this.componentAttribute = componentFactory.getComponentAttribute();
         initializeComponents();
@@ -180,10 +178,6 @@ public class CompositeSlider extends CompositeComponent {
         }
     }
 
-    public int getValue() {
-        return slider.getValue();
-    }
-
     public JSlider getSlider() {
         return slider;
     }
@@ -257,6 +251,10 @@ public class CompositeSlider extends CompositeComponent {
         }
 
         return values;
+    }
+
+    public Object getValue(){
+        return this.slider.getValue();
     }
 
     public void setValue(int value) {

@@ -277,7 +277,7 @@ public class GuiBuilder {
         if (panelParent != null) {
             panelParent.setComponentZOrder(panel, optionGroups.getPanelOptions().getzIndex());
         } else {
-            Engine.getLOGGER().warn("Parent for panel {} is null!", panel.getName());
+            //Engine.getLOGGER().warn("Parent for panel {} is null!", panel.getName());
         }
         return panel;
     }

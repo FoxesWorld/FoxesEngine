@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.componentAccessor;
 
 import org.foxesworld.engine.gui.GuiBuilder;
+import org.foxesworld.engine.gui.components.CompositeComponent;
 import org.foxesworld.engine.gui.components.checkbox.Checkbox;
 import org.foxesworld.engine.gui.components.compositeSlider.CompositeSlider;
 import org.foxesworld.engine.gui.components.dropBox.DropBox;
@@ -42,7 +43,8 @@ public class ComponentsAccessor {
             Slider.class, c -> String.valueOf(((Slider) c).getValue()),
             DropBox.class, c -> String.valueOf(((DropBox) c).getSelectedIndex()),
             FileSelector.class, c -> ((FileSelector)c).getValue(),
-            CompositeSlider.class, c -> String.valueOf(((CompositeSlider) c).getValue())
+            CompositeSlider.class, c -> String.valueOf(((CompositeSlider) c).getValue()),
+            CompositeComponent.class, c -> ((CompositeComponent)c).getValue().toString()
     );
 
     protected void initComponents() {
@@ -57,20 +59,18 @@ public class ComponentsAccessor {
                 JComponent component = componentMap.get(componentId);
                 if (component != null) {
                     try {
-                        boolean wasAccessible = field.isAccessible();
+                        boolean wasAccessible = field.canAccess(this);
                         field.setAccessible(true);
                         field.set(this, component);
                         field.setAccessible(wasAccessible);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(
-                                "Error injecting component '" + componentId + "' into field "
-                                        + field.getName(), e
+                                "Error injecting component '" + componentId + "' into field " + field.getName(), e
                         );
                     }
                 } else {
                     throw new IllegalArgumentException(
-                            "Component with ID '" + componentId + "' not found for field "
-                                    + field.getName()
+                            "Component with ID '" + componentId + "' not found for field " + field.getName()
                     );
                 }
             }

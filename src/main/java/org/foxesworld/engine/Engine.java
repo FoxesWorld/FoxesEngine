@@ -37,10 +37,8 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -51,7 +49,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     private final OperatingSystemMXBean osBean;
     public static String currentOS = "";
     protected LoadingManager loadingManager;
-    private final Map<String, Class<?>> configFiles;
+    private Map<String, Class<?>> configFiles = new HashMap<>();
     private final String appTitle;
     protected Sound SOUND;
     protected Config config;
@@ -81,7 +79,9 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         currentOS = OS.determineCurrentOS();
         osBean = ManagementFactory.getOperatingSystemMXBean();
         this.engineData = new EngineData();
-        this.configFiles = configFiles;
+        if(configFiles!=null) {
+            this.configFiles = configFiles;
+        }
 
         InputStreamReader reader = new InputStreamReader(
                 Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("buildInfo.json")),
@@ -107,7 +107,9 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         LOGGER.info("Available Processors: {}", osBean.getAvailableProcessors());
         LOGGER.info("System Load Average: {}", osBean.getSystemLoadAverage());
         LOGGER.info("Log Level: {}", engineData.getLogLevel());
-        LOGGER.info("Configuration Files: {}", configFiles.keySet());
+        if(configFiles != null) {
+            LOGGER.info("Configuration Files: {}", configFiles.keySet());
+        }
 
         this.FONTUTILS = new FontUtils(this);
         setLogLevel(Level.valueOf(engineData.getLogLevel()));
@@ -236,6 +238,16 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    protected void safeSubmitTask(Runnable task, String taskName) {
+        this.getExecutorServiceProvider().submitTask(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                getLOGGER().error("Task error -  " + taskName, e);
+            }
+        }, taskName);
+    }
+
     public Map<String, Class<?>> getConfigFiles() {
         return configFiles;
     }
@@ -338,5 +350,9 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
 
     public IconUtils getIconUtils() {
         return iconUtils;
+    }
+
+    public void setIconUtils(IconUtils iconUtils) {
+        this.iconUtils = iconUtils;
     }
 }

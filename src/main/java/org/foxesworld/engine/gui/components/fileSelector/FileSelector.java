@@ -1,6 +1,7 @@
 package org.foxesworld.engine.gui.components.fileSelector;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.CompositeComponent;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.components.button.Button;
@@ -17,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class FileSelector extends CompositeComponent {
     private final ComponentFactory componentFactory;
@@ -28,9 +30,12 @@ public class FileSelector extends CompositeComponent {
         this.componentFactory = componentFactory;
         List<String> fileExtensions = componentFactory.getComponentAttribute().getFileExtensions();
         Map<String, String> styles = componentFactory.getComponentAttribute().getStyles();
+        //this.initComponents(styles);
 
         filePathField = createStyledTextFieldWithTexture(styles.get("textField"));
-        browseButton = new Button(componentFactory, "...");
+        browseButton = new Button(componentFactory,
+                componentFactory.getEngine().getIconUtils().getIcon(componentFactory.getComponentAttribute()),
+                this.componentFactory.getEngine().getLANG().getString(componentFactory.getComponentAttribute().getLocaleKey()));
         StyleAttributes attributes = componentFactory.getEngine().getStyleProvider().getElementStyles().get("button").get(styles.get("button"));
         componentFactory.setStyle(attributes);
         ButtonStyle buttonStyle = new ButtonStyle(componentFactory);
@@ -62,7 +67,6 @@ public class FileSelector extends CompositeComponent {
     public void setValue(String path) {
         File file = new File(path);
 
-        // Проверка существования пути
         if (!file.exists()) {
             try {
                 if (fileChooser.getFileSelectionMode() == JFileChooser.DIRECTORIES_ONLY) {
@@ -100,17 +104,27 @@ public class FileSelector extends CompositeComponent {
      * Настраивает JFileChooser для работы с файлами или директориями.
      */
     private void configureFileChooser(List<String> fileExtensions, SelectionMode selectionMode) {
-        if (selectionMode == SelectionMode.DIRECTORIES_ONLY) {
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        } else {
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            if (fileExtensions != null && !fileExtensions.isEmpty()) {
-                String description = String.join(", ", fileExtensions) + " files";
-                FileNameExtensionFilter filter = new FileNameExtensionFilter(description, fileExtensions.toArray(new String[0]));
-                fileChooser.setFileFilter(filter);
-            }
-        }
+        // Сопоставляем режим выбора с константами JFileChooser
+        ComponentAttributes componentAttribute = componentFactory.getComponentAttribute();
+        Map<SelectionMode, Integer> modeMap = Map.of(
+                SelectionMode.DIRECTORIES_ONLY, JFileChooser.DIRECTORIES_ONLY,
+                SelectionMode.FILES_ONLY, JFileChooser.FILES_ONLY
+        );
+        fileChooser.setFileSelectionMode(modeMap.get(selectionMode));
+        fileChooser.setDialogTitle("FoxesChoosoooery");
+        Optional.ofNullable(fileExtensions)
+                .filter(ext -> !ext.isEmpty())
+                .ifPresent(ext -> {
+                    String localeString = componentFactory.getEngine().getLANG()
+                            .getString(componentAttribute.getLocaleKey());
+                    Object initialValue = componentAttribute.getInitialValue();
+                    String description = String.join(", ", ext) + " " + localeString + " " + (initialValue != null ? initialValue : "");
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter(description, ext.toArray(new String[0]));
+                    fileChooser.setFileFilter(filter);
+                });
     }
+
+
 
     private class BrowseButtonListener implements ActionListener {
         @Override
