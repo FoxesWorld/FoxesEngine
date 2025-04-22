@@ -1,6 +1,5 @@
 package org.foxesworld.engine.gui.components.label;
 
-import org.foxesworld.engine.Engine;
 import org.foxesworld.engine.gui.components.ComponentFactory;
 import org.foxesworld.engine.gui.styles.StyleAttributes;
 
@@ -34,9 +33,9 @@ public class LabelStyle {
 
 	public LabelStyle(StyleAttributes styleAttributes){
 		style = styleAttributes;
-			this.idleColor = hexToColor(style.getColor());
-			this.activeColor = idleColor;
-			this.isGradient = false;
+		this.idleColor = hexToColor(style.getColor());
+		this.activeColor = idleColor;
+		this.isGradient = false;
 
 	}
 
@@ -44,15 +43,8 @@ public class LabelStyle {
 		this.fontName = style.getFont();
 		this.fontSize = style.getFontSize();
 		label.setFont(this.componentFactory.getEngine().getFONTUTILS().getFont(fontName, fontSize));
+		label.setForeground(idleColor);
 
-		if (isGradient) {
-			label.setGradientText(true); // Устанавливаем, что нужно использовать градиент
-			label.setStartColor(startColor);
-			label.setEndColor(endColor);
-		} else {
-			// Если нет градиента, устанавливаем обычный цвет
-			label.setForeground(idleColor);
-		}
 	}
 
 	// Геттеры и сеттеры для свойств

@@ -1,6 +1,7 @@
 package org.foxesworld.engine.utils.Download;
 
 import org.foxesworld.engine.Engine;
+import org.foxesworld.engine.fileLoader.FileLoader;
 import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.utils.HTTP.HTTPrequest;
 
@@ -22,13 +23,14 @@ public class DownloadUtils extends HTTPrequest {
     private Button cancelButton;
     private int percent;
     private long downloaded = 0;
-    public DownloadUtils(Engine engine) {
-        super(engine, "GET");
-        this.engine = engine;
+    private long totalSize;
+    public DownloadUtils(FileLoader fileLoader) {
+        super(fileLoader.getEngine(), "GET");
+        this.engine = fileLoader.getEngine();
     }
 
     @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
-    public void downloader(String downloadFile, String savePath, long totalSize) {
+    public void downloader(String downloadFile, String savePath) {
         this.progressBar.add(this.progressLabel);
         this.progressBar.add(cancelButton);
 
@@ -115,6 +117,10 @@ public class DownloadUtils extends HTTPrequest {
             throw new RuntimeException(e);
         }
         fileZip.delete();
+    }
+
+    public void setTotalSize(long totalSize) {
+        this.totalSize = totalSize;
     }
 
     public void setProgressLabel(JLabel progressLabel) {

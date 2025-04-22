@@ -17,12 +17,6 @@ public class TestLabel {
         label.setText("Градиентный Текст");
         label.setFont(new Font("Arial", Font.PLAIN, 40));
 
-        // Настроим градиент
-        label.setStartColor(Color.BLUE);
-        label.setEndColor(Color.RED);
-        label.setGradientText(true);
-        label.setVerticalGradient(false); // Горизонтальный градиент
-
         // Добавляем Label на панель
         frame.getContentPane().add(label);
 

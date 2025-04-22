@@ -61,17 +61,28 @@ public class ImageUtils {
     }
 
     public BufferedImage base64ToBufferedImage(String base64Image) {
+        if (base64Image == null || base64Image.isEmpty()) return null;
+
+        if (base64Image.startsWith("data:image")) {
+            base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
+        }
+
+        base64Image = base64Image.replaceAll("\\s", "");
+
         try {
             byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-            BufferedImage bufferedImage = ImageIO.read(bis);
-            bis.close();
-            return bufferedImage;
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes)) {
+                return ImageIO.read(bis);
+            }
+        } catch (IllegalArgumentException e) {
+            System.err.println("Base64 decode error: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            System.err.println("IO error while reading image: " + e.getMessage());
         }
+
+        return null;
     }
+
 
     public BufferedImage loadImageFromUrl(String imageUrl) {
         try {

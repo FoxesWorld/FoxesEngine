@@ -206,9 +206,7 @@ public class ComponentFactory extends JComponent {
         label.setIcon(iconUtils.getIcon(componentAttributes));
         String initial = (componentAttributes.getInitialValue() != null) ? String.valueOf(componentAttributes.getInitialValue()) : "";
         label.setText(this.getEngine().getLANG().getString(componentAttributes.getLocaleKey()) + " " + initial);
-        if(!label.isGradientText()) {
-            label.setForeground(hexToColor(componentAttributes.getColor()));
-        }
+        label.setForeground(hexToColor(componentAttributes.getColor()));
         label.setFont(engine.getFONTUTILS().getFont(style.getFont(), componentAttributes.getFontSize()));
         return label;
     }

@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class FileLoader {
-
     private final Engine engine;
     private final AtomicBoolean isCancelled = new AtomicBoolean(false);
     private boolean forceUpdate = false;
@@ -30,7 +30,6 @@ public class FileLoader {
     private final FileFetcher fileFetcher;
     private final FileValidator fileValidator;
     private FileLoaderListener fileLoaderListener;
-
     private FileAttributes currentFile;
     private long totalSize = -1;
     private String fileExtension;
@@ -40,7 +39,7 @@ public class FileLoader {
         this.client = actionHandler.getCurrentServer().getServerName();
         this.version = actionHandler.getCurrentServer().getServerVersion();
         this.homeDir = homeDir + File.separator;
-        this.downloadUtils = new DownloadUtils(engine);
+        this.downloadUtils = new DownloadUtils(this);
         this.loadingManager = engine.getLoadingManager();
         this.fileFetcher = new FileFetcher(engine);
         this.fileValidator = new FileValidator();
@@ -107,7 +106,8 @@ public class FileLoader {
         }
         this.engine.getExecutorServiceProvider().submitTask(() -> {
             fileLoaderListener.onDownloadStart();
-            totalSize = fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
+            totalSize = this.calculateTotalSize();//fileAttributes.stream().mapToLong(FileAttributes::getSize).sum();
+            downloadUtils.setTotalSize(this.totalSize);
 
             fileAttributes.forEach(file -> CompletableFuture.runAsync(() -> downloadFile(file, totalFiles)));
         }, "fileLoader");
@@ -159,10 +159,9 @@ public class FileLoader {
 
     public void cancel() {
         isCancelled.set(true);
-        //executorService.shutdownNow();
         fileLoaderListener.onCancel();
     }
-    public long getTotalSize() {
+    private long calculateTotalSize() {
         if (totalSize == -1) {
             totalSize = fileAttributes.stream()
                     .mapToLong(file -> {
@@ -170,12 +169,10 @@ public class FileLoader {
                         File localFile = new File(homeDir, localPath);
                         return (localFile.exists() && !fileValidator.isInvalidFile(localFile, file.getHash(), file.getSize()))
                                 ? 0 : file.getSize();
-                    })
-                    .sum();
+                    }).sum();
         }
         return totalSize;
     }
-
     public String getHomeDir() {
         return homeDir;
     }
@@ -222,6 +219,10 @@ public class FileLoader {
 
     public void setLoaderListener(FileLoaderListener fileLoaderListener) {
         this.fileLoaderListener = fileLoaderListener;
+    }
+
+    public Engine getEngine() {
+        return engine;
     }
 
     private Void handleFileListRetrievalError(Throwable e) {
