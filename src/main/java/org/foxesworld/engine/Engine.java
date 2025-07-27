@@ -35,7 +35,7 @@ public class Engine extends JFrame implements ActionListener {
     private EngineData engineData;
     private GuiBuilder guiBuilder;
     private StyleProvider styleProvider;
-    private final String LOCALE;
+    private String LOCALE;
     private final LanguageProvider LANG;
     private final Config config;
     private Map<String, Object> CONFIG;
@@ -198,5 +198,9 @@ public class Engine extends JFrame implements ActionListener {
     }
     public Sound getSOUND() {
         return SOUND;
+    }
+
+    public void setLOCALE(String LOCALE) {
+        this.LOCALE = LOCALE;
     }
 }

@@ -17,6 +17,7 @@ import java.util.zip.ZipFile;
 public class DownloadUtils {
     private final Engine engine;
     private DownloadListener downloadListener;
+    private UnpackListener unpackListener;
     private final JLabel progressLabel;
     private JProgressBar progressBar;
 
@@ -27,15 +28,24 @@ public class DownloadUtils {
         this.progressBar.add(progressLabel);
     }
 
+    public void setDownloadListener(DownloadListener downloadListener) {
+        this.downloadListener = downloadListener;
+    }
+
+    public void setUnpackListener(UnpackListener unpackListener) {
+        this.unpackListener = unpackListener;
+    }
+
     public void downloadAsync(String Durl, String PATH) {
         progressBar.setVisible(true);
         progressLabel.setVisible(true);
         try {Thread.sleep(1000L);} catch (InterruptedException e) {throw new RuntimeException(e);}
+
         SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
             @Override
             protected Void doInBackground() {
                 download(Durl, PATH);
-                if(Durl.contains(engine.getEngineData().getLauncherRuntime())) {
+                if (Durl.contains(engine.getEngineData().getLauncherRuntime())) {
                     unpackAsync(PATH, new File(PATH).getParentFile());
                 }
                 return null;
@@ -80,7 +90,11 @@ public class DownloadUtils {
             HttpURLConnection connection = (HttpURLConnection) downloadUrl.openConnection();
             long fileSize = connection.getContentLength();
             String fileName = extractFileNameFromUrl(downloadUrl);
-            downloadListener.downloading(fileName);
+
+            if (downloadListener != null) {
+                downloadListener.downloading(fileName);
+            }
+
             try (InputStream inputStream = new BufferedInputStream(connection.getInputStream())) {
                 File destinationFile = new File(destinationPath);
                 FileOutputStream outputStream = new FileOutputStream(destinationFile);
@@ -107,7 +121,9 @@ public class DownloadUtils {
                 progressBar.setVisible(false);
                 progressLabel.setVisible(false);
                 progressBar.setValue(0);
-                downloadListener.onFileDownloaded(fileName);
+                if (downloadListener != null) {
+                    downloadListener.onFileDownloaded(fileName);
+                }
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,12 +145,12 @@ public class DownloadUtils {
         }
     }
 
-
-
     private String extractFileNameFromUrl(URL url) {
         String urlString = url.toString();
         int lastSlashIndex = urlString.lastIndexOf('/');
-        return lastSlashIndex != -1 && lastSlashIndex < urlString.length() - 1 ? urlString.substring(lastSlashIndex + 1) : null;
+        return lastSlashIndex != -1 && lastSlashIndex < urlString.length() - 1 ?
+                urlString.substring(lastSlashIndex + 1) :
+                "unknown_file";
     }
 
     private void unpack(String zipFilePath, File destinationDir) {
@@ -153,8 +169,11 @@ public class DownloadUtils {
 
             for (ZipEntry entry : zippedFiles) {
                 fileName = entry.getName();
+                if (unpackListener != null) {
+                    unpackListener.unpacking(fileName);
+                }
+
                 File outFile = new File(destinationDir, fileName);
-                downloadListener.unpacking(fileName);
                 try (InputStream inputStream = zipFile.getInputStream(entry);
                      OutputStream outputStream = Files.newOutputStream(outFile.toPath())) {
                     if (!outFile.getParentFile().exists()) {
@@ -172,16 +191,14 @@ public class DownloadUtils {
         }
 
         new File(zipFilePath).delete();
-        downloadListener.onFileUnpacked(fileName);
+        if (unpackListener != null && fileName != null) {
+            unpackListener.onFileUnpacked(fileName);
+        }
     }
 
     private void publish(int progress, String fileName) {
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue(progress);
         });
-    }
-
-    public void setDownloadListener(DownloadListener downloadListener) {
-        this.downloadListener = downloadListener;
     }
 }

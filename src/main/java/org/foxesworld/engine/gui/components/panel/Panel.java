@@ -10,6 +10,7 @@ import org.foxesworld.engine.utils.ImageUtils;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
@@ -68,7 +69,27 @@ public class Panel {
     }
 
     public JPanel createGroupPanel(PanelOptions panelOptions, String groupName) {
-        JPanel groupPanel = new JPanel();
+        JPanel groupPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                if (panelOptions.borderRadius > 0) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    // Рисуем закругленный фон
+                    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(
+                            0, 0, getWidth(), getHeight(),
+                            panelOptions.borderRadius, panelOptions.borderRadius
+                    );
+
+                    g2d.setColor(getBackground());
+                    g2d.fill(roundedRectangle);
+                    g2d.dispose();
+                } else {
+                    super.paintComponent(g);
+                }
+            }
+        };
         groupPanel.setName(groupName);
         groupPanel.setOpaque(panelOptions.opaque);
         groupPanel.setLayout(null);
@@ -83,7 +104,6 @@ public class Panel {
                 case "dragger": actionListener.addDragListener(groupPanel, frame.getFrame());
             }
         }
-        //frame.getAppFrame().displayPanel(groupName, panelOptions.display);
 
         String[] bounds = panelOptions.bounds.split(",");
         int posX = Integer.parseInt(bounds[0]);

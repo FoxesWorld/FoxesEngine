@@ -12,6 +12,7 @@ public abstract class InfoDisplay {
 
     public abstract void setInfo(String title, String desc);
 
+    public abstract void setInfo(String s, String s1, int await);
     protected void animateTextFlyUp(JLabel label, String newText) {
         if (label.getText().equals(newText)) {
             return;
@@ -21,66 +22,87 @@ public abstract class InfoDisplay {
         final int totalSteps = animationDuration / animationStepDelay;
         final int[] step = {0};
         final Point startLocation = label.getLocation();
-        final Point endLocation = new Point(startLocation.x, startLocation.y - 30);
+        final int targetY = startLocation.y - 30;
         final float alphaStep = 1.0f / totalSteps;
 
         timer.addActionListener(e -> {
             float progress = (float) step[0] / totalSteps;
-            int yOffset = (int) (startLocation.y - (progress * (startLocation.y - endLocation.y)));
-            label.setLocation(startLocation.x, yOffset);
 
+            // Плавное движение вверх
+            int currentY = (int) (startLocation.y - (progress * 30));
+            label.setLocation(startLocation.x, currentY);
+
+            // Плавное исчезновение
+            int alpha = (int) (255 * (1 - progress));
             label.setForeground(new Color(
                     label.getForeground().getRed(),
                     label.getForeground().getGreen(),
                     label.getForeground().getBlue(),
-                    Math.max(0, (int) (255 * (1 - progress)))
+                    Math.max(0, alpha)
             ));
 
-            step[0]++;
-            if (step[0] >= totalSteps) {
+            if (++step[0] >= totalSteps) {
                 timer.stop();
-                label.setText("");
-                label.setLocation(startLocation);
-                label.setForeground(new Color(
-                        label.getForeground().getRed(),
-                        label.getForeground().getGreen(),
-                        label.getForeground().getBlue(),
-                        0));
+                prepareForNextAnimation(label, startLocation);
                 SwingUtilities.invokeLater(() -> animateTextFlyDown(label, newText));
             }
         });
-
         timer.start();
+    }
+
+    private void prepareForNextAnimation(JLabel label, Point location) {
+        label.setText("");
+        label.setLocation(location);
+        label.setForeground(new Color(
+                label.getForeground().getRed(),
+                label.getForeground().getGreen(),
+                label.getForeground().getBlue(),
+                0));
     }
 
     protected void animateTextFlyDown(JLabel label, String newText) {
         Timer timer = new Timer(animationStepDelay, null);
         final int totalSteps = animationDuration / animationStepDelay;
         final int[] step = {0};
-        label.setText(newText);
 
-        final Point startLocation = label.getLocation();
-        final Point endLocation = new Point(startLocation.x, startLocation.y + 30);
+        final Point targetLocation = label.getLocation();
+        final Point startLocation = new Point(targetLocation.x, targetLocation.y - 30);
+
+        label.setText(newText);
+        label.setLocation(startLocation);
+        label.setForeground(new Color(
+                label.getForeground().getRed(),
+                label.getForeground().getGreen(),
+                label.getForeground().getBlue(),
+                0));
 
         timer.addActionListener(e -> {
             float progress = (float) step[0] / totalSteps;
-            int yOffset = (int) (endLocation.y - (progress * (endLocation.y - startLocation.y)));
-            label.setLocation(startLocation.x, yOffset);
 
+            // Плавное движение вниз
+            int currentY = (int) (startLocation.y + (progress * 30));
+            label.setLocation(startLocation.x, currentY);
+
+            // Плавное появление
+            int alpha = (int) (255 * progress);
             label.setForeground(new Color(
                     label.getForeground().getRed(),
                     label.getForeground().getGreen(),
                     label.getForeground().getBlue(),
-                    Math.min(255, (int) (255 * progress))
+                    Math.min(255, alpha)
             ));
 
-            step[0]++;
-            if (step[0] >= totalSteps) {
+            if (++step[0] >= totalSteps) {
                 timer.stop();
-                label.setLocation(startLocation);
+                // Финализируем позицию и прозрачность
+                label.setLocation(targetLocation);
+                label.setForeground(new Color(
+                        label.getForeground().getRed(),
+                        label.getForeground().getGreen(),
+                        label.getForeground().getBlue(),
+                        255));
             }
         });
-
         timer.start();
     }
 
