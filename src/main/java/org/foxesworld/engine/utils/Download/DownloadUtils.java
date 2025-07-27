@@ -154,23 +154,37 @@ public class DownloadUtils {
     }
 
     private void unpack(String zipFilePath, File destinationDir) {
-        String fileName = null;
         try (ZipFile zipFile = new ZipFile(zipFilePath, StandardCharsets.UTF_8)) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             LinkedList<ZipEntry> zippedFiles = new LinkedList<>();
+
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
-                    new File(destinationDir + File.separator + entry.getName()).mkdirs();
+                    new File(destinationDir, entry.getName()).mkdirs();
                 } else {
                     zippedFiles.add(entry);
                 }
             }
 
+            int totalFiles = zippedFiles.size();
+            int processedFiles = 0;
+
+            // Уведомляем о начале распаковки
+            if (unpackListener != null) {
+                unpackListener.unpackingStart(totalFiles, new File(zipFilePath));
+            }
+
             for (ZipEntry entry : zippedFiles) {
-                fileName = entry.getName();
+                String fileName = entry.getName();
+                processedFiles++;
+                int percent = (processedFiles * 100) / totalFiles;
+                progressBar.setVisible(true);
+                progressLabel.setVisible(true);
+                publish(percent, fileName);
+
                 if (unpackListener != null) {
-                    unpackListener.unpacking(fileName);
+                    unpackListener.unpackProgress(percent, fileName);
                 }
 
                 File outFile = new File(destinationDir, fileName);
@@ -188,11 +202,15 @@ public class DownloadUtils {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            new File(zipFilePath).delete();
         }
 
-        new File(zipFilePath).delete();
-        if (unpackListener != null && fileName != null) {
-            unpackListener.onFileUnpacked(fileName);
+        progressBar.setVisible(false);
+        progressLabel.setVisible(false);
+        progressBar.setValue(0);
+        if (unpackListener != null) {
+            unpackListener.onFileUnpacked(zipFilePath);
         }
     }
 
