@@ -115,7 +115,7 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         setLogLevel(Level.valueOf(engineData.getLogLevel()));
         executorServiceProvider = new ExecutorServiceProvider(poolSize, worker);
 
-        this.imageUtils = new ImageUtils(this);
+        this.imageUtils = new ImageUtils();
         FlatIntelliJLaf.setup();
     }
 

@@ -45,7 +45,7 @@ public class FontUtils {
 
     public static Color hexToColor(String hex) {
         if (hex != null) {
-            if (!hex.equals("")) {
+            if (!hex.isEmpty()) {
                 hex = hex.replace("#", "");
                 int red = Integer.parseInt(hex.substring(0, 2), 16);
                 int green = Integer.parseInt(hex.substring(2, 4), 16);

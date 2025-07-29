@@ -42,10 +42,10 @@ public class CompositeSlider extends CompositeComponent {
         if (componentAttribute.getComponentId().contains("ram")) {
             RamRangeCalculator calculator = new RamRangeCalculator();
             RamRangeCalculator.SliderRange sliderRange = calculator.calculateSliderRange(componentAttribute.getStepSize());
-            minValue = sliderRange.getMinValue();
-            maxValue = sliderRange.getMaxValue();
-            initialValue = getInitialValue(sliderRange.getInitialValue());
-            values = sliderRange.getValues();
+            minValue = sliderRange.minValue();
+            maxValue = sliderRange.maxValue();
+            initialValue = getInitialValue(sliderRange.initialValue());
+            values = sliderRange.values();
         } else {
             minValue = componentAttribute.getMinValue();
             maxValue = componentAttribute.getMaxValue();

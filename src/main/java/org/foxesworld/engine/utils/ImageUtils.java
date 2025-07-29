@@ -1,7 +1,5 @@
 package org.foxesworld.engine.utils;
-
 import org.foxesworld.engine.Engine;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -14,22 +12,19 @@ import java.awt.image.Kernel;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.foxesworld.engine.utils.HashUtils.sha1String;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class ImageUtils {
+    private static final int CACHE_SIZE = 100;
     private static final Map<String, BufferedImage> imgCache = new HashMap<>();
-    private final Engine engine;
+    private static final Map<String, BufferedImage> MEMORY_CACHE = new LruCache<>(CACHE_SIZE);
 
-    public  ImageUtils(Engine engine) {
-        this.engine = engine;
-    }
+    public  ImageUtils() {}
 
     public BufferedImage getLocalImage(String name) {
         if (imgCache.containsKey(name)) {
@@ -37,7 +32,7 @@ public class ImageUtils {
         }
 
         try {
-            InputStream inputStream = engine.getClass().getClassLoader().getResourceAsStream(name);
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(name);
             if (inputStream != null) {
                 BufferedImage img = ImageIO.read(inputStream);
                 imgCache.put(name, img);
@@ -59,31 +54,60 @@ public class ImageUtils {
         }
         return subImage;
     }
+/*
+@Deprecated
+public BufferedImage base64ToBufferedImage(String base64Image) {
+    if (base64Image == null || base64Image.isEmpty()) return null;
 
-    public BufferedImage base64ToBufferedImage(String base64Image) {
-        if (base64Image == null || base64Image.isEmpty()) return null;
+    if (base64Image.startsWith("data:image")) {
+        base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
+    }
 
-        if (base64Image.startsWith("data:image")) {
-            base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
+    base64Image = base64Image.replaceAll("\\s", "");
+
+    try {
+        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes)) {
+            return ImageIO.read(bis);
         }
+    } catch (IllegalArgumentException e) {
+        System.err.println("Base64 decode error: " + e.getMessage());
+    } catch (IOException e) {
+        System.err.println("IO error while reading image: " + e.getMessage());
+    }
 
-        base64Image = base64Image.replaceAll("\\s", "");
+    return null;
+} */
 
+    /**
+     * Decodes a Base64 string into a BufferedImage.
+     * Handles optional "data:image/..." prefix.
+     *
+     * @param base64String The Base64 encoded image string.
+     * @return An Optional containing the BufferedImage, or an empty Optional if decoding fails.
+     */
+    public Optional<BufferedImage> fromBase64(String base64String) {
+        if (base64String == null || base64String.isEmpty()) {
+            return Optional.empty();
+        }
         try {
-            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-            try (ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes)) {
-                return ImageIO.read(bis);
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.println("Base64 decode error: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("IO error while reading image: " + e.getMessage());
-        }
+            String pureBase64 = base64String.contains(",")
+                    ? base64String.substring(base64String.indexOf(',') + 1)
+                    : base64String;
 
-        return null;
+            byte[] imageBytes = Base64.getDecoder().decode(pureBase64.trim());
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes)) {
+                return Optional.ofNullable(ImageIO.read(bis));
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            Engine.LOGGER.error("Failed to decode Base64 image", e);
+            return Optional.empty();
+        }
     }
 
 
+    /*
+    @Deprecated
     public BufferedImage loadImageFromUrl(String imageUrl) {
         try {
             if (!isValidUrl(imageUrl)) {
@@ -101,7 +125,7 @@ public class ImageUtils {
     @Deprecated
     public BufferedImage getCachedUrlImg(String imageUrl, String cachePath, BufferedImage ifNotFound) {
         try {
-            String cacheKey = sha1String(imageUrl);
+            String cacheKey = sha1(imageUrl);
 
             if (imgCache.containsKey(cacheKey)) {
                 return imgCache.get(cacheKey);
@@ -128,6 +152,50 @@ public class ImageUtils {
             Engine.LOGGER.error("Error loading image from URL: {}", imageUrl, e);
         }
         return ifNotFound;
+    }
+
+    /**
+     * Loads an image from a URL, with support for file-based caching.
+     *
+     * @param imageUrl  The URL of the image to load.
+     * @param cacheDir  The directory path to store cached images.
+     * @return An Optional containing the BufferedImage, or an empty Optional if loading fails.
+     */
+    public static Optional<BufferedImage> loadFromUrl(String imageUrl, Path cacheDir) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String cacheKey = HashUtils.sha1String(imageUrl);
+        BufferedImage cachedImage = MEMORY_CACHE.get(cacheKey);
+        if (cachedImage != null) {
+            return Optional.of(cachedImage);
+        }
+
+        try {
+            Path cacheFile = cacheDir.resolve(cacheKey + ".png");
+            if (Files.exists(cacheFile)) {
+                BufferedImage image = ImageIO.read(cacheFile.toFile());
+                MEMORY_CACHE.put(cacheKey, image);
+                return Optional.of(image);
+            }
+
+            // If not in file cache, download it
+            URL url = new URL(imageUrl);
+            try (InputStream in = url.openStream()) {
+                BufferedImage image = ImageIO.read(in);
+                if (image != null) {
+                    Files.createDirectories(cacheDir);
+                    ImageIO.write(image, "png", cacheFile.toFile());
+                    MEMORY_CACHE.put(cacheKey, image);
+                    Engine.LOGGER.info("Image downloaded and cached: {}", imageUrl);
+                }
+                return Optional.ofNullable(image);
+            }
+        } catch (IOException e) {
+            Engine.LOGGER.error("Failed to load image from URL: {}", imageUrl, e);
+            return Optional.empty();
+        }
     }
 
     private String getFileNameFromUrl(String urlString) {
@@ -328,5 +396,22 @@ public class ImageUtils {
             }
         }
         return spritesOut;
+    }
+
+    /**
+     * A simple LRU cache implementation based on LinkedHashMap.
+     */
+    private static class LruCache<K, V> extends LinkedHashMap<K, V> {
+        private final int capacity;
+
+        public LruCache(int capacity) {
+            super(capacity, 0.75f, true);
+            this.capacity = capacity;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            return size() > capacity;
+        }
     }
 }

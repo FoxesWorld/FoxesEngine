@@ -55,7 +55,7 @@ public class LibraryReader {
 
                         File libraryFile = new File(libraryFullPath);
                         if (libraryFile.exists()) {
-                            boolean isValidHash = library.getArtifact().getSha1().equals(HashUtils.calculateSHA1(libraryFullPath));
+                            boolean isValidHash = library.getArtifact().getSha1().equals(HashUtils.sha1String(libraryFullPath));
 
                             if (this.checkHash && isValidHash) {
                                 size += library.getArtifact().getSize() / (1024 * 1024);
