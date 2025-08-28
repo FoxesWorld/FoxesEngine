@@ -108,7 +108,6 @@ public class GuiBuilder {
             Engine.getLOGGER().error("Parent panel is null");
             return;
         }
-        // Сохраняем future для возможности отмены
         currentBuildFuture = CompletableFuture.supplyAsync(() -> loadFrameAttributes(framePath))
                 .thenAccept(attributes -> {
                     if (attributes == null) {

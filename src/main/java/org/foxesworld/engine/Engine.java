@@ -43,38 +43,104 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("unused")
+/**
+ * Base abstract engine class for FoxEngine applications.
+ * <p>
+ * The Engine encapsulates common application subsystems: configuration, GUI builder, sound subsystem,
+ * background task provider, loading manager, localization, and more. The class is intended to be
+ * subclassed by a concrete application implementation (for example, `Launcher`).
+ * </p>
+ *
+ * <h3>Main responsibilities</h3>
+ * <ul>
+ *   <li>Initialize and hold common services (ExecutorServiceProvider, FontUtils, ImageUtils, etc.).</li>
+ *   <li>Manage application lifecycle and safe shutdown.</li>
+ *   <li>Provide APIs for working with the GUI (GuiBuilder, FrameConstructor, PanelVisibility).</li>
+ *   <li>Utilities for showing dialogs and restarting the application.</li>
+ * </ul>
+ *
+ * <p><b>Thread-safety:</b> The Engine is not fully thread-safe for arbitrary access. Public methods that
+ * modify the UI or interact with Swing must be called from the EDT. For background work, use
+ * {@link #getExecutorServiceProvider()} and {@link #safeSubmitTask}.</p>
+ */
 public abstract class Engine implements ActionListener, GuiBuilderListener, FocusStatusListener {
+    /** Background task provider. */
     private final ExecutorServiceProvider executorServiceProvider;
-    private final FileProperties fileProperties;
+
+    /** File properties and path helpers. */
+    protected final FileProperties fileProperties;
+
+    /** Operating system MXBean. */
     private final OperatingSystemMXBean osBean;
+
+    /** Current OS identifier string. */
     public static String currentOS = "";
+
+    /** Loading indicator manager. */
     protected LoadingManager loadingManager;
+
+    /** Map of configuration files passed to the constructor. */
     private Map<String, Class<?>> configFiles = new HashMap<>();
+
+    /** Application title (brand + version). */
     private final String appTitle;
+
+    /** Sound subsystem. */
     protected Sound SOUND;
+
+    /** Application configuration object. */
     protected Config config;
+
+    /** Localization provider. */
     protected LanguageProvider LANG;
+
     protected ServerInfo serverInfo;
+
     protected ImageUtils imageUtils;
+
     private News news;
+
+    /** Shared engine logger (static for convenient access). */
     public static Logger LOGGER;
+
     protected Discord discord;
+
+    /** Font utilities. */
     private final FontUtils FONTUTILS;
+
     private IconUtils iconUtils;
+
     protected CryptUtils CRYPTO;
+
     protected FrameConstructor frameConstructor;
+
     private final PanelVisibility panelVisibility;
+
     private GuiBuilder guiBuilder;
+
     private StyleProvider styleProvider;
+
     private EngineData engineData;
+
+    /** External action handler. */
     public ActionHandler actionHandler;
+
+    /** Initialization flag. */
     protected final AtomicBoolean initialized = new AtomicBoolean(false);
+
     private final EngineInfo engineInfo;
+
     private final BiHookSet<Void, Void> preInitHooks = new BiHookSet<>();
     private final BiHookSet<Void, Void> postInitHooks = new BiHookSet<>();
     private final BiHookSet<String, Object> customHooks = new BiHookSet<>();
 
-
+    /**
+     * Engine constructor.
+     *
+     * @param poolSize    thread pool size for {@link ExecutorServiceProvider}.
+     * @param worker      worker thread name (used in thread naming).
+     * @param configFiles map of configuration files (name -> class) — may be {@code null}.
+     */
     public Engine(int poolSize, String worker, Map<String, Class<?>> configFiles) {
         currentOS = OS.determineCurrentOS();
         osBean = ManagementFactory.getOperatingSystemMXBean();
@@ -119,27 +185,60 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         FlatIntelliJLaf.setup();
     }
 
-
+    /**
+     * Sets the logging level for the engine logger.
+     *
+     * @param level logging level.
+     */
     public void setLogLevel(Level level) {
         Configurator.setLevel(LOGGER.getName(), level);
         LOGGER.info("Log level set to " + level);
     }
 
+    /**
+     * Abstract method for initializing the concrete engine implementation.
+     * Implement application-specific initialization (load services, GUI, etc.).
+     */
     public abstract void init();
+
+    /**
+     * Called before the main initialization (`init`). Use for early setup.
+     */
     protected abstract void preInit();
+
+    /**
+     * Called after the main initialization (`init`). Use for actions that must run
+     * after panels are built and main services loaded.
+     */
     protected abstract void postInit();
+
     @Override
     public abstract void onPanelsBuilt();
+
     @Override
     public abstract void onPanelBuild(Map<String, OptionGroups> panels, String componentGroup, Container parentPanel);
+
     @Override
     public abstract void actionPerformed(ActionEvent e);
+
+    /**
+     * Loads the main GUI panel asynchronously.
+     *
+     * @param path path to the GUI description (for example XML or JSON) handled by GuiBuilder.
+     */
     protected void loadMainPanel(String path) {
         this.guiBuilder.buildGuiAsync(path, this.getFrame().getRootPanel());
         if (!initialized.get()) {
             this.postInit();
         }
     }
+
+    /**
+     * Returns the path to the running jar/class of the application.
+     * May return {@code null} if URI decoding fails.
+     *
+     * @return application path or {@code null}.
+     */
     public String appPath() {
         try {
             return URLDecoder.decode(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),StandardCharsets.UTF_8);
@@ -148,9 +247,15 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    /**
+     * Restarts the application with the specified Xmx and JVM located in the given directory.
+     * Starts a new process and terminates the current one.
+     *
+     * @param xmx    maximum heap size in megabytes.
+     * @param jvmDir JVM directory relative to runtime (used to compose the path).
+     */
     public void restartApplication(int xmx, String jvmDir) {
         System.gc();
-        //Runtime.getRuntime().addShutdownHook(new Thread(this.guiBuilder.getComponentFactory().getCustomTooltip()::clearAllTooltips));
         String path = this.config.getFullPath();
         List<String> params = new LinkedList<>();
         params.add(path + "/runtime/"+ jvmDir + "/bin/java");
@@ -171,6 +276,10 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    /**
+     * Interrupts all threads in the JVM (except the current one) by calling {@code Thread.interrupt()}.
+     * Used during restart/shutdown.
+     */
     private void terminateAllThreads() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         long[] threadIds = threadMXBean.getAllThreadIds();
@@ -186,6 +295,12 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    /**
+     * Finds a live thread by id.
+     *
+     * @param threadId thread id.
+     * @return found thread or {@code null}.
+     */
     private Thread findThread(long threadId) {
         for (Thread thread : Thread.getAllStackTraces().keySet()) {
             if (thread.getId() == threadId) {
@@ -195,7 +310,15 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         return null;
     }
 
-
+    /**
+     * Shows a dialog with a localized message and optionally terminates the application.
+     * Always runs on the EDT.
+     *
+     * @param messageKey    localization key for the message.
+     * @param errorTitle    dialog title.
+     * @param warningMessage message type (for example {@link JOptionPane#ERROR_MESSAGE}).
+     * @param terminate     if {@code true} — {@code System.exit(0)} will be called after dialog closes.
+     */
     public void showDialog(String messageKey, String errorTitle, int warningMessage, boolean terminate) {
         SwingUtilities.invokeLater(() -> {
             String errorMessage = this.getLANG().getString(messageKey);
@@ -208,7 +331,9 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         });
     }
 
-
+    /**
+     * Internal class used to deserialize engine info from buildInfo.json.
+     */
     private static class EngineInfo {
         private String engineVersion, engineBrand;
 
@@ -221,8 +346,17 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    /**
+     * Method to update window focus status — must be implemented by subclasses.
+     *
+     * @param hasFocus {@code true} if the window has focus.
+     */
     public abstract void updateFocus(boolean hasFocus);
 
+    /**
+     * Shuts down the {@link ExecutorServiceProvider} gracefully, waiting for tasks to finish.
+     * Forces shutdown on timeout.
+     */
     public void shutdownExecutorService(){
         executorServiceProvider.shutdown();
         try {
@@ -238,6 +372,12 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }
     }
 
+    /**
+     * Wrapper for submitting tasks safely to the executor — logs exceptions thrown by tasks.
+     *
+     * @param task     task to execute.
+     * @param taskName task name (used for logging).
+     */
     protected void safeSubmitTask(Runnable task, String taskName) {
         this.getExecutorServiceProvider().submitTask(() -> {
             try {
@@ -248,110 +388,299 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         }, taskName);
     }
 
+    /**
+     * Returns the map of configuration files passed to the constructor.
+     *
+     * @return map (may be empty but never {@code null}).
+     */
     public Map<String, Class<?>> getConfigFiles() {
         return configFiles;
     }
+
+    /**
+     * Checks whether the engine has been initialized.
+     *
+     * @return {@code true} if initialization has completed.
+     */
     protected boolean isInit() {
         return initialized.get();
     }
+
+    /**
+     * Returns the main application frame constructor.
+     *
+     * @return {@link FrameConstructor} — interface for interacting with the main window.
+     */
     public FrameConstructor getFrame() {
         return this.frameConstructor;
     }
+
+    /**
+     * Returns the GUI builder used by the engine.
+     *
+     * @return current {@link GuiBuilder}.
+     */
     public GuiBuilder getGuiBuilder() {
         return guiBuilder;
     }
+
+    /**
+     * Returns the global engine logger.
+     *
+     * @return logger.
+     */
     public static Logger getLOGGER() {
         return LOGGER;
     }
+
+    /**
+     * Returns the localization provider.
+     *
+     * @return {@link LanguageProvider}.
+     */
     public LanguageProvider getLANG() {
         return LANG;
     }
+
+    /**
+     * Returns the font utilities.
+     *
+     * @return {@link FontUtils}.
+     */
     public FontUtils getFONTUTILS() {
         return FONTUTILS;
     }
+
+    /**
+     * Returns the GUI style provider.
+     *
+     * @return {@link StyleProvider} or {@code null} if not set.
+     */
     public StyleProvider getStyleProvider() {
         return styleProvider;
     }
+
+    /**
+     * Returns the sound subsystem.
+     *
+     * @return {@link Sound}.
+     */
     public Sound getSOUND() {
         return SOUND;
     }
+
+    /**
+     * Returns the engine data (engine.json etc.).
+     *
+     * @return {@link EngineData}.
+     */
     public EngineData getEngineData() {
         return engineData;
     }
+
+    /**
+     * Sets the GUI style provider.
+     *
+     * @param styleProvider style provider.
+     */
     public void setStyleProvider(StyleProvider styleProvider) {
         this.styleProvider = styleProvider;
     }
+
+    /**
+     * Replaces the {@link EngineData} instance (used during initialization).
+     *
+     * @param engineData new engine data.
+     */
     public void setEngineData(EngineData engineData) {
         this.engineData = engineData;
     }
+
+    /**
+     * Returns server information.
+     *
+     * @return {@link ServerInfo} or {@code null}.
+     */
     public ServerInfo getServerInfo() {
         return serverInfo;
     }
+
+    /**
+     * Returns Discord integration if configured.
+     *
+     * @return {@link Discord} or {@code null}.
+     */
     public Discord getDiscord() {
         return discord;
     }
+
+    /**
+     * Returns the application title (brand-version).
+     *
+     * @return application title.
+     */
     public String getAppTitle() {
         return appTitle;
     }
+
+    /**
+     * Returns the panel visibility manager.
+     *
+     * @return {@link PanelVisibility}.
+     */
     public PanelVisibility getPanelVisibility() {
         return panelVisibility;
     }
+
+    /**
+     * Sets an external action handler.
+     *
+     * @param actionHandler an instance of {@link ActionHandler}.
+     */
     public void setActionHandler(ActionHandler actionHandler) {
         this.actionHandler = actionHandler;
     }
+
+    /**
+     * Sets the GUI builder used by the engine.
+     *
+     * @param guiBuilder an instance of {@link GuiBuilder}.
+     */
     public void setGuiBuilder(GuiBuilder guiBuilder) {
         this.guiBuilder = guiBuilder;
     }
+
+    /**
+     * Marks initialization state.
+     *
+     * @param init {@code true} if the engine is initialized.
+     */
     public void setInit(boolean init) {
         this.initialized.set(init);
     }
-    public FileProperties getFileProperties() {
-        return fileProperties;
-    }
+
+    /**
+     * Returns the loading manager.
+     *
+     * @return {@link LoadingManager} or {@code null}.
+     */
     public LoadingManager getLoadingManager() {
         return loadingManager;
     }
+
+    /**
+     * Sets news to be displayed in the UI.
+     *
+     * @param news a {@link News} instance.
+     */
     public void setNews(News news) {
         this.news = news;
     }
+
+    /**
+     * Returns the news object.
+     *
+     * @return {@link News} or {@code null}.
+     */
     public News getNews() {
         return news;
     }
+
+    /**
+     * Returns image utilities.
+     *
+     * @return {@link ImageUtils}.
+     */
     public ImageUtils getImageUtils() {
         return imageUtils;
     }
+
+    /**
+     * Returns cryptographic utilities.
+     *
+     * @return {@link CryptUtils} or {@code null}.
+     */
     public CryptUtils getCRYPTO() {
         return CRYPTO;
     }
+
+    /**
+     * Returns the application configuration object.
+     *
+     * @return {@link Config}.
+     */
     public Config getConfig() {
         return config;
     }
+
+    /**
+     * Returns parsed engine info from buildInfo.json.
+     *
+     * @return {@link EngineInfo}.
+     */
     public EngineInfo getEngineInfo(){
         return this.engineInfo;
     }
+
+    /**
+     * Returns the Java OperatingSystemMXBean.
+     *
+     * @return {@link OperatingSystemMXBean}.
+     */
     public OperatingSystemMXBean getOsBean() {
         return osBean;
     }
+
+    /**
+     * Returns the background task provider.
+     *
+     * @return {@link ExecutorServiceProvider}.
+     */
     public ExecutorServiceProvider getExecutorServiceProvider() {
         return executorServiceProvider;
     }
 
+    /**
+     * Returns the set of hooks executed before initialization.
+     *
+     * @return {@link BiHookSet} for preInit.
+     */
     public BiHookSet<Void, Void> getPreInitHooks() {
         return preInitHooks;
     }
 
+    /**
+     * Returns the set of hooks executed after initialization.
+     *
+     * @return {@link BiHookSet} for postInit.
+     */
     public BiHookSet<Void, Void> getPostInitHooks() {
         return postInitHooks;
     }
 
+    /**
+     * Returns a custom hook set for arbitrary events/data.
+     *
+     * @return {@link BiHookSet} for custom hooks.
+     */
     public BiHookSet<String, Object> getCustomHooks() {
         return customHooks;
     }
 
+    /**
+     * Returns icon utilities.
+     *
+     * @return {@link IconUtils}.
+     */
     public IconUtils getIconUtils() {
         return iconUtils;
     }
 
+    /**
+     * Sets the icon utilities.
+     *
+     * @param iconUtils {@link IconUtils}.
+     */
     public void setIconUtils(IconUtils iconUtils) {
         this.iconUtils = iconUtils;
     }

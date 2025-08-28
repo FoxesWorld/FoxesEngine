@@ -3,26 +3,26 @@ package org.foxesworld.engine.fileLoader;
 import java.io.File;
 
 /**
- * Интерфейс для проверки валидности локальных файлов.
+ * Interface for validating local files.
  */
 public interface IFileValidator {
     /**
-     * Проверка файла на соответствие ожидаемым параметрам.
+     * Checks whether a file does not match the expected parameters.
      *
-     * @param localFile   локальный файл
-     * @param expectedHash ожидаемый хэш файла
-     * @param expectedSize ожидаемый размер файла
-     * @return true, если файл не соответствует ожиданиям (невалиден), иначе false
+     * @param localFile    the local file to validate
+     * @param expectedHash the expected file hash (e.g. MD5)
+     * @param expectedSize the expected file size in bytes
+     * @return {@code true} if the file does not match expectations (is invalid), otherwise {@code false}
      */
     boolean isInvalidFile(File localFile, String expectedHash, long expectedSize);
 
     /**
-     * Проверяет, является ли файл валидным.
+     * Checks whether a file is valid.
      *
-     * @param localFile    локальный файл
-     * @param expectedHash ожидаемый MD5-хэш файла
-     * @param expectedSize ожидаемый размер файла в байтах
-     * @return true, если файл валиден; иначе false
+     * @param localFile    the local file to validate
+     * @param expectedHash the expected MD5 hash of the file
+     * @param expectedSize the expected file size in bytes
+     * @return {@code true} if the file is valid; {@code false} otherwise
      */
     default boolean isValidFile(File localFile, String expectedHash, long expectedSize) {
         return !isInvalidFile(localFile, expectedHash, expectedSize);

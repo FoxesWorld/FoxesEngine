@@ -1,4 +1,5 @@
-import org.foxesworld.engine.Engine;
+package org.foxesworld.engine;
+
 import org.foxesworld.engine.gui.ComponentValue;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
@@ -10,15 +11,16 @@ import org.foxesworld.engine.locale.LanguageProvider;
 import org.foxesworld.engine.sound.Sound;
 import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.IconUtils;
-import org.foxesworld.engine.utils.ServerInfo;
-import org.foxesworld.engine.utils.hook.HookException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Test extends Engine {
+
     public Test(int poolSize, String worker, Map<String, Class<?>> configFiles) {
         super(poolSize, worker, configFiles);
         preInit();
@@ -28,20 +30,21 @@ public class Test extends Engine {
     public static void main(String[] args){
         new Test(10, "forge", null);
     }
+
     private void buildGui(String[] styles) {
         setStyleProvider(new StyleProvider(styles));
         setGuiBuilder(new GuiBuilder(this));
         getGuiBuilder().getComponentFactory().setComponentFactoryListener(new InitialValue(this));
         getGuiBuilder().addGuiBuilderListener(this);
-        getGuiBuilder().buildGuiAsync(getFileProperties().getFrameTpl(), getFrame().getRootPanel());
-        setIconUtils(new IconUtils(this));
+        getGuiBuilder().buildGuiAsync(fileProperties.getFrameTpl(), getFrame().getRootPanel());
+        this.setIconUtils(new IconUtils(this));
     }
 
     @Override
     public void init() {
         safeSubmitTask(() -> {
             buildGui(getEngineData().getStyles());
-            loadMainPanel(getFileProperties().getMainFrame());
+            loadMainPanel(fileProperties.getMainFrame());
         }, "init");
     }
 
@@ -49,17 +52,9 @@ public class Test extends Engine {
     protected void preInit() {
         System.setProperty("AppDir", System.getenv("APPDATA"));
         System.setProperty("RamAmount", String.valueOf(Runtime.getRuntime().maxMemory() / 45));
-        try {
-            if (getPreInitHooks().hook(null, null)) {
-                LOGGER.info("Pre-init hooks прервали инициализацию");
-                return;
-            }
-        } catch (HookException e) {
-            LOGGER.error("Ошибка в pre-init hooks", e);
-        }
 
-        this.LANG = new LanguageProvider(this, getFileProperties().getLocaleFile(), 0);
-        this.SOUND = new Sound(this, getClass().getClassLoader().getResourceAsStream(getFileProperties().getSoundsFile()));
+        this.LANG = new LanguageProvider(this, fileProperties.getLocaleFile(), 0);
+        this.SOUND = new Sound(this, getClass().getClassLoader().getResourceAsStream(fileProperties.getSoundsFile()));
         this.frameConstructor = new FrameConstructor(this);
         this.CRYPTO = new CryptUtils();
         this.frameConstructor.setFocusStatusListener(this);
@@ -67,7 +62,6 @@ public class Test extends Engine {
 
     @Override
     protected void postInit() {
-
     }
 
     @Override
@@ -100,7 +94,7 @@ public class Test extends Engine {
 
     }
 
-    public static class InitialValue extends ComponentValue implements ComponentFactoryListener {
+    class InitialValue extends ComponentValue implements ComponentFactoryListener {
 
         private int count;
         private final Test launcher;
@@ -124,6 +118,34 @@ public class Test extends Engine {
                 case "version" -> componentAttributes.setInitialValue(this.launcher.getEngineData().getLauncherVersion());
                 case "build" -> componentAttributes.setInitialValue(this.launcher.getEngineData().getLauncherBuild());
             }
+        }
+    }
+
+    class ActionHandler extends org.foxesworld.engine.gui.ActionHandler {
+
+        public ActionHandler(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
+            super(guiBuilder, panelId, componentTypes);
+
+        }
+
+        @Override
+        public void handleAction(ActionEvent e) {
+
+        }
+
+        @Override
+        public void registerCommand(String key, Consumer<ActionEvent> command) {
+
+        }
+
+        @Override
+        public void unregisterCommand(String key) {
+
+        }
+
+        @Override
+        public void executeCommand(String key, ActionEvent event) {
+
         }
     }
 }

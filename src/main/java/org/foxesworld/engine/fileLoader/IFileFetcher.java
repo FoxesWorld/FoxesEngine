@@ -1,16 +1,16 @@
 package org.foxesworld.engine.fileLoader;
 
 /**
- * Интерфейс для получения списка атрибутов файлов.
+ * Interface for obtaining a list of file attributes.
  */
 public interface IFileFetcher {
     /**
-     * Получение списка атрибутов файлов для загрузки.
+     * Fetches the list of file attributes to download.
      *
-     * @param client        название клиента
-     * @param version       версия клиента
-     * @param platformCode  код платформы (например, 1 для Windows, 2 для Mac и т.д.)
-     * @return CompletableFuture с массивом атрибутов файлов
+     * @param client       the client name
+     * @param version      the client version
+     * @param platformCode platform code (for example: 1 for Windows, 2 for Mac, etc.)
+     * @return a {@link java.util.concurrent.CompletableFuture} containing an array of {@code FileAttributes}
      */
     java.util.concurrent.CompletableFuture<FileAttributes[]> fetchDownloadList(String client, String version, int platformCode);
 }
