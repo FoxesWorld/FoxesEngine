@@ -7,8 +7,6 @@ import org.foxesworld.engine.gui.components.ComponentFactoryListener;
 import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
 import org.foxesworld.engine.gui.components.multiButton.MultiButton;
-import org.foxesworld.engine.gui.styles.StyleProvider;
-import org.foxesworld.engine.utils.IconUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,27 +19,16 @@ public class Test extends Engine {
 
     public Test(int poolSize, String worker, Map<String, Class<?>> configFiles) {
         super(poolSize, worker, configFiles);
-        preInit();
-        init();
     }
 
     public static void main(String[] args){
         new Test(10, "forge", null);
     }
 
-    private void buildGui(String[] styles) {
-        setStyleProvider(new StyleProvider(styles));
-        setGuiBuilder(new GuiBuilder(this));
-        getGuiBuilder().getComponentFactory().setComponentFactoryListener(new InitialValue(this));
-        getGuiBuilder().addGuiBuilderListener(this);
-        getGuiBuilder().buildGuiAsync(fileProperties.getFrameTpl(), getFrame().getRootPanel());
-        this.setIconUtils(new IconUtils(this));
-    }
-
     @Override
     public void init() {
         safeSubmitTask(() -> {
-            buildGui(getEngineData().getStyles());
+            buildGui(new InitialValue(this));
             loadMainPanel(fileProperties.getMainFrame());
         }, "init");
     }
@@ -88,13 +75,14 @@ public class Test extends Engine {
 
     }
 
+    // INTERNAL CLASSES
     static class InitialValue extends ComponentValue implements ComponentFactoryListener {
 
         private int count;
-        private final Test launcher;
-        public InitialValue(Test launcher) {
-            super(launcher);
-            this.launcher = launcher;
+        private final Test test;
+        public InitialValue(Test test) {
+            super(test);
+            this.test = test;
         }
 
         @Override
@@ -109,8 +97,8 @@ public class Test extends Engine {
         public void setInitialData(ComponentAttributes componentAttributes) {
             String[] splitValue = String.valueOf(componentAttributes.getInitialValue()).split("#");
             switch (splitValue[0]) {
-                case "version" -> componentAttributes.setInitialValue(this.launcher.getEngineData().getLauncherVersion());
-                case "build" -> componentAttributes.setInitialValue(this.launcher.getEngineData().getLauncherBuild());
+                case "version" -> componentAttributes.setInitialValue(this.test.getEngineData().getLauncherVersion());
+                case "build" -> componentAttributes.setInitialValue(this.test.getEngineData().getLauncherBuild());
             }
         }
     }
@@ -147,7 +135,6 @@ public class Test extends Engine {
 
         @Override
         public void executeCommand(String key, ActionEvent event) {
-            System.out.println(key);
         }
     }
 }

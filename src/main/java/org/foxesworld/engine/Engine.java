@@ -9,6 +9,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.foxesworld.engine.config.Config;
 import org.foxesworld.engine.discord.Discord;
 import org.foxesworld.engine.gui.*;
+import org.foxesworld.engine.gui.components.ComponentFactoryListener;
 import org.foxesworld.engine.gui.components.frame.FocusStatusListener;
 import org.foxesworld.engine.gui.components.frame.FrameConstructor;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
@@ -189,6 +190,9 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         this.SOUND = new Sound(this, getClass().getClassLoader().getResourceAsStream(fileProperties.getSoundsFile()));
         this.frameConstructor = new FrameConstructor(this);
         this.CRYPTO = new CryptUtils();
+
+        preInit();
+        init();
     }
 
     /**
@@ -199,6 +203,15 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
     public void setLogLevel(Level level) {
         Configurator.setLevel(LOGGER.getName(), level);
         LOGGER.info("Log level set to " + level);
+    }
+
+    protected void buildGui(ComponentFactoryListener componentFactoryListener) {
+        setStyleProvider(new StyleProvider(this.engineData.getStyles()));
+        setGuiBuilder(new GuiBuilder(this));
+        getGuiBuilder().getComponentFactory().setComponentFactoryListener(componentFactoryListener);
+        getGuiBuilder().addGuiBuilderListener(this);
+        getGuiBuilder().buildGuiAsync(fileProperties.getFrameTpl(), getFrame().getRootPanel());
+        this.setIconUtils(new IconUtils(this));
     }
 
     public static void logEngineInfoBox(
