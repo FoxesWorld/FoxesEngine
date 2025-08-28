@@ -165,17 +165,17 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         appTitle = engineData.getLauncherBrand() + '-' + engineData.getLauncherVersion();
         this.panelVisibility = new PanelVisibility(this);
 
-        LOGGER.info("===== Engine Initialization =====");
-        LOGGER.info(this.engineInfo.getEngineBrand());
-        LOGGER.info("Engine Version: {}", this.engineInfo.getEngineVersion());
-        LOGGER.info("Application Title: {}", appTitle);
-        LOGGER.info("Operating System: {}", currentOS);
-        LOGGER.info("Available Processors: {}", osBean.getAvailableProcessors());
-        LOGGER.info("System Load Average: {}", osBean.getSystemLoadAverage());
-        LOGGER.info("Log Level: {}", engineData.getLogLevel());
-        if(configFiles != null) {
-            LOGGER.info("Configuration Files: {}", configFiles.keySet());
-        }
+        logEngineInfoBox(
+                LOGGER,
+                this.engineInfo.getEngineBrand(),
+                this.engineInfo.getEngineVersion(),
+                appTitle,
+                currentOS,
+                osBean,
+                engineData.getLogLevel(),
+                configFiles
+        );
+
 
         this.FONTUTILS = new FontUtils(this);
         setLogLevel(Level.valueOf(engineData.getLogLevel()));
@@ -183,6 +183,12 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
 
         this.imageUtils = new ImageUtils();
         FlatIntelliJLaf.setup();
+
+        //Basic Components Initialisation
+        this.LANG = new LanguageProvider(this, fileProperties.getLocaleFile(), 0);
+        this.SOUND = new Sound(this, getClass().getClassLoader().getResourceAsStream(fileProperties.getSoundsFile()));
+        this.frameConstructor = new FrameConstructor(this);
+        this.CRYPTO = new CryptUtils();
     }
 
     /**
@@ -194,6 +200,56 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
         Configurator.setLevel(LOGGER.getName(), level);
         LOGGER.info("Log level set to " + level);
     }
+
+    public static void logEngineInfoBox(
+            Logger LOGGER,
+            String engineBrand,
+            String engineVersion,
+            String appTitle,
+            String currentOS,
+            OperatingSystemMXBean osBean,
+            String logLevel,
+            Map<String, ?> configFiles // nullable
+    ) {
+        String header = String.format(
+                "%s \n— %s",
+                engineBrand != null ? engineBrand : "Unknown Engine",
+                appTitle != null ? appTitle : "Untitled"
+        );
+
+        // Prepare lines
+        List<String> lines = new ArrayList<>();
+        lines.add("===== FoxEngine Initialization =====");
+        lines.add(String.format("Engine Version: %s", engineVersion));
+        lines.add(String.format("Operating System: %s", currentOS));
+        if (osBean != null) {
+            lines.add(String.format("Available Processors: %d", osBean.getAvailableProcessors()));
+            lines.add(String.format("System Load Average: %.2f", osBean.getSystemLoadAverage()));
+        }
+        lines.add(String.format("Log Level: %s", logLevel));
+        if (configFiles != null && !configFiles.isEmpty()) {
+            lines.add(String.format("Configuration Files: %s", configFiles.keySet()));
+        }
+
+        // Compute max width
+        int max = 0;
+        for (String l : lines) if (l.length() > max) max = l.length();
+        int padding = 2; // left + right inner padding
+        int innerWidth = max + padding * 2;
+
+        // Box drawing
+        String top    = "╔" + "═".repeat(innerWidth) + "╗\n";
+        String middle = "";
+        String bottom = "╚" + "═".repeat(innerWidth) + "╝";
+
+        for (String l : lines) {
+            String padded = " ".repeat(padding) + l + " ".repeat(innerWidth - padding - l.length());
+            middle += "║" + padded + "║\n";
+        }
+        String box = top + middle + bottom;
+        LOGGER.info("\n" + box + "\n" + header );
+    }
+
 
     /**
      * Abstract method for initializing the concrete engine implementation.
@@ -674,6 +730,10 @@ public abstract class Engine implements ActionListener, GuiBuilderListener, Focu
      */
     public IconUtils getIconUtils() {
         return iconUtils;
+    }
+
+    public FileProperties getFileProperties() {
+        return fileProperties;
     }
 
     /**

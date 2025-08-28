@@ -14,6 +14,8 @@ public abstract class ActionHandler extends ComponentsAccessor implements Dynami
 
     public ActionHandler(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
         super(guiBuilder, panelId, componentTypes);
+        this.engine = guiBuilder.getEngine();
+        Engine.LOGGER.info("ActionHandler created with {} panel and listens {}", panelId, componentTypes);
     }
 
     @SuppressWarnings("unused")

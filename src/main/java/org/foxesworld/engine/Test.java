@@ -4,12 +4,10 @@ import org.foxesworld.engine.gui.ComponentValue;
 import org.foxesworld.engine.gui.GuiBuilder;
 import org.foxesworld.engine.gui.components.ComponentAttributes;
 import org.foxesworld.engine.gui.components.ComponentFactoryListener;
-import org.foxesworld.engine.gui.components.frame.FrameConstructor;
+import org.foxesworld.engine.gui.components.button.Button;
 import org.foxesworld.engine.gui.components.frame.OptionGroups;
+import org.foxesworld.engine.gui.components.multiButton.MultiButton;
 import org.foxesworld.engine.gui.styles.StyleProvider;
-import org.foxesworld.engine.locale.LanguageProvider;
-import org.foxesworld.engine.sound.Sound;
-import org.foxesworld.engine.utils.Crypt.CryptUtils;
 import org.foxesworld.engine.utils.IconUtils;
 
 import javax.swing.*;
@@ -53,20 +51,17 @@ public class Test extends Engine {
         System.setProperty("AppDir", System.getenv("APPDATA"));
         System.setProperty("RamAmount", String.valueOf(Runtime.getRuntime().maxMemory() / 45));
 
-        this.LANG = new LanguageProvider(this, fileProperties.getLocaleFile(), 0);
-        this.SOUND = new Sound(this, getClass().getClassLoader().getResourceAsStream(fileProperties.getSoundsFile()));
-        this.frameConstructor = new FrameConstructor(this);
-        this.CRYPTO = new CryptUtils();
         this.frameConstructor.setFocusStatusListener(this);
     }
 
     @Override
     protected void postInit() {
+        setActionHandler(new ActionHandler(this.getGuiBuilder(), "mainFrame", List.of(MultiButton.class, Button.class)));
     }
 
     @Override
     public void onPanelsBuilt() {
-
+        this.getFrame().repaint();
     }
 
     @Override
@@ -76,7 +71,6 @@ public class Test extends Engine {
 
     @Override
     public void onGuiBuilt() {
-        this.getFrame().repaint();
     }
 
     @Override
@@ -86,7 +80,7 @@ public class Test extends Engine {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        actionHandler.handleAction(e);
     }
 
     @Override
@@ -94,7 +88,7 @@ public class Test extends Engine {
 
     }
 
-    class InitialValue extends ComponentValue implements ComponentFactoryListener {
+    static class InitialValue extends ComponentValue implements ComponentFactoryListener {
 
         private int count;
         private final Test launcher;
@@ -121,7 +115,7 @@ public class Test extends Engine {
         }
     }
 
-    class ActionHandler extends org.foxesworld.engine.gui.ActionHandler {
+    static class ActionHandler extends org.foxesworld.engine.gui.ActionHandler {
 
         public ActionHandler(GuiBuilder guiBuilder, String panelId, List<Class<?>> componentTypes) {
             super(guiBuilder, panelId, componentTypes);
@@ -130,7 +124,15 @@ public class Test extends Engine {
 
         @Override
         public void handleAction(ActionEvent e) {
+            switch (e.getActionCommand()){
+                case "closeButton":
+                    System.exit(0);
+                    break;
 
+                case "hideButton":
+                    engine.getFrame().setExtendedState(Frame.ICONIFIED);
+                    break;
+            }
         }
 
         @Override
@@ -145,7 +147,7 @@ public class Test extends Engine {
 
         @Override
         public void executeCommand(String key, ActionEvent event) {
-
+            System.out.println(key);
         }
     }
 }

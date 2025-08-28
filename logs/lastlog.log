@@ -1,5 +1,13 @@
-[03:30:18.666][INFO] ===== Engine Initialization =====
-[03:30:18.668][INFO]       
+[07:39:48.308][INFO] 
+╔════════════════════════════════════════╗
+║  ===== FoxEngine Initialization =====  ║
+║  Engine Version: 1.15.16               ║
+║  Operating System: windows             ║
+║  Available Processors: 20              ║
+║  System Load Average: -1,00            ║
+║  Log Level: INFO                       ║
+╚════════════════════════════════════════╝
+      
       _____                    _____                _____          
      /\    \                  /\    \              /\    \         
     /::\    \                /::\    \            /::\    \        
@@ -20,37 +28,39 @@
                            \:::\    \                              
                             \:::\____\                             
                              \::/    /                             
-                              \/____/              
-[03:30:18.674][INFO] Engine Version: 1.15.15
-[03:30:18.674][INFO] Application Title: FoxesLauncher-1.24.1
-[03:30:18.674][INFO] Operating System: windows
-[03:30:18.674][INFO] Available Processors: 20
-[03:30:18.675][INFO] System Load Average: -1.0
-[03:30:18.675][INFO] Log Level: INFO
-[03:30:18.679][INFO] Log level set to INFO
-[03:30:18.762][INFO] Initializing ExecutorService with pool size: 10
-[03:30:18.763][WARN] executor-config.properties not found, using default settings.
-[03:30:18.763][INFO] Creating default ExecutorService with pool size: 10
-[03:30:18.884][INFO]forge-0 Sounds loaded successfully
-[03:30:19.087][INFO] FrameConstructor initialization
-[03:30:19.091][INFO] Building FrameConstructor...
-[03:30:19.210][INFO]forge-1 Initializing StyleProvider with path: assets/styles/
-[03:30:19.220][INFO]forge-1 Registering json adapter...
-[03:30:19.221][INFO]forge-1 Registering json5 adapter...
-[03:30:19.221][INFO]forge-1 Registered adapters: [json5, json]
-[03:30:19.233][INFO]forge-1     - Registered component: label
-[03:30:19.235][INFO]forge-1     - Registered component: progressBar
-[03:30:19.235][INFO]forge-1     - Registered component: button
-[03:30:19.235][INFO]forge-1     - Registered component: textArea
-[03:30:19.236][INFO]forge-1     - Registered component: checkBox
-[03:30:19.236][INFO]forge-1     - Registered component: textField
-[03:30:19.236][INFO]forge-1     - Registered component: spriteImage
-[03:30:19.237][INFO]forge-1     - Registered component: passField
-[03:30:19.237][INFO]forge-1     - Registered component: spinner
-[03:30:19.237][INFO]forge-1     - Registered component: multiButton
-[03:30:19.238][INFO]forge-1     - Registered component: dropBox
-[03:30:19.238][INFO]forge-1     - Registered component: slider
-[03:30:19.238][INFO]forge-1     - Registered component: compositeSlider
-[03:30:19.239][INFO]forge-1     - Registered component: fileSelector
-[03:30:19.239][INFO]forge-1     - Registered component: compositeComponent
-[03:30:19.345][INFO] Created font - mcfontBold
+                              \/____/               
+— TestApp-1.0.0
+[07:39:48.315][INFO] Log level set to INFO
+[07:39:48.402][INFO] Initializing ExecutorService with pool size: 10
+[07:39:48.403][WARN] executor-config.properties not found, using default settings.
+[07:39:48.403][INFO] Creating default ExecutorService with pool size: 10
+[07:39:48.524][INFO]forge-0 Sounds loaded successfully
+[07:39:48.702][INFO] FrameConstructor: initialization started
+[07:39:48.702][INFO] FrameConstructor: building AppFrame from 'assets/frames/frame.json'
+[07:39:48.846][INFO] FrameConstructor: frame is visible (title='ЛисийМир', size=850x500)
+[07:39:48.846][INFO] FrameConstructor: frame successfully built from 'assets/frames/frame.json'
+[07:39:48.847][INFO] FrameConstructor: initialization completed
+[07:39:48.849][INFO]forge-1 Initializing StyleProvider with path: assets/styles/
+[07:39:48.861][INFO]forge-1 Registering json adapter...
+[07:39:48.861][INFO]forge-1 Registering json5 adapter...
+[07:39:48.861][INFO]forge-1 Registered adapters: [json5, json]
+[07:39:48.874][INFO]forge-1     - Registered component: label
+[07:39:48.874][INFO]forge-1     - Registered component: progressBar
+[07:39:48.875][INFO]forge-1     - Registered component: button
+[07:39:48.875][INFO]forge-1     - Registered component: textArea
+[07:39:48.875][INFO]forge-1     - Registered component: checkBox
+[07:39:48.876][INFO]forge-1     - Registered component: textField
+[07:39:48.876][INFO]forge-1     - Registered component: spriteImage
+[07:39:48.876][INFO]forge-1     - Registered component: passField
+[07:39:48.877][INFO]forge-1     - Registered component: spinner
+[07:39:48.877][INFO]forge-1     - Registered component: multiButton
+[07:39:48.877][INFO]forge-1     - Registered component: dropBox
+[07:39:48.878][INFO]forge-1     - Registered component: slider
+[07:39:48.878][INFO]forge-1     - Registered component: compositeSlider
+[07:39:48.878][INFO]forge-1     - Registered component: fileSelector
+[07:39:48.879][INFO]forge-1     - Registered component: compositeComponent
+[07:39:48.884][INFO]forge-1 ActionHandler created with mainFrame panel and listens [class org.foxesworld.engine.gui.components.multiButton.MultiButton, class org.foxesworld.engine.gui.components.button.Button]
+[07:39:48.974][INFO] FrameConstructor: frame focus gained
+[07:39:48.975][INFO] FrameConstructor: frame focus gained
+[07:39:49.004][INFO] Created font - mcfontBold
+[07:39:49.093][INFO] Created font - mcfont
