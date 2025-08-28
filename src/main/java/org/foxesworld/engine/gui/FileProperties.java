@@ -5,6 +5,7 @@ import org.foxesworld.engine.Engine;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class FileProperties {
     private String frameTpl, mainFrame,localeFile,soundsFile;
 

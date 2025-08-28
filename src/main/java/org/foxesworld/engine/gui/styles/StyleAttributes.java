@@ -2,6 +2,7 @@ package org.foxesworld.engine.gui.styles;
 
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class StyleAttributes {
     private String name,backgroundImage,background,color,hoverColor,caretColor,align,borderColor,trackImage, thumbImage,texture,font,selectionColor;
     private int width,height,paddingX,paddingY,fontSize, borderRadius, iconWidth, iconHeight;

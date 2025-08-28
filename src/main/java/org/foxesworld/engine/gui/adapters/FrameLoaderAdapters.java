@@ -12,23 +12,27 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Класс-адаптер для загрузчиков атрибутов фрейма.
+ * Adapter manager for frame attributes loaders.
  *
- * Отвечает за регистрацию, получение и управление загрузчиками для различных типов файлов.
+ * <p>
+ * Responsible for registering, retrieving and managing {@link FrameAttributesLoader} instances
+ * for different file types (json, json5, xml, etc.). Uses thread-safe maps for adapter storage.
+ * </p>
  */
 @SuppressWarnings("unused")
 public class FrameLoaderAdapters {
 
-    // Карта зарегистрированных адаптеров (потокобезопасная)
+    // Map of registered adapters (thread-safe)
     private final Map<String, FrameAttributesLoader> adapters = new ConcurrentHashMap<>();
-    // Карта адаптеров по умолчанию (потокобезопасная)
+    // Map of default adapters (thread-safe)
     private final Map<String, FrameAttributesLoader> defaultAdapters = new ConcurrentHashMap<>();
     private final Engine engine;
 
     /**
-     * Конструктор, инициализирующий адаптеры по умолчанию и загруженные из конфигурации движка.
+     * Constructs the adapter manager and initializes default adapters as well as adapters
+     * configured via the engine.
      *
-     * @param engine экземпляр движка
+     * @param engine engine instance used to obtain configuration.
      */
     public FrameLoaderAdapters(Engine engine) {
         this.engine = engine;
@@ -37,7 +41,12 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Регистрирует адаптеры по умолчанию.
+     * Registers built-in default adapters.
+     *
+     * <p>
+     * Default mappings include JSON, JSON5 and XML loaders. Additional default mappings
+     * can be added here in the future.
+     * </p>
      */
     private void registerDefaultAdapters() {
         defaultAdapters.put("json", new JsonFrameAttributesLoader());
@@ -48,14 +57,18 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Регистрирует адаптеры, заданные в конфигурации движка.
+     * Registers adapters specified in the engine configuration.
+     *
      * <p>
-     * Если список адаптеров пустой или не задан, регистрируются все адаптеры по умолчанию.
+     * If the engine configuration does not specify any adapters, all default adapters are
+     * registered. Otherwise only the types listed in the configuration are registered
+     * (if a default for that type exists).
+     * </p>
      */
     private void registerEngineConfiguredAdapters() {
         String[] loadAdapters = engine.getEngineData().getLoadAdapters();
         if (loadAdapters == null) {
-            // Если в конфигурации движка не указаны конкретные адаптеры, регистрируем все по умолчанию.
+            // If the engine configuration does not specify specific adapters, register all defaults.
             adapters.putAll(defaultAdapters);
             Engine.LOGGER.info("No specific adapters configured. Registered all default adapters: {}", adapters.keySet());
         } else {
@@ -73,11 +86,11 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Возвращает загрузчик для указанного типа файла.
+     * Returns the loader for the specified file type.
      *
-     * @param fileType тип файла
-     * @return соответствующий загрузчик
-     * @throws IllegalArgumentException если адаптер для указанного типа не найден
+     * @param fileType file type (extension) to look up (e.g. "json", "xml").
+     * @return corresponding {@link FrameAttributesLoader}.
+     * @throws IllegalArgumentException if no adapter is registered for the given file type.
      */
     public FrameAttributesLoader getLoader(String fileType) {
         FrameAttributesLoader loader = adapters.get(fileType);
@@ -88,10 +101,10 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Регистрирует адаптер для указанного типа файла.
+     * Registers or replaces an adapter for the specified file type.
      *
-     * @param type    тип файла
-     * @param adapter экземпляр загрузчика атрибутов
+     * @param type    file type (extension).
+     * @param adapter instance of {@link FrameAttributesLoader} to register.
      */
     public void registerAdapter(String type, FrameAttributesLoader adapter) {
         if (adapters.containsKey(type)) {
@@ -102,9 +115,9 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Пакетно регистрирует адаптеры.
+     * Registers multiple adapters in batch.
      *
-     * @param newAdapters карта, содержащая тип файла и соответствующий загрузчик атрибутов
+     * @param newAdapters map of file type -> {@link FrameAttributesLoader}.
      */
     public void registerAdapters(Map<String, FrameAttributesLoader> newAdapters) {
         if (newAdapters == null) {
@@ -117,9 +130,9 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Удаляет адаптер для указанного типа файла.
+     * Unregisters the adapter for the given file type.
      *
-     * @param type тип файла
+     * @param type file type to unregister.
      */
     public void unregisterAdapter(String type) {
         if (adapters.remove(type) != null) {
@@ -130,9 +143,9 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Пакетно удаляет адаптеры для указанных типов файлов.
+     * Unregisters adapters for the provided collection of file types.
      *
-     * @param types коллекция типов файлов
+     * @param types collection of file type identifiers to remove.
      */
     public void unregisterAdapters(Collection<String> types) {
         if (types == null) {
@@ -145,35 +158,35 @@ public class FrameLoaderAdapters {
     }
 
     /**
-     * Проверяет, зарегистрирован ли адаптер для указанного типа файла.
+     * Checks whether an adapter is registered for the given file type.
      *
-     * @param type тип файла
-     * @return true, если адаптер зарегистрирован, иначе false
+     * @param type file type to check.
+     * @return true if an adapter is registered, false otherwise.
      */
     public boolean isAdapterRegistered(String type) {
         return adapters.containsKey(type);
     }
 
     /**
-     * Возвращает копию карты зарегистрированных адаптеров.
+     * Returns a thread-safe copy of currently registered adapters.
      *
-     * @return карта зарегистрированных адаптеров
+     * @return map of registered adapters (fileType -> loader).
      */
     public Map<String, FrameAttributesLoader> getRegisteredAdapters() {
         return new ConcurrentHashMap<>(adapters);
     }
 
     /**
-     * Возвращает копию карты адаптеров по умолчанию.
+     * Returns a thread-safe copy of the default adapters map.
      *
-     * @return карта адаптеров по умолчанию
+     * @return map of default adapters.
      */
     public Map<String, FrameAttributesLoader> getDefaultAdapters() {
         return new ConcurrentHashMap<>(defaultAdapters);
     }
 
     /**
-     * Сбрасывает зарегистрированные адаптеры, возвращая их к настройкам по умолчанию.
+     * Resets registered adapters to the default set.
      */
     public void resetAdapters() {
         adapters.clear();

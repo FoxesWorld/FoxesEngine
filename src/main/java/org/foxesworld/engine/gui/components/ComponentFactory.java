@@ -49,6 +49,15 @@ import java.util.function.Function;
 
 import static org.foxesworld.engine.utils.FontUtils.hexToColor;
 
+/**
+ * Factory responsible for creating Swing {@link JComponent} instances used by the GUI system.
+ *
+ * <p>
+ * The factory holds a registry of component creators and style definitions. Components are created
+ * from {@link ComponentAttributes} describing type, style, bounds and behavior. The factory also
+ * provides async creation helpers, tooltip initialization and composite component creation.
+ * </p>
+ */
 public class ComponentFactory extends JComponent {
 
     private final Engine engine;
@@ -61,6 +70,15 @@ public class ComponentFactory extends JComponent {
     private ComponentFactoryListener componentFactoryListener;
     private Rectangle bounds;
 
+    /**
+     * Creates a new ComponentFactory bound to the provided {@link Engine}.
+     *
+     * <p>
+     * The constructor registers a set of built-in component creators (label, button, textArea, etc.).
+     * </p>
+     *
+     * @param engine engine instance used for resources, localization and event wiring; must not be {@code null}.
+     */
     public ComponentFactory(Engine engine) {
         this.engine = engine;
         this.langProvider = engine.getLANG();
@@ -83,11 +101,28 @@ public class ComponentFactory extends JComponent {
         registerComponent("compositeComponent", this::createCompositeComponent);
     }
 
+    /**
+     * Registers a component creator function for a given component type identifier.
+     *
+     * @param type    string identifier used in {@link ComponentAttributes#getComponentType()}.
+     * @param creator function that receives {@link ComponentAttributes} and returns the created {@link JComponent}.
+     */
     public void registerComponent(String type, Function<ComponentAttributes, JComponent> creator) {
         componentRegistry.put(type, creator);
         Engine.LOGGER.info("    - Registered component: {}", type);
     }
 
+    /**
+     * Creates a component asynchronously using a background task.
+     *
+     * <p>
+     * This method wraps {@link #createComponent(ComponentAttributes)} in a {@link CompletableFuture}.
+     * Any exceptions during creation are caught and logged; {@code null} is returned in such cases.
+     * </p>
+     *
+     * @param attributes component attributes describing the component to create.
+     * @return a CompletableFuture that completes with the created {@link JComponent} or {@code null} on error.
+     */
     public CompletableFuture<JComponent> createComponentAsync(ComponentAttributes attributes) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -99,6 +134,19 @@ public class ComponentFactory extends JComponent {
         });
     }
 
+    /**
+     * Creates a composite component that contains multiple child components.
+     *
+     * <p>
+     * This feature is experimental: children are created (potentially asynchronously internally)
+     * and attached to a {@code CompositeComponent}. Child components inherit the parent's initial value
+     * when not explicitly provided.
+     * </p>
+     *
+     * @param componentAttributes attributes describing the composite and its children.
+     * @return constructed composite {@link JComponent}.
+     * @throws RuntimeException if child creation is interrupted or fails.
+     */
     public JComponent createCompositeComponent(ComponentAttributes componentAttributes) {
         Engine.LOGGER.warn("Using experimental CompositeComponent {} !", componentAttributes.getComponentId());
         CompositeComponent compositeComponent = new CompositeComponent();
@@ -136,6 +184,18 @@ public class ComponentFactory extends JComponent {
 
 
 
+    /**
+     * Creates a Swing component described by {@link ComponentAttributes}.
+     *
+     * <p>
+     * The method resolves a registered creator by {@code componentType}, applies styles, sets bounds,
+     * initializes tooltips (if present), and wires basic actions/listeners.
+     * </p>
+     *
+     * @param attributes descriptor describing the desired component.
+     * @return created {@link JComponent}.
+     * @throws IllegalArgumentException if the {@code componentType} is not registered / supported.
+     */
     public JComponent createComponent(ComponentAttributes attributes) {
         this.componentAttribute = attributes;
         this.bounds = attributes.getBounds().getBounds();
@@ -163,6 +223,16 @@ public class ComponentFactory extends JComponent {
         return component;
     }
 
+    /**
+     * Initializes and attaches a tooltip to the given component based on tooltip style attributes.
+     *
+     * <p>
+     * This method reads tooltip style definitions from a bundled JSON resource and builds a {@link CustomTooltip}.
+     * </p>
+     *
+     * @param component  component to attach the tooltip to.
+     * @param attributes component attributes containing tooltip keys and style names.
+     */
     private void initializeTooltip(JComponent component, ComponentAttributes attributes) {
         String toolTipStyle = attributes.getTooltipStyle() != null ? attributes.getTooltipStyle() : "default";
         TooltipAttributes tooltipAttributes = loadTooltipAttributes(toolTipStyle);
@@ -178,6 +248,11 @@ public class ComponentFactory extends JComponent {
         }
     }
 
+    /**
+     * Loads the style for the current component from the engine's style provider.
+     *
+     * @param attributes attributes containing type and style name.
+     */
     private void loadStyle(ComponentAttributes attributes) {
         String componentType = attributes.getComponentType();
         String componentStyle = attributes.getComponentStyle();
@@ -188,6 +263,12 @@ public class ComponentFactory extends JComponent {
         }
     }
 
+    /**
+     * Loads tooltip style attributes from a bundled JSON resource.
+     *
+     * @param styleName style key to lookup in the tooltip definitions.
+     * @return TooltipAttributes instance or {@code null} if loading fails.
+     */
     private TooltipAttributes loadTooltipAttributes(String styleName) {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/styles/tooltip.json");
              InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(inputStream))) {
@@ -354,38 +435,83 @@ public class ComponentFactory extends JComponent {
         return fileSelector;
     }
 
+    /**
+     * Returns the engine instance associated with this factory.
+     *
+     * @return engine instance.
+     */
     public Engine getEngine() {
         return engine;
     }
 
+    /**
+     * Returns the language provider used for localization.
+     *
+     * @return language provider.
+     */
     public LanguageProvider getLangProvider() {
         return langProvider;
     }
 
+    /**
+     * Returns the icon utility instance used to resolve icons for components.
+     *
+     * @return icon utility.
+     */
     public IconUtils getIconUtils() {
         return iconUtils;
     }
 
+    /**
+     * Returns the map of component styles loaded from the engine style provider.
+     *
+     * @return component styles map (componentType -> (styleName -> StyleAttributes)).
+     */
     public Map<String, Map<String, StyleAttributes>> getComponentStyles() {
         return componentStyles;
     }
 
+    /**
+     * Returns the registry of component creators.
+     *
+     * @return map of component type -> creator function.
+     */
     public Map<String, Function<ComponentAttributes, JComponent>> getComponentRegistry() {
         return componentRegistry;
     }
 
+    /**
+     * Returns the currently applied style attributes used during component creation.
+     *
+     * @return current {@link StyleAttributes} or {@code null} if none applied.
+     */
     public StyleAttributes getStyle() {
         return style;
     }
 
+    /**
+     * Manually sets the style attributes to be used for subsequent component creation.
+     *
+     * @param style style attributes.
+     */
     public void setStyle(StyleAttributes style) {
         this.style = style;
     }
 
+    /**
+     * Returns the last {@link ComponentAttributes} used by {@link #createComponent(ComponentAttributes)}.
+     *
+     * @return last component attributes or {@code null}.
+     */
     public ComponentAttributes getComponentAttribute() {
         return componentAttribute;
     }
 
+    /**
+     * Sets a listener that will receive component factory events (creation start/completion etc.).
+     *
+     * @param componentFactoryListener listener instance.
+     */
     public void setComponentFactoryListener(ComponentFactoryListener componentFactoryListener) {
         this.componentFactoryListener = componentFactoryListener;
     }

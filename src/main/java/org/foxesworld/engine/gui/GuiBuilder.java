@@ -19,10 +19,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Расширенный класс для построения графических интерфейсов.
+ * Advanced class for building graphical user interfaces.
  *
- * Предоставляет синхронное и асинхронное построение GUI с возможностью регистрации дополнительных загрузчиков,
- * множественных слушателей событий и отмены асинхронных задач.
+ * Provides synchronous and asynchronous GUI construction with support for registering additional loaders,
+ * multiple event listeners, and cancellation of asynchronous tasks.
  */
 public class GuiBuilder {
     private final FrameLoaderAdapters frameLoaderAdapters;
@@ -37,22 +37,22 @@ public class GuiBuilder {
     private final Map<String, JPanel> loadPanels = new ConcurrentHashMap<>();
     private GuiBuilderListener guiBuilderListener;
 
-    // Поддержка нескольких слушателей построения GUI
+    // Support for multiple GUI build listeners
     private final List<GuiBuilderListener> guiBuilderListeners = new CopyOnWriteArrayList<>();
 
-    // Слушатель, который выполнится по завершению построения всех панелей (однократно)
+    // Listener that will run once after all panels are built
     private Runnable onPanelsBuildTask;
 
-    // Флаг для контроля одноразовой сборки дополнительных панелей
+    // Flag to ensure additional panels are built only once
     private final AtomicBoolean additionalPanelsBuilt = new AtomicBoolean(false);
 
-    // Хранит текущий CompletableFuture для асинхронного построения, что позволяет его отменить
+    // Holds the current CompletableFuture for async build so it can be cancelled
     private volatile CompletableFuture<?> currentBuildFuture;
 
     /**
-     * Конструктор сборщика GUI.
+     * GUI builder constructor.
      *
-     * @param engine Экземпляр движка. Если engine равен null, выбрасывается IllegalArgumentException.
+     * @param engine Engine instance. If engine is null, an IllegalArgumentException is thrown.
      */
     public GuiBuilder(Engine engine) {
         if (engine == null) {
@@ -68,10 +68,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Синхронное построение GUI.
+     * Synchronous GUI build.
      *
-     * @param framePath путь к файлу описания фрейма; не должен быть пустым.
-     * @param parent    родительская панель, в которую добавляются компоненты.
+     * @param framePath path to the frame description file; must not be empty.
+     * @param parent    parent panel into which components are added.
      */
     public void buildGui(String framePath, JPanel parent) {
         if (framePath == null || framePath.isEmpty()) {
@@ -88,16 +88,16 @@ public class GuiBuilder {
             return;
         }
         buildPanels(frameAttributes.getGroups(), parent);
-        notifyPanelsBuilt();  // Вызывается один раз после завершения построения всех панелей
+        notifyPanelsBuilt();  // Called once after finishing building all panels
     }
 
     /**
-     * Асинхронное построение GUI.
+     * Asynchronous GUI build.
      *
-     * Загрузка атрибутов фрейма производится в фоновом потоке, а построение панелей – на EDT.
+     * Frame attributes are loaded in a background thread while panel construction runs on the EDT.
      *
-     * @param framePath путь к файлу описания фрейма; не должен быть пустым.
-     * @param parent    родительская панель, в которую добавляются компоненты.
+     * @param framePath path to the frame description file; must not be empty.
+     * @param parent    parent panel into which components are added.
      */
     public void buildGuiAsync(String framePath, JPanel parent) {
         if (framePath == null || framePath.isEmpty()) {
@@ -116,7 +116,7 @@ public class GuiBuilder {
                     }
                     SwingUtilities.invokeLater(() -> {
                         buildPanels(attributes.getGroups(), parent);
-                        notifyPanelsBuilt(); // Вызывается один раз после завершения построения всех панелей
+                        notifyPanelsBuilt(); // Called once after finishing building all panels
                     });
                 })
                 .exceptionally(ex -> {
@@ -126,7 +126,7 @@ public class GuiBuilder {
     }
 
     /**
-     * Отменяет асинхронное построение GUI, если оно еще выполняется.
+     * Cancels the asynchronous GUI build if it is still running.
      */
     public void cancelBuild() {
         if (currentBuildFuture != null && !currentBuildFuture.isDone()) {
@@ -136,37 +136,37 @@ public class GuiBuilder {
     }
 
     /**
-     * Регистрирует слушателя для событий сборки GUI.
+     * Registers a listener for GUI build events.
      *
-     * @param listener слушатель.
+     * @param listener listener.
      */
     public void addGuiBuilderListener(GuiBuilderListener listener) {
         guiBuilderListeners.add(listener);
     }
 
     /**
-     * Удаляет ранее зарегистрированного слушателя.
+     * Removes a previously registered listener.
      *
-     * @param listener слушатель.
+     * @param listener listener.
      */
     public void removeGuiBuilderListener(GuiBuilderListener listener) {
         guiBuilderListeners.remove(listener);
     }
 
     /**
-     * Устанавливает слушатель, который будет вызван один раз после завершения построения всех панелей.
+     * Sets a listener that will be called once after all panels have been built.
      *
-     * @param task экземпляр Runnable, который будет выполнен по завершению построения.
+     * @param task Runnable instance to be executed upon completion of the build.
      */
     public void setOnPanelsBuild(Runnable task) {
         this.onPanelsBuildTask = task;
     }
 
     /**
-     * Позволяет зарегистрировать загрузчик атрибутов фрейма для нового типа файла.
+     * Allows registering a frame attributes loader for a new file type.
      *
-     * @param fileExtension расширение файла (например, "xml", "ini"); не должно быть пустым.
-     * @param loader        загрузчик атрибутов.
+     * @param fileExtension file extension (for example, "xml", "ini"); must not be empty.
+     * @param loader        attributes loader.
      */
     public void registerFrameAttributesLoader(String fileExtension, FrameAttributesLoader loader) {
         if (fileExtension == null || fileExtension.isEmpty()) {
@@ -178,7 +178,7 @@ public class GuiBuilder {
     }
 
     /**
-     * Очищает внутреннее состояние сборщика: карты панелей, компонентов и связи родитель-потомок.
+     * Clears the internal state of the builder: panels map, components map, and parent-child relations.
      */
     public void resetState() {
         panelsMap.clear();
@@ -190,10 +190,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Загрузка атрибутов фрейма в зависимости от типа файла.
+     * Loads frame attributes depending on the file type.
      *
-     * @param framePath путь к файлу конфигурации.
-     * @return объект Attributes фрейма или null при ошибке загрузки.
+     * @param framePath path to the configuration file.
+     * @return Attributes object for the frame, or null if loading failed.
      */
     private Attributes loadFrameAttributes(String framePath) {
         String fileType = getFileType(framePath);
@@ -206,10 +206,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Определяет тип файла по его расширению.
+     * Determines the file type by its extension.
      *
-     * @param framePath путь к файлу.
-     * @return строка, обозначающая тип файла.
+     * @param framePath path to the file.
+     * @return string representing the file type.
      */
     private String getFileType(String framePath) {
         String lowerCasePath = framePath.toLowerCase(Locale.ROOT);
@@ -222,15 +222,15 @@ public class GuiBuilder {
         } else if (lowerCasePath.endsWith(".fxml")) {
             return "fxml";
         }
-        // Расширение по умолчанию
+        // Default extension
         return "json";
     }
 
     /**
-     * Возвращает все дочерние компоненты для указанной родительской панели.
+     * Returns all child components for the specified parent panel name.
      *
-     * @param parentPanelName имя родительской панели.
-     * @return список дочерних компонентов.
+     * @param parentPanelName name of the parent panel.
+     * @return list of child components.
      */
     public List<Component> getAllChildComponents(String parentPanelName) {
         List<Component> components = new ArrayList<>();
@@ -240,10 +240,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Рекурсивное построение панелей.
+     * Recursively builds panels.
      *
-     * @param panels      карта групп панелей; может быть null.
-     * @param parentPanel родительская панель.
+     * @param panels      map of panel groups; may be null.
+     * @param parentPanel parent panel.
      */
     private void buildPanels(Map<String, OptionGroups> panels, JPanel parentPanel) {
         if (panels != null) {
@@ -262,11 +262,11 @@ public class GuiBuilder {
     }
 
     /**
-     * Создаёт панель на основе заданных опций.
+     * Creates a panel based on the given options.
      *
-     * @param optionGroups   параметры для создания панели.
-     * @param componentGroup имя группы компонентов.
-     * @return созданная панель.
+     * @param optionGroups   options for creating the panel.
+     * @param componentGroup component group name.
+     * @return created panel.
      */
     private JPanel createPanel(OptionGroups optionGroups, String componentGroup) {
         JPanel panel = frameConstructor.getPanel().createGroupPanel(optionGroups.getPanelOptions(), componentGroup, frameConstructor);
@@ -276,16 +276,16 @@ public class GuiBuilder {
         if (panelParent != null) {
             panelParent.setComponentZOrder(panel, optionGroups.getPanelOptions().getzIndex());
         } else {
-            //Engine.getLOGGER().warn("Parent for panel {} is null!", panel.getName());
+            // Engine.getLOGGER().warn("Parent for panel {} is null!", panel.getName());
         }
         return panel;
     }
 
     /**
-     * Обрабатывает дочерние компоненты и группы, определённые в атрибутах.
+     * Processes child components and groups defined in the attributes.
      *
-     * @param childComponents список дочерних атрибутов компонентов; может быть null.
-     * @param parentPanel     родительская панель.
+     * @param childComponents list of child ComponentAttributes; may be null.
+     * @param parentPanel     parent panel.
      */
     private void processChildComponents(List<ComponentAttributes> childComponents, JPanel parentPanel) {
         if (childComponents == null) {
@@ -309,10 +309,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Создаёт и добавляет компонент в родительскую панель.
+     * Creates and adds a component to the parent panel.
      *
-     * @param componentAttributes атрибуты компонента.
-     * @param parentPanel         родительская панель.
+     * @param componentAttributes component attributes.
+     * @param parentPanel         parent panel.
      */
     private void addComponentToParent(ComponentAttributes componentAttributes, JPanel parentPanel) {
         JComponent component = componentFactory.createComponent(componentAttributes);
@@ -330,10 +330,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Обрабатывает атрибут readFrom для загрузки дополнительных компонентов или групп.
+     * Processes the readFrom attribute to load additional components or groups.
      *
-     * @param componentAttributes атрибуты компонента.
-     * @param parentPanel         родительская панель.
+     * @param componentAttributes component attributes.
+     * @param parentPanel         parent panel.
      */
     private void processReadFromAttribute(ComponentAttributes componentAttributes, JPanel parentPanel) {
         Attributes frameAttributes = loadFrameAttributes(componentAttributes.getReadFrom());
@@ -349,12 +349,12 @@ public class GuiBuilder {
     }
 
     /**
-     * Добавляет дочернюю панель к родительской, если такой панели еще нет в карте.
+     * Adds a child panel to the parent if it does not already exist in the map.
      *
-     * @param panels         карта групп панелей.
-     * @param parentPanel    родительская панель.
-     * @param childPanel     дочерняя панель.
-     * @param componentGroup имя группы компонентов.
+     * @param panels         map of panel groups.
+     * @param parentPanel    parent panel.
+     * @param childPanel     child panel.
+     * @param componentGroup component group name.
      */
     private void addChildPanelIfNeeded(Map<String, OptionGroups> panels, JPanel parentPanel, JPanel childPanel, String componentGroup) {
         if (!panelsMap.containsKey(componentGroup)) {
@@ -364,10 +364,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Обновляет карту связи родитель-потомок.
+     * Updates the parent-child relationship map.
      *
-     * @param parentPanel родительская панель.
-     * @param childPanel  дочерняя панель.
+     * @param parentPanel parent panel.
+     * @param childPanel  child panel.
      */
     private void updateChildParentMap(JPanel parentPanel, JPanel childPanel) {
         String parentName = parentPanel.getName();
@@ -379,8 +379,8 @@ public class GuiBuilder {
     }
 
     /**
-     * Построение дополнительных панелей, которые загружались отдельно.
-     * Выполняется только один раз.
+     * Builds additional panels that were loaded separately.
+     * This is performed only once.
      */
     public void buildAdditionalPanels() {
         if (additionalPanelsBuilt.compareAndSet(false, true)) {
@@ -401,10 +401,10 @@ public class GuiBuilder {
     }
 
     /**
-     * Добавляет дочернюю панель к родительской.
+     * Adds a child panel to a parent.
      *
-     * @param parent родительская панель.
-     * @param child  дочерняя панель.
+     * @param parent parent panel.
+     * @param child  child panel.
      */
     private void addPanelGroup(JPanel parent, JPanel child) {
         if (parent == null || child == null) {
@@ -417,7 +417,7 @@ public class GuiBuilder {
     }
 
     /**
-     * Уведомляет слушателей о завершении построения всех панелей.
+     * Notifies listeners that all panels have been built.
      */
     private void notifyPanelsBuilt() {
         for (GuiBuilderListener listener : guiBuilderListeners) {
@@ -429,11 +429,11 @@ public class GuiBuilder {
     }
 
     /**
-     * Уведомляет слушателей о построении конкретной панели.
+     * Notifies listeners that a specific panel has been built.
      *
-     * @param panels         карта групп панелей.
-     * @param componentGroup имя группы компонентов.
-     * @param parentPanel    родительская панель.
+     * @param panels         map of panel groups.
+     * @param componentGroup component group name.
+     * @param parentPanel    parent panel.
      */
     private void notifyPanelBuild(Map<String, OptionGroups> panels, String componentGroup, JPanel parentPanel) {
         for (GuiBuilderListener listener : guiBuilderListeners) {
@@ -442,9 +442,9 @@ public class GuiBuilder {
     }
 
     /**
-     * Уведомляет слушателей о построении дополнительной панели.
+     * Notifies listeners that an additional panel has been built.
      *
-     * @param panel панель.
+     * @param panel panel.
      */
     private void notifyAdditionalPanelBuild(JPanel panel) {
         for (GuiBuilderListener listener : guiBuilderListeners) {
@@ -453,18 +453,18 @@ public class GuiBuilder {
     }
 
     /**
-     * Возвращает карту компонентов, сгруппированных по имени панели.
+     * Returns the component map grouped by panel name.
      *
-     * @return карта компонентов.
+     * @return components map.
      */
     public Map<String, List<JComponent>> getComponentsMap() {
         return componentsMap;
     }
 
     /**
-     * Добавляет панель в карту панелей.
+     * Adds a panel to the panels map.
      *
-     * @param panel панель; должна иметь ненулевое имя.
+     * @param panel panel; must have a non-null name.
      */
     public void addPanelToMap(JPanel panel) {
         if (panel != null && panel.getName() != null) {
@@ -475,25 +475,25 @@ public class GuiBuilder {
     }
 
     /**
-     * Возвращает карту панелей.
+     * Returns the panels map.
      *
-     * @return карта панелей.
+     * @return panels map.
      */
     public Map<String, JPanel> getPanelsMap() {
         return panelsMap;
     }
 
     /**
-     * Возвращает карту связи родитель-потомок для панелей.
+     * Returns the parent-child relationship map for panels.
      *
-     * @return карта связи родитель-потомок.
+     * @return parent-child map.
      */
     public Map<String, List<String>> getChildParentMap() {
         return childParentMap;
     }
 
     /**
-     * Возвращает экземпляр Engine.
+     * Returns the Engine instance.
      *
      * @return engine.
      */
@@ -502,7 +502,7 @@ public class GuiBuilder {
     }
 
     /**
-     * Возвращает адаптеры для загрузки фреймов.
+     * Returns the frame loader adapters.
      *
      * @return frameLoaderAdapters.
      */
@@ -511,7 +511,7 @@ public class GuiBuilder {
     }
 
     /**
-     * Возвращает экземпляр Notification.
+     * Returns the Notification instance.
      *
      * @return notification.
      */
@@ -525,7 +525,7 @@ public class GuiBuilder {
     }
 
     /**
-     * Возвращает фабрику компонентов.
+     * Returns the component factory.
      *
      * @return componentFactory.
      */
