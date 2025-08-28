@@ -89,13 +89,13 @@ public class ComponentsAccessor {
      * Scans declared fields of this class for the {@code @Component} annotation and injects
      * matching {@link JComponent} instances into annotated fields.
      *
-     * <p>
+     *
      * Injection rules:
      * <ul>
      *     <li>If annotation's {@code value()} is non-empty, it is used as the component id.</li>
      *     <li>Otherwise the Java field name is used as the component id.</li>
      * </ul>
-     * </p>
+     *
      *
      * @throws RuntimeException         if a field cannot be set due to access restrictions.
      * @throws IllegalArgumentException if a required component id cannot be found in the collected components.
